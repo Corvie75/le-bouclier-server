@@ -137,30 +137,30 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 .hp-status{margin-left:auto;font-size:12px}
 
 /* ── GAME ── */
-#screen-game.active{display:flex;flex-direction:column;height:100%;overflow:hidden}
+#screen-game.active{display:flex;flex-direction:column;overflow:hidden;height:100dvh;height:100vh}
 
-.game-topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px;border-bottom:1px solid var(--bord);flex-shrink:0}
+.game-topbar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px 7px;border-bottom:1px solid var(--bord);flex-shrink:0}
 .game-topbar-title{font-size:13px;font-weight:700}
 .game-topbar-right{display:flex;align-items:center;gap:7px}
 .deck-pill{font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--bord);border-radius:20px;padding:3px 9px}
 
-/* Toujours visible : état des autres joueurs */
+/* Toujours visible : état des autres joueurs — compact */
 .players-status-bar{
-  display:flex;gap:6px;padding:8px 14px;
+  display:flex;gap:4px;padding:5px 10px;
   border-bottom:1px solid var(--bord);
   flex-wrap:wrap;
   flex-shrink:0;
 }
 .player-status-card{
-  display:flex;align-items:center;gap:6px;
+  display:flex;align-items:center;gap:4px;
   background:var(--bg3);border:1px solid var(--bord);
-  border-radius:8px;padding:5px 8px;
-  flex:1;min-width:90px;
+  border-radius:7px;padding:4px 6px;
+  flex:1;min-width:75px;
   transition:border-color .2s;
 }
 .player-status-card.their-turn{border-color:var(--red)}
 .player-status-card.dead{opacity:.3}
-.ps-avatar{width:24px;height:24px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:11px;overflow:hidden;flex-shrink:0;border:1px solid var(--bord)}
+.ps-avatar{width:20px;height:20px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:10px;overflow:hidden;flex-shrink:0;border:1px solid var(--bord)}
 .ps-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .ps-info{display:flex;flex-direction:column;gap:1px;min-width:0}
 .ps-name{font-size:10px;font-weight:600;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -169,38 +169,45 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 .turn-dot-sm{width:5px;height:5px;border-radius:50%;background:var(--red);box-shadow:0 0 4px var(--red);animation:pul 1s ease-in-out infinite;flex-shrink:0}
 @keyframes pul{0%,100%{transform:scale(1)}50%{transform:scale(1.6)}}
 
-/* Mes cartes */
-.my-cards-zone{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 14px;gap:8px;overflow:hidden}
-.my-cards-header{display:flex;align-items:center;gap:10px;width:100%}
-.my-avatar{width:36px;height:36px;border-radius:50%;background:var(--bg4);border:2px solid var(--bord);display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden;flex-shrink:0}
+/* Mes cartes — prend tout l'espace disponible */
+.my-cards-zone{
+  flex:1;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:6px 12px;gap:5px;
+  overflow:hidden;
+  min-height:0;
+}
+.my-cards-header{display:flex;align-items:center;gap:8px;width:100%}
+.my-avatar{width:32px;height:32px;border-radius:50%;background:var(--bg4);border:2px solid var(--bord);display:flex;align-items:center;justify-content:center;font-size:14px;overflow:hidden;flex-shrink:0}
 .my-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .my-name{font-size:12px;font-weight:600;color:var(--text2)}
 .my-hero-tag{font-size:11px;color:var(--text3);margin-left:auto}
 .charge-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(37,99,168,.2);border:1px solid rgba(96,165,250,.3);border-radius:20px;padding:2px 9px;font-size:11px;color:#60a5fa}
-.my-cards-layout{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%}
+.my-cards-layout{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
 .card-row-shield{display:flex;justify-content:center}
-.card-row-pv{display:flex;gap:10px;justify-content:center}
-.card-section-label{font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:4px}
-.potions-row{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
-.potion-btn{display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--bg3);border:1px solid var(--bord);border-radius:8px;padding:6px 10px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif}
+.card-row-pv{display:flex;gap:8px;justify-content:center}
+.card-section-label{font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:3px}
+.potions-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.potion-btn{display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--bg3);border:1px solid var(--bord);border-radius:8px;padding:5px 9px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif}
 .potion-btn:hover:not(.used){border-color:var(--bord2)}
 .potion-btn.used{opacity:.3;cursor:not-allowed}
-.potion-btn .p-emoji{font-size:18px}
+.potion-btn .p-emoji{font-size:16px}
 .potion-btn .p-name{font-size:10px;color:var(--text2)}
 
-/* CARDS */
-.card{background:#fff;border-radius:8px;border:1px solid rgba(0,0,0,.08);position:relative;flex-shrink:0;user-select:none;box-shadow:0 4px 16px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.8);font-family:'Inter',sans-serif;font-weight:700;color:#111}
+/* CARDS — taille adaptative */
+.card{background:#fff;border-radius:8px;border:1px solid rgba(0,0,0,.08);position:relative;flex-shrink:0;user-select:none;box-shadow:0 3px 10px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.8);font-family:'Inter',sans-serif;font-weight:700;color:#111}
 .card.red{color:var(--red)}.card.jkr{color:var(--blue)}
-.card-norm{width:68px;height:96px}
-.card-norm .ctop{position:absolute;top:5px;left:5px;font-size:12px;line-height:1.1}
-.card-norm .ctop .cv{display:block;font-size:15px;font-weight:800}.card-norm .ctop .cs{display:block;font-size:10px}
-.card-norm .cbot{position:absolute;bottom:5px;right:5px;font-size:12px;line-height:1.1;transform:rotate(180deg)}
-.card-norm .cbot .cv{display:block;font-size:15px;font-weight:800}.card-norm .cbot .cs{display:block;font-size:10px}
-.card-norm .ccc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px}
-.card-horiz{width:96px;height:68px;display:flex;align-items:center;justify-content:center;gap:5px}
-.card-horiz .hv{font-size:20px;font-weight:800}.card-horiz .hs{font-size:15px}
+.card-norm{width:62px;height:88px}
+.card-norm .ctop{position:absolute;top:4px;left:5px;font-size:11px;line-height:1.1}
+.card-norm .ctop .cv{display:block;font-size:14px;font-weight:800}.card-norm .ctop .cs{display:block;font-size:9px}
+.card-norm .cbot{position:absolute;bottom:4px;right:5px;font-size:11px;line-height:1.1;transform:rotate(180deg)}
+.card-norm .cbot .cv{display:block;font-size:14px;font-weight:800}.card-norm .cbot .cs{display:block;font-size:9px}
+.card-norm .ccc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px}
+.card-horiz{width:88px;height:62px;display:flex;align-items:center;justify-content:center;gap:5px}
+.card-horiz .hv{font-size:18px;font-weight:800}.card-horiz .hs{font-size:13px}
 .card-back{background:linear-gradient(135deg,#1a2a5e,#2a4298);border:1px solid rgba(184,134,11,.3)}
-.card-back .bi{position:absolute;inset:4px;border:1px solid rgba(255,255,255,.15);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.card-back .bi{position:absolute;inset:4px;border:1px solid rgba(255,255,255,.15);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px}
 .card-big{width:120px;height:168px;border-radius:12px;border:2px solid rgba(0,0,0,.1);box-shadow:0 20px 60px rgba(0,0,0,.8),inset 0 2px 0 rgba(255,255,255,.9)}
 .card-big .ctop{position:absolute;top:7px;left:9px;font-size:14px;line-height:1.2}
 .card-big .ctop .cv{display:block;font-size:19px;font-weight:800}.card-big .ctop .cs{display:block;font-size:12px}
@@ -208,28 +215,42 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 .card-big .cbot .cv{display:block;font-size:19px;font-weight:800}.card-big .cbot .cs{display:block;font-size:12px}
 .card-big .ccc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:44px}
 
-/* TURN ZONE */
-.turn-zone{border-top:1px solid var(--bord);padding:10px 14px 20px;display:flex;flex-direction:column;gap:8px;flex-shrink:0}
-.turn-banner{width:100%;text-align:center;padding:10px;border-radius:10px;font-size:13px;font-weight:600}
+/* TURN ZONE — compact, taille fixe */
+.turn-zone{border-top:1px solid var(--bord);padding:8px 12px 10px;display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.turn-banner{width:100%;text-align:center;padding:9px;border-radius:10px;font-size:13px;font-weight:600}
 .turn-banner.mine{background:var(--red);color:#fff;animation:glowR 2s ease-in-out infinite alternate}
 .turn-banner.wait{background:var(--bg3);border:1px solid var(--bord);color:var(--text3)}
 @keyframes glowR{from{box-shadow:0 0 0 rgba(230,57,70,0)}to{box-shadow:0 0 14px rgba(230,57,70,.4)}}
 .step-label{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;text-align:center}
-.action-btns{display:flex;gap:7px}
-.action-btns .btn{flex:1;padding:11px 5px;font-size:12px}
+.action-btns{display:flex;gap:6px}
+.action-btns .btn{flex:1;padding:10px 5px;font-size:12px}
 .btn-atk{background:var(--red);color:#fff;border:none}
 .btn-atk:hover:not(:disabled){background:var(--red2)}
 .btn-shl,.btn-chg{background:var(--bg3);border:1px solid var(--bord);color:var(--text2)}
 .btn-shl.forced,.btn-chg.forced{opacity:.25;cursor:not-allowed;pointer-events:none}
-.charge-warning{font-size:12px;color:#60a5fa;text-align:center;background:rgba(37,99,168,.1);border:1px solid rgba(37,99,168,.2);border-radius:8px;padding:7px 11px}
-.targets-grid{display:flex;gap:7px;flex-wrap:wrap}
-.tgt-btn{flex:1;min-width:75px;background:var(--bg3);border:1px solid var(--bord);border-radius:10px;padding:9px 7px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:all .15s}
+.charge-warning{font-size:12px;color:#60a5fa;text-align:center;background:rgba(37,99,168,.1);border:1px solid rgba(37,99,168,.2);border-radius:8px;padding:6px 10px}
+.targets-grid{display:flex;gap:6px;flex-wrap:wrap}
+.tgt-btn{flex:1;min-width:70px;background:var(--bg3);border:1px solid var(--bord);border-radius:9px;padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;transition:all .15s}
 .tgt-btn:hover,.tgt-btn.sel{border-color:var(--red);background:var(--red-bg)}
-.tbt-avatar{width:28px;height:28px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:12px;overflow:hidden;margin-bottom:2px}
+.tbt-avatar{width:26px;height:26px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:11px;overflow:hidden;margin-bottom:1px}
 .tbt-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .tbt-name{font-size:12px;font-weight:600;color:var(--text)}
 .tbt-stats{font-size:10px;color:var(--text3)}
-.back-btn{background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;padding:3px;font-family:'Inter',sans-serif;align-self:flex-start}
+.back-btn{background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;padding:3px;font-family:'Inter',sans-serif;align-self:flex-start}
+
+/* Petits écrans : encore plus compact */
+@media (max-height:680px){
+  .card-norm{width:52px;height:74px}
+  .card-norm .ctop .cv{font-size:12px}.card-norm .ccc{font-size:18px}
+  .card-horiz{width:74px;height:52px}
+  .card-horiz .hv{font-size:15px}
+  .my-cards-zone{padding:4px 12px;gap:3px}
+  .turn-zone{padding:6px 12px 8px;gap:5px}
+  .turn-banner{padding:7px;font-size:12px}
+  .action-btns .btn{padding:8px 4px;font-size:11px}
+  .game-topbar{padding:6px 12px 5px}
+  .players-status-bar{padding:4px 10px}
+}
 
 /* In-game chat toggle */
 .chat-toggle-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:20px;padding:4px 10px;font-size:12px;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;position:relative}
