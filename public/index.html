@@ -20,6 +20,13 @@
 html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:430px;margin:0 auto;overflow-x:hidden}
 .screen{display:none;flex-direction:column;min-height:100vh}
 .screen.active{display:flex}
+/* Game screen prend tout l'écran sans scroll */
+#screen-game{
+  position:fixed;inset:0;z-index:50;
+  max-width:430px;margin:0 auto;
+  background:var(--bg);
+}
+.screen.active{display:flex}
 
 /* ── HOME ── */
 #screen-home{align-items:center;justify-content:center;padding:32px 20px}
@@ -129,8 +136,7 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
 .hp-status{margin-left:auto;font-size:12px}
 
 /* ── GAME ── */
-#screen-game{padding:0;justify-content:flex-start;height:100vh;overflow:hidden;display:none;flex-direction:column}
-#screen-game.active{display:flex}
+#screen-game.active{display:flex;flex-direction:column;height:100%;overflow:hidden}
 
 .game-topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 10px;border-bottom:1px solid var(--bord);flex-shrink:0}
 .game-topbar-title{font-size:13px;font-weight:700}
@@ -614,13 +620,23 @@ let heroMode=false;
 // ── AVATAR ──
 document.getElementById('avatar-input').addEventListener('change', function(e){
   const file=e.target.files[0]; if(!file) return;
-  const reader=new FileReader();
-  reader.onload=function(ev){
-    myAvatar=ev.target.result;
+  // Redimensionner l'image pour éviter les problèmes de taille
+  const img=new Image();
+  const url=URL.createObjectURL(file);
+  img.onload=function(){
+    const canvas=document.createElement('canvas');
+    const size=120; // max 120x120px
+    const ratio=Math.min(size/img.width,size/img.height);
+    canvas.width=Math.round(img.width*ratio);
+    canvas.height=Math.round(img.height*ratio);
+    const ctx=canvas.getContext('2d');
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    myAvatar=canvas.toDataURL('image/jpeg',0.7);
+    URL.revokeObjectURL(url);
     const prev=document.getElementById('avatar-preview');
     prev.innerHTML=`<img src="${myAvatar}" alt="avatar">`;
   };
-  reader.readAsDataURL(file);
+  img.src=url;
 });
 
 socket.on('connect',()=>{ myId=socket.id; });
@@ -666,6 +682,8 @@ socket.on('return_to_lobby',({players,heroMode:hm,isHost:hostId})=>{
 
 // ── CHAT ──
 socket.on('chat_message',(msg)=>{
+  // Ne pas afficher si c'est notre propre message (déjà affiché localement)
+  if(msg.playerId===myId) return;
   appendChatMsg('lobby-chat-messages',msg);
   appendChatMsg('game-chat-messages',msg);
   if(!gameChatOpen&&document.getElementById('screen-game').classList.contains('active')){
@@ -688,11 +706,18 @@ function appendChatMsg(containerId,msg){
 function sendLobbyChat(){
   const inp=document.getElementById('lobby-chat-inp');
   const text=inp.value.trim(); if(!text) return;
+  // Afficher immédiatement chez l'expéditeur
+  const localMsg={playerId:myId,playerName:myName,avatar:myAvatar,text};
+  appendChatMsg('lobby-chat-messages',localMsg);
+  appendChatMsg('game-chat-messages',localMsg);
   socket.emit('chat_message',{code:roomCode,text}); inp.value='';
 }
 function sendGameChat(){
   const inp=document.getElementById('game-chat-inp');
   const text=inp.value.trim(); if(!text) return;
+  const localMsg={playerId:myId,playerName:myName,avatar:myAvatar,text};
+  appendChatMsg('lobby-chat-messages',localMsg);
+  appendChatMsg('game-chat-messages',localMsg);
   socket.emit('chat_message',{code:roomCode,text}); inp.value='';
 }
 function openGameChat(){
@@ -1213,7 +1238,11 @@ function makeBackCard(){ const el=document.createElement('div'); el.className='c
 function getMe(){ return gs?gs.players.find(p=>p.id===myId):null; }
 function totalPV(p){ return p&&p.pv?p.pv.reduce((s,c)=>s+c.numVal,0):0; }
 function escHtml(t){ const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
-function showScreen(n){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(`screen-${n}`).classList.add('active'); }
+function showScreen(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(`screen-${n}`).classList.add('active');
+  window.scrollTo(0,0);
+}
 function homeErr(msg){ document.getElementById('home-err').textContent=msg; setTimeout(()=>document.getElementById('home-err').textContent='',3000); }
 let toastT;
 function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3000); }
