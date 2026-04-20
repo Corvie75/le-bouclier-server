@@ -398,7 +398,7 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
         <div class="avatar-picker-title">Photo de profil</div>
         <div class="avatar-picker-sub">Optionnel — caméra ou galerie</div>
       </div>
-      <input type="file" id="avatar-input" accept="image/*" capture="user">
+      <input type="file" id="avatar-input" accept="image/*">
     </div>
     <div class="input-group">
       <div class="input-label">Votre nom</div>
@@ -610,12 +610,14 @@ const SERVER_URL = 'https://le-bouclier-server-production.up.railway.app';
 const socket = io(SERVER_URL, {transports:['websocket','polling']});
 
 let myId=null, myName='', roomCode='', isHost=false;
-let myAvatar=null; // base64
+let myAvatar=null;
 let gs=null, isMyTurn=false, pendingAction=null, pendingTargetId=null;
 let volState={myType:null,myIdx:0,theirType:null,theirIdx:0,targetId:null};
 let revealT=null, popupT=null;
 let chatUnread=0, gameChatOpen=false;
 let heroMode=false;
+// Cache local des avatars (persistant entre les state_updates)
+const avatarCache={};
 
 // ── AVATAR ──
 document.getElementById('avatar-input').addEventListener('change', function(e){
@@ -682,8 +684,6 @@ socket.on('return_to_lobby',({players,heroMode:hm,isHost:hostId})=>{
 
 // ── CHAT ──
 socket.on('chat_message',(msg)=>{
-  // Ne pas afficher si c'est notre propre message (déjà affiché localement)
-  if(msg.playerId===myId) return;
   appendChatMsg('lobby-chat-messages',msg);
   appendChatMsg('game-chat-messages',msg);
   if(!gameChatOpen&&document.getElementById('screen-game').classList.contains('active')){
@@ -847,7 +847,8 @@ socket.on('voleuse_prompt',({targetId,targetName,targetPV,targetShield,myPV,mySh
 socket.on('game_over',({winner,finalState})=>{
   gs=finalState;
   const wa=document.getElementById('go-winner-avatar');
-  if(winner.avatar) wa.innerHTML=`<img src="${winner.avatar}" alt="">`; else wa.textContent='👤';
+  const winAvSrc=getAvatar(winner.id,winner.avatar);
+  if(winAvSrc) wa.innerHTML=`<img src="${winAvSrc}" alt="">`; else wa.textContent='👤';
   document.getElementById('go-winner').textContent=`👑 ${winner.name} — ${winner.wins} victoire${winner.wins>1?'s':''}`;
   const sc=document.getElementById('go-scores'); sc.innerHTML='';
   finalState.players.slice().sort((a,b)=>totalPV(b)-totalPV(a)).forEach(p=>{
@@ -900,7 +901,8 @@ function buildTargets(type){
     if(type==='attack'&&p.id===myId) return;
     const btn=document.createElement('div'); btn.className='tgt-btn';
     const av=document.createElement('div'); av.className='tbt-avatar';
-    if(p.avatar) av.innerHTML=`<img src="${p.avatar}" alt="">`; else av.textContent='👤';
+    const avSrc=getAvatar(p.id,p.avatar);
+    if(avSrc) av.innerHTML=`<img src="${avSrc}" alt="">`; else av.textContent='👤';
     btn.appendChild(av);
     const nm=document.createElement('div'); nm.className='tbt-name'; nm.textContent=p.id===myId?'Moi':p.name;
     const st=document.createElement('div'); st.className='tbt-stats'; st.textContent=`🛡️${p.shieldVal}  ❤️${totalPV(p)}`;
@@ -1140,7 +1142,8 @@ function renderPlayersStatusBar(){
     const card=document.createElement('div');
     card.className='player-status-card'+(gs.currentTurnId===p.id?' their-turn':'')+(p.eliminated?' dead':'');
     const av=document.createElement('div'); av.className='ps-avatar';
-    if(p.avatar) av.innerHTML=`<img src="${p.avatar}" alt="">`; else av.textContent=p.heroEmoji||'👤';
+    const avSrc=getAvatar(p.id,p.avatar);
+    if(avSrc) av.innerHTML=`<img src="${avSrc}" alt="">`; else av.textContent=p.heroEmoji||'👤';
     const info=document.createElement('div'); info.className='ps-info';
     const nm=document.createElement('div'); nm.className='ps-name'; nm.textContent=p.id===myId?'Vous':p.name;
     const st=document.createElement('div'); st.className='ps-stats';
@@ -1191,13 +1194,22 @@ function mkExItem(label,isMine,type,idx){
 }
 
 // ── LOBBY PLAYERS ──
+// Helper avatar : utilise le cache local
+function getAvatar(playerId, fallbackAvatar){
+  if(playerId===myId) return myAvatar;
+  if(fallbackAvatar) avatarCache[playerId]=fallbackAvatar;
+  return avatarCache[playerId]||null;
+}
+
 function renderLobbyPlayers(players){
   const ul=document.getElementById('lobby-players'); ul.innerHTML='';
   const maxWins=Math.max(...players.map(p=>p.wins||0));
   players.forEach((p,i)=>{
+    if(p.avatar) avatarCache[p.id]=p.avatar; // mise en cache
     const li=document.createElement('div'); li.className='lobby-player-item';
     const av=document.createElement('div'); av.className='lp-avatar';
-    if(p.avatar) av.innerHTML=`<img src="${p.avatar}" alt="">`; else av.textContent='👤';
+    const avSrc=getAvatar(p.id,p.avatar);
+    if(avSrc) av.innerHTML=`<img src="${avSrc}" alt="">`; else av.textContent='👤';
     const info=document.createElement('div'); info.className='lp-info';
     const nm=document.createElement('div'); nm.className='lp-name'; nm.textContent=p.name+(p.id===myId?' (vous)':'');
     const wins=document.createElement('div'); wins.className='lp-wins';
