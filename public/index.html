@@ -195,19 +195,20 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 .potion-btn .p-emoji{font-size:16px}
 .potion-btn .p-name{font-size:10px;color:var(--text2)}
 
-/* CARDS — taille adaptative */
-.card{background:#fff;border-radius:8px;border:1px solid rgba(0,0,0,.08);position:relative;flex-shrink:0;user-select:none;box-shadow:0 3px 10px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.8);font-family:'Inter',sans-serif;font-weight:700;color:#111}
+/* CARDS — tailles calculées par JS via CSS variables */
+:root{--cw:62px;--ch:88px;--csw:88px;--csh:62px;--cfs:10px;--cfsl:12px;--ccc:22px}
+.card{background:#fff;border-radius:7px;border:1px solid rgba(0,0,0,.08);position:relative;flex-shrink:0;user-select:none;box-shadow:0 3px 10px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.8);font-family:'Inter',sans-serif;font-weight:700;color:#111}
 .card.red{color:var(--red)}.card.jkr{color:var(--blue)}
-.card-norm{width:62px;height:88px}
-.card-norm .ctop{position:absolute;top:4px;left:5px;font-size:11px;line-height:1.1}
-.card-norm .ctop .cv{display:block;font-size:14px;font-weight:800}.card-norm .ctop .cs{display:block;font-size:9px}
-.card-norm .cbot{position:absolute;bottom:4px;right:5px;font-size:11px;line-height:1.1;transform:rotate(180deg)}
-.card-norm .cbot .cv{display:block;font-size:14px;font-weight:800}.card-norm .cbot .cs{display:block;font-size:9px}
-.card-norm .ccc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px}
-.card-horiz{width:88px;height:62px;display:flex;align-items:center;justify-content:center;gap:5px}
-.card-horiz .hv{font-size:18px;font-weight:800}.card-horiz .hs{font-size:13px}
+.card-norm{width:var(--cw);height:var(--ch)}
+.card-norm .ctop{position:absolute;top:4px;left:4px;line-height:1.1}
+.card-norm .ctop .cv{display:block;font-size:var(--cfsl);font-weight:800}.card-norm .ctop .cs{display:block;font-size:var(--cfs)}
+.card-norm .cbot{position:absolute;bottom:4px;right:4px;line-height:1.1;transform:rotate(180deg)}
+.card-norm .cbot .cv{display:block;font-size:var(--cfsl);font-weight:800}.card-norm .cbot .cs{display:block;font-size:var(--cfs)}
+.card-norm .ccc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:var(--ccc)}
+.card-horiz{width:var(--csw);height:var(--csh);display:flex;align-items:center;justify-content:center;gap:4px}
+.card-horiz .hv{font-size:var(--cfsl);font-weight:800}.card-horiz .hs{font-size:var(--cfs)}
 .card-back{background:linear-gradient(135deg,#1a2a5e,#2a4298);border:1px solid rgba(184,134,11,.3)}
-.card-back .bi{position:absolute;inset:4px;border:1px solid rgba(255,255,255,.15);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.card-back .bi{position:absolute;inset:3px;border:1px solid rgba(255,255,255,.15);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:var(--ccc)}
 .card-big{width:120px;height:168px;border-radius:12px;border:2px solid rgba(0,0,0,.1);box-shadow:0 20px 60px rgba(0,0,0,.8),inset 0 2px 0 rgba(255,255,255,.9)}
 .card-big .ctop{position:absolute;top:7px;left:9px;font-size:14px;line-height:1.2}
 .card-big .ctop .cv{display:block;font-size:19px;font-weight:800}.card-big .ctop .cs{display:block;font-size:12px}
@@ -237,20 +238,6 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 .tbt-name{font-size:12px;font-weight:600;color:var(--text)}
 .tbt-stats{font-size:10px;color:var(--text3)}
 .back-btn{background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;padding:3px;font-family:'Inter',sans-serif;align-self:flex-start}
-
-/* Petits écrans : encore plus compact */
-@media (max-height:680px){
-  .card-norm{width:52px;height:74px}
-  .card-norm .ctop .cv{font-size:12px}.card-norm .ccc{font-size:18px}
-  .card-horiz{width:74px;height:52px}
-  .card-horiz .hv{font-size:15px}
-  .my-cards-zone{padding:4px 12px;gap:3px}
-  .turn-zone{padding:6px 12px 8px;gap:5px}
-  .turn-banner{padding:7px;font-size:12px}
-  .action-btns .btn{padding:8px 4px;font-size:11px}
-  .game-topbar{padding:6px 12px 5px}
-  .players-status-bar{padding:4px 10px}
-}
 
 /* In-game chat toggle */
 .chat-toggle-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:20px;padding:4px 10px;font-size:12px;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;position:relative}
@@ -495,15 +482,11 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
   <div class="game-topbar">
     <div class="game-topbar-title">Le Bouclier</div>
     <div class="game-topbar-right">
-      <div class="chat-toggle-btn" onclick="openGameChat()">💬 <span class="chat-unread" id="chat-unread">0</span></div>
+      <div class="chat-toggle-btn" onclick="openGameChat()">💬 <span class="chat-unread" id="chat-unread" style="display:none">0</span></div>
       <div class="deck-pill" id="deck-pill">Pioche : —</div>
     </div>
   </div>
-
-  <!-- Toujours visible : stats joueurs -->
   <div class="players-status-bar" id="players-status-bar"></div>
-
-  <!-- Mes cartes -->
   <div class="my-cards-zone">
     <div class="my-cards-header">
       <div class="my-avatar" id="my-avatar">👤</div>
@@ -514,21 +497,20 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
     <div class="my-cards-layout" id="my-cards-layout"></div>
     <div class="potions-row" id="potions-row" style="display:none"></div>
   </div>
-
-  <div class="turn-zone">
+  <div class="turn-zone" id="turn-zone">
     <div class="turn-banner wait" id="turn-banner">En attente…</div>
     <div id="step-action" style="display:none">
-      <div class="step-label" style="margin-bottom:7px">1 · Quelle action ?</div>
+      <div class="step-label" style="margin-bottom:6px">1 · Quelle action ?</div>
       <div class="charge-warning" id="charge-warning" style="display:none">⚡ Charge active — vous devez attaquer !</div>
-      <div class="action-btns" style="margin-top:7px">
+      <div class="action-btns" style="margin-top:6px">
         <button class="btn btn-atk" id="btn-atk" onclick="pickAction('attack')">⚔️ Attaquer</button>
         <button class="btn btn-shl" id="btn-shl" onclick="pickAction('shield_swap')">🛡️ Bouclier</button>
         <button class="btn btn-chg" id="btn-chg" onclick="pickAction('charge')">⚡ Charger</button>
       </div>
-      <div id="hero-extra-btns" style="margin-top:7px;display:flex;flex-direction:column;gap:6px"></div>
+      <div id="hero-extra-btns" style="margin-top:6px;display:flex;flex-direction:column;gap:5px"></div>
     </div>
     <div id="step-target" style="display:none">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
         <button class="back-btn" onclick="backToAction()">← Retour</button>
         <div class="step-label">2 · Choisir une cible</div>
       </div>
@@ -1272,12 +1254,55 @@ function makeBackCard(){ const el=document.createElement('div'); el.className='c
 function getMe(){ return gs?gs.players.find(p=>p.id===myId):null; }
 function totalPV(p){ return p&&p.pv?p.pv.reduce((s,c)=>s+c.numVal,0):0; }
 function escHtml(t){ const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+// ── TAILLE CARTES ADAPTIVE ──
+// Calcule la taille des cartes selon l'espace réellement disponible
+function calcCardSize(){
+  const vh = window.innerHeight;
+  // Zones fixes (topbar + statusbar + turn-zone estimée)
+  const topbar = 38;
+  const statusbar = 36;
+  const turnzone = 160; // turn-banner + boutons action
+  const header = 44; // my-cards-header
+  const labels = 30; // labels sections
+  const margins = 24;
+  const available = vh - topbar - statusbar - turnzone - header - labels - margins;
+  // On a bouclier (horiz) + PV (norm) empilés
+  // Ratio carte: largeur = hauteur * 0.714
+  // bouclier horiz: largeur = h_shield, hauteur = h_shield * 0.714
+  // pv norm: largeur = h_pv * 0.714, hauteur = h_pv
+  // Espace total vertical = h_shield*0.714 + gap(8) + h_pv
+  // On veut que h_shield*0.714 + 8 + h_pv = available
+  // On fixe h_pv = h_shield * 1.1 (légèrement plus grande)
+  // h_shield*0.714 + 8 + h_shield*1.1 = available
+  // h_shield * 1.814 = available - 8
+  const h_shield = Math.min(Math.floor((available - 8) / 1.814), 80);
+  const w_shield = Math.floor(h_shield / 0.714);
+  const h_pv = Math.min(Math.floor(h_shield * 1.1), 110);
+  const w_pv = Math.floor(h_pv * 0.714);
+
+  // Appliquer via CSS custom properties
+  const root = document.documentElement;
+  root.style.setProperty('--cw', w_pv+'px');
+  root.style.setProperty('--ch', h_pv+'px');
+  root.style.setProperty('--csw', w_shield+'px'); // shield width (horiz)
+  root.style.setProperty('--csh', h_shield+'px'); // shield height (horiz)
+  // Taille police selon hauteur carte
+  const fs = Math.max(Math.floor(h_pv * 0.15), 9);
+  const fsb = Math.max(Math.floor(h_pv * 0.17), 10);
+  root.style.setProperty('--cfs', fs+'px');
+  root.style.setProperty('--cfsl', fsb+'px');
+  root.style.setProperty('--ccc', Math.floor(h_pv*0.25)+'px');
+}
+
+window.addEventListener('resize', calcCardSize);
+window.addEventListener('orientationchange', ()=>setTimeout(calcCardSize,200));
+
 function showScreen(n){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(`screen-${n}`).classList.add('active');
-  // Bloquer le scroll du body pendant le jeu
   if(n==='game'){
     document.body.classList.add('game-active');
+    setTimeout(calcCardSize, 50); // après le rendu
   } else {
     document.body.classList.remove('game-active');
     window.scrollTo(0,0);
