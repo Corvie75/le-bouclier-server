@@ -787,6 +787,8 @@ socket.on('choose_action',({deckCount,discardTop,mustAttack,canUsePotion,potions
   document.getElementById('charge-warning').style.display=mustAttack?'block':'none';
   if(potions) updatePotions(potions,canUsePotion);
   buildHeroExtra(discardTop);
+  // Recalculer taille cartes car turn-zone a changé de hauteur
+  setTimeout(calcCardSize, 50);
 });
 
 socket.on('wait_turn',({playerName,deckCount})=>{
@@ -1255,54 +1257,57 @@ function getMe(){ return gs?gs.players.find(p=>p.id===myId):null; }
 function totalPV(p){ return p&&p.pv?p.pv.reduce((s,c)=>s+c.numVal,0):0; }
 function escHtml(t){ const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
 // ── TAILLE CARTES ADAPTIVE ──
-// Calcule la taille des cartes selon l'espace réellement disponible
 function calcCardSize(){
-  const vh = window.innerHeight;
-  // Zones fixes (topbar + statusbar + turn-zone estimée)
-  const topbar = 38;
-  const statusbar = 36;
-  const turnzone = 160; // turn-banner + boutons action
-  const header = 44; // my-cards-header
-  const labels = 30; // labels sections
-  const margins = 24;
-  const available = vh - topbar - statusbar - turnzone - header - labels - margins;
-  // On a bouclier (horiz) + PV (norm) empilés
-  // Ratio carte: largeur = hauteur * 0.714
-  // bouclier horiz: largeur = h_shield, hauteur = h_shield * 0.714
-  // pv norm: largeur = h_pv * 0.714, hauteur = h_pv
-  // Espace total vertical = h_shield*0.714 + gap(8) + h_pv
-  // On veut que h_shield*0.714 + 8 + h_pv = available
-  // On fixe h_pv = h_shield * 1.1 (légèrement plus grande)
-  // h_shield*0.714 + 8 + h_shield*1.1 = available
-  // h_shield * 1.814 = available - 8
-  const h_shield = Math.min(Math.floor((available - 8) / 1.814), 80);
-  const w_shield = Math.floor(h_shield / 0.714);
-  const h_pv = Math.min(Math.floor(h_shield * 1.1), 110);
-  const w_pv = Math.floor(h_pv * 0.714);
+  // Utiliser visualViewport si dispo (tient compte de la barre Safari)
+  const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
 
-  // Appliquer via CSS custom properties
+  // Mesurer les zones fixes réelles dans le DOM
+  const topbar   = document.querySelector('.game-topbar')?.offsetHeight || 40;
+  const statusbar= document.querySelector('.players-status-bar')?.offsetHeight || 36;
+  const header   = document.querySelector('.my-cards-header')?.offsetHeight || 36;
+  const turnzone = document.getElementById('turn-zone')?.offsetHeight || 170;
+  const labels   = 30; // card-section-labels
+  const gaps     = 20; // marges internes
+
+  const available = vh - topbar - statusbar - header - turnzone - labels - gaps;
+
+  // Espace pour bouclier (horiz) + gap + PV (norm) empilés verticalement
+  // bouclier horiz hauteur = h_s, PV norm hauteur = h_p
+  // h_s + 8 + h_p = available, avec h_p = h_s * 1.4
+  // h_s + 8 + h_s*1.4 = available → h_s = (available-8) / 2.4
+  const h_s = Math.max(Math.min(Math.floor((available - 8) / 2.4), 72), 40);
+  const w_s = Math.floor(h_s / 0.714); // ratio carte standard
+  const h_p = Math.max(Math.min(Math.floor(h_s * 1.4), 100), 56);
+  const w_p = Math.floor(h_p * 0.714);
+
   const root = document.documentElement;
-  root.style.setProperty('--cw', w_pv+'px');
-  root.style.setProperty('--ch', h_pv+'px');
-  root.style.setProperty('--csw', w_shield+'px'); // shield width (horiz)
-  root.style.setProperty('--csh', h_shield+'px'); // shield height (horiz)
-  // Taille police selon hauteur carte
-  const fs = Math.max(Math.floor(h_pv * 0.15), 9);
-  const fsb = Math.max(Math.floor(h_pv * 0.17), 10);
-  root.style.setProperty('--cfs', fs+'px');
-  root.style.setProperty('--cfsl', fsb+'px');
-  root.style.setProperty('--ccc', Math.floor(h_pv*0.25)+'px');
+  root.style.setProperty('--cw',  w_p+'px');
+  root.style.setProperty('--ch',  h_p+'px');
+  root.style.setProperty('--csw', w_s+'px');
+  root.style.setProperty('--csh', h_s+'px');
+
+  const fs  = Math.max(Math.floor(h_p * 0.13), 9)+'px';
+  const fsb = Math.max(Math.floor(h_p * 0.16), 11)+'px';
+  const fcc = Math.max(Math.floor(h_p * 0.26), 14)+'px';
+  root.style.setProperty('--cfs',  fs);
+  root.style.setProperty('--cfsl', fsb);
+  root.style.setProperty('--ccc',  fcc);
 }
 
+// Recalculer quand le viewport change (Safari barre qui monte/descend)
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize', calcCardSize);
+}
 window.addEventListener('resize', calcCardSize);
-window.addEventListener('orientationchange', ()=>setTimeout(calcCardSize,200));
+window.addEventListener('orientationchange', ()=>setTimeout(calcCardSize, 300));
 
 function showScreen(n){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(`screen-${n}`).classList.add('active');
   if(n==='game'){
     document.body.classList.add('game-active');
-    setTimeout(calcCardSize, 50); // après le rendu
+    // Double setTimeout pour laisser le navigateur rendre le DOM complet
+    setTimeout(()=>{ calcCardSize(); setTimeout(calcCardSize, 200); }, 50);
   } else {
     document.body.classList.remove('game-active');
     window.scrollTo(0,0);
