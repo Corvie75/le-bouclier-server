@@ -861,30 +861,27 @@ socket.on('voleuse_prompt',({targetId,targetName,targetPV,targetShield,myPV,mySh
 socket.on('game_over',({winner,finalState})=>{
   gs=finalState;
   const avSrc=getAvatar(winner.id,winner.avatar);
-  // Préparer les écrans mais ne pas les montrer tout de suite
-  // D'abord laisser le popup d'action se terminer (il dure ~3.2s), puis montrer victoire
+  // game_over arrive APRÈS le popup (délai géré côté serveur)
+  // On affiche directement l'animation victoire
+  const va=document.getElementById('victory-avatar');
+  if(avSrc) va.innerHTML=`<img src="${avSrc}" alt="">`; else va.textContent='👤';
+  document.getElementById('victory-name').textContent=winner.name;
+  document.getElementById('victory-wins').textContent=`${winner.wins} victoire${winner.wins>1?'s':''}`;
+  document.getElementById('victory-screen').classList.add('show');
+  // Puis game over après 3s
   setTimeout(()=>{
-    // Animation victoire
-    const va=document.getElementById('victory-avatar');
-    if(avSrc) va.innerHTML=`<img src="${avSrc}" alt="">`; else va.textContent='👤';
-    document.getElementById('victory-name').textContent=winner.name;
-    document.getElementById('victory-wins').textContent=`${winner.wins} victoire${winner.wins>1?'s':''}`;
-    document.getElementById('victory-screen').classList.add('show');
-    // Puis game over après 4s
-    setTimeout(()=>{
-      document.getElementById('victory-screen').classList.remove('show');
-      const gwav=document.getElementById('go-winner-avatar');
-      if(avSrc) gwav.innerHTML=`<img src="${avSrc}" alt="">`; else gwav.textContent='👤';
-      document.getElementById('go-winner').textContent=`👑 ${winner.name} — ${winner.wins} victoire${winner.wins>1?'s':''}`;
-      const sc=document.getElementById('go-scores'); sc.innerHTML='';
-      finalState.players.slice().sort((a,b)=>totalPV(b)-totalPV(a)).forEach(p=>{
-        const d=document.createElement('div'); d.className='sc-row'+(p.id===winner.id?' w':'');
-        d.innerHTML=`<span>${p.id===winner.id?'👑 ':''}${p.heroEmoji?p.heroEmoji+' ':''}${p.name}${p.eliminated?' 💀':''}</span><span class="sc-pts">${totalPV(p)} PV</span>`;
-        sc.appendChild(d);
-      });
-      document.getElementById('go-screen').classList.add('show');
-    },4000);
-  }, 3500); // Attendre que le popup d'action soit terminé
+    document.getElementById('victory-screen').classList.remove('show');
+    const gwav=document.getElementById('go-winner-avatar');
+    if(avSrc) gwav.innerHTML=`<img src="${avSrc}" alt="">`; else gwav.textContent='👤';
+    document.getElementById('go-winner').textContent=`👑 ${winner.name} — ${winner.wins} victoire${winner.wins>1?'s':''}`;
+    const sc=document.getElementById('go-scores'); sc.innerHTML='';
+    finalState.players.slice().sort((a,b)=>totalPV(b)-totalPV(a)).forEach(p=>{
+      const d=document.createElement('div'); d.className='sc-row'+(p.id===winner.id?' w':'');
+      d.innerHTML=`<span>${p.id===winner.id?'👑 ':''}${p.heroEmoji?p.heroEmoji+' ':''}${p.name}${p.eliminated?' 💀':''}</span><span class="sc-pts">${totalPV(p)} PV</span>`;
+      sc.appendChild(d);
+    });
+    document.getElementById('go-screen').classList.add('show');
+  },3000);
 });
 
 socket.on('err',({msg})=>{ homeErr(msg); showToast(msg); });
