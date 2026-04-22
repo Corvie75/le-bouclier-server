@@ -15,19 +15,13 @@
   --blue:#2563a8;--blue-bg:rgba(37,99,168,.12);
   --gold:#d4a017;--gold-bg:rgba(212,160,23,.1);
   --green:#22c55e;--purple:#8b5cf6;--purple-bg:rgba(139,92,246,.12);
+  --cw:62px;--ch:88px;--csw:88px;--csh:62px;--cfs:10px;--cfsl:13px;--ccc:22px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{height:100%;max-width:430px;margin:0 auto;overflow:hidden}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100%;max-width:430px;margin:0 auto;overflow-x:hidden;overflow-y:hidden}
-body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
+body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
 .screen{display:none;flex-direction:column;min-height:100vh;overflow-y:auto;overflow-x:hidden}
-.screen.active{display:flex}
-/* Game screen prend tout l'écran sans scroll */
-#screen-game{
-  position:fixed;inset:0;z-index:50;
-  max-width:430px;margin:0 auto;
-  background:var(--bg);
-}
 .screen.active{display:flex}
 
 /* ── HOME ── */
@@ -37,16 +31,13 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 .home-logo-title{font-size:26px;font-weight:800;letter-spacing:-1px}
 .home-logo-sub{font-size:11px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin-top:-4px}
 .home-form{width:100%;display:flex;flex-direction:column;gap:11px}
-
-/* Avatar picker */
 .avatar-picker{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--bord);border-radius:10px;padding:12px 14px;cursor:pointer}
 .avatar-preview{width:48px;height:48px;border-radius:50%;background:var(--bg4);border:2px solid var(--bord);display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden;flex-shrink:0}
 .avatar-preview img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .avatar-picker-info{display:flex;flex-direction:column;gap:2px}
-.avatar-picker-title{font-size:14px;font-weight:600;color:var(--text)}
+.avatar-picker-title{font-size:14px;font-weight:600}
 .avatar-picker-sub{font-size:11px;color:var(--text3)}
 #avatar-input{display:none}
-
 .input-group{display:flex;flex-direction:column;gap:6px}
 .input-label{font-size:11px;font-weight:600;color:var(--text2);letter-spacing:1px;text-transform:uppercase}
 .inp{width:100%;background:var(--bg3);border:1px solid var(--bord);border-radius:10px;padding:13px 15px;color:var(--text);font-family:'Inter',sans-serif;font-size:15px;outline:none;transition:border-color .2s}
@@ -64,7 +55,6 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 .btn-ghost:hover:not(:disabled){border-color:var(--bord2);color:var(--text)}
 .btn-blue{background:var(--blue-bg);border:1px solid rgba(37,99,168,.3);color:#60a5fa}
 .btn-gold{background:var(--gold-bg);border:1px solid rgba(212,160,23,.3);color:var(--gold)}
-.btn-green{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:var(--green)}
 .btn-purple{background:var(--purple-bg);border:1px solid rgba(139,92,246,.3);color:var(--purple)}
 .btn-sm{padding:9px 13px;font-size:13px;width:auto}
 .err-msg{font-size:13px;color:var(--red);text-align:center;min-height:18px}
@@ -75,16 +65,14 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 
 /* ── LOBBY ── */
 #screen-lobby{padding:0;display:flex;flex-direction:column;height:100vh}
-.lobby-top{padding:20px 18px 14px;border-bottom:1px solid var(--bord)}
-.lobby-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.lobby-top{padding:16px 16px 12px;border-bottom:1px solid var(--bord)}
+.lobby-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .lobby-header h2{font-size:18px;font-weight:700}
 .lobby-leave{background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;font-family:'Inter',sans-serif}
-.code-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.code-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .code-label{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase}
 .code-val{font-size:22px;font-weight:800;letter-spacing:6px;color:var(--red)}
-
-/* Hero toggle in lobby */
-.hero-mode-row{display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--bord);border-radius:10px;padding:10px 14px;margin-bottom:10px}
+.hero-mode-row{display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--bord);border-radius:10px;padding:9px 13px}
 .hm-info{display:flex;flex-direction:column;gap:2px}
 .hm-name{font-size:13px;font-weight:600}
 .hm-sub{font-size:11px;color:var(--text3)}
@@ -93,102 +81,67 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 .toggle-sw::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s}
 .toggle-sw.on::after{transform:translateX(16px)}
 .toggle-sw.disabled{opacity:.4;cursor:not-allowed}
-
-.lobby-players-list{flex:1;overflow-y:auto;padding:10px 18px}
-.lobby-player-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--bord);border-radius:10px;margin-bottom:8px;animation:sIn .25s ease}
-@keyframes sIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-.lp-avatar{width:40px;height:40px;border-radius:50%;background:var(--bg4);border:2px solid var(--bord);display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden;flex-shrink:0}
+.lobby-players-list{flex:1;overflow-y:auto;padding:8px 14px}
+.lobby-player-item{display:flex;align-items:center;gap:9px;padding:9px 11px;background:var(--bg3);border:1px solid var(--bord);border-radius:10px;margin-bottom:7px}
+.lp-avatar{width:38px;height:38px;border-radius:50%;background:var(--bg4);border:2px solid var(--bord);display:flex;align-items:center;justify-content:center;font-size:17px;overflow:hidden;flex-shrink:0}
 .lp-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .lp-info{flex:1;min-width:0}
 .lp-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lp-wins{font-size:11px;color:var(--text3);margin-top:1px}
-.lp-badge{font-size:16px;flex-shrink:0}
-
-/* Chat */
-.chat-section{border-top:1px solid var(--bord);display:flex;flex-direction:column;height:200px}
-.chat-messages{flex:1;overflow-y:auto;padding:8px 14px;display:flex;flex-direction:column;gap:4px}
-.chat-msg{display:flex;align-items:flex-start;gap:7px}
-.chat-msg-avatar{width:22px;height:22px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:10px;overflow:hidden;flex-shrink:0}
+.lp-badge{font-size:15px;flex-shrink:0}
+.chat-section{border-top:1px solid var(--bord);display:flex;flex-direction:column;height:160px}
+.chat-messages{flex:1;overflow-y:auto;padding:7px 13px;display:flex;flex-direction:column;gap:3px}
+.chat-msg{display:flex;align-items:flex-start;gap:6px}
+.chat-msg-avatar{width:20px;height:20px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:9px;overflow:hidden;flex-shrink:0}
 .chat-msg-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .chat-msg-content{font-size:12px;line-height:1.4}
 .chat-msg-name{font-weight:600;color:var(--red);margin-right:4px}
 .chat-msg-text{color:var(--text2)}
-.chat-input-row{display:flex;gap:8px;padding:8px 14px;border-top:1px solid var(--bord)}
-.chat-inp{flex:1;background:var(--bg3);border:1px solid var(--bord);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;outline:none}
+.chat-input-row{display:flex;gap:7px;padding:7px 13px;border-top:1px solid var(--bord)}
+.chat-inp{flex:1;background:var(--bg3);border:1px solid var(--bord);border-radius:8px;padding:7px 11px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;outline:none}
 .chat-inp::placeholder{color:var(--text3)}
-.chat-send{background:var(--red);border:none;border-radius:8px;padding:8px 14px;color:#fff;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;flex-shrink:0}
-
-.lobby-bottom{padding:10px 18px 24px;border-top:1px solid var(--bord)}
-.lobby-bottom .btn{margin-bottom:8px}
-
-/* ── HERO PICK ── */
-#screen-hero-pick{padding:36px 18px;align-items:center}
-.hp-title{font-size:20px;font-weight:800;letter-spacing:-1px;margin-bottom:5px;text-align:center}
-.hp-sub{font-size:13px;color:var(--text3);text-align:center;margin-bottom:20px}
-.hero-cards{display:flex;gap:10px;width:100%;margin-bottom:18px}
-.hero-card{flex:1;background:var(--bg3);border:2px solid var(--bord);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;transition:all .2s}
-.hero-card:hover{border-color:var(--bord2);transform:translateY(-2px)}
-.hero-card.chosen{border-color:var(--red);background:var(--red-bg)}
-.hc-emoji{font-size:34px;display:block;margin-bottom:7px}
-.hc-name{font-size:14px;font-weight:700;margin-bottom:5px}
-.hc-desc{font-size:11px;color:var(--text2);line-height:1.5}
-.hp-waiting-list{width:100%;display:flex;flex-direction:column;gap:7px}
-.hp-player-row{display:flex;align-items:center;gap:9px;padding:9px 12px;background:var(--bg3);border:1px solid var(--bord);border-radius:10px;font-size:13px;color:var(--text2)}
-.hp-player-row.done{color:var(--text)}
-.hp-status{margin-left:auto;font-size:12px}
+.chat-send{background:var(--red);border:none;border-radius:8px;padding:7px 13px;color:#fff;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;flex-shrink:0}
+.lobby-bottom{padding:9px 14px 20px;border-top:1px solid var(--bord)}
+.lobby-bottom .btn{margin-bottom:7px}
 
 /* ── GAME ── */
+#screen-game{position:fixed;inset:0;z-index:50;max-width:430px;margin:0 auto;background:var(--bg)}
 #screen-game.active{display:flex;flex-direction:column;overflow:hidden;height:100dvh;height:100vh}
-
 .game-topbar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px 7px;border-bottom:1px solid var(--bord);flex-shrink:0}
 .game-topbar-title{font-size:13px;font-weight:700}
 .game-topbar-right{display:flex;align-items:center;gap:7px}
-.deck-pill{font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--bord);border-radius:20px;padding:3px 9px}
+.deck-pill{font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--bord);border-radius:20px;padding:3px 9px;cursor:pointer}
+.deck-pill:hover{border-color:var(--bord2)}
+.chat-toggle-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:20px;padding:4px 10px;font-size:12px;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;position:relative}
+.chat-unread{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--red);border-radius:50%;font-size:9px;color:#fff;display:none;align-items:center;justify-content:center}
 
-/* Toujours visible : état des autres joueurs — compact */
-.players-status-bar{
-  display:flex;gap:4px;padding:5px 10px;
-  border-bottom:1px solid var(--bord);
-  flex-wrap:wrap;
-  flex-shrink:0;
-}
-.player-status-card{
-  display:flex;align-items:center;gap:4px;
-  background:var(--bg3);border:1px solid var(--bord);
-  border-radius:7px;padding:4px 6px;
-  flex:1;min-width:75px;
-  transition:border-color .2s;
-}
+/* Stats bar */
+.players-status-bar{display:flex;gap:4px;padding:5px 10px;border-bottom:1px solid var(--bord);flex-wrap:wrap;flex-shrink:0}
+.player-status-card{display:flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--bord);border-radius:7px;padding:4px 6px;flex:1;min-width:75px;transition:border-color .2s;cursor:pointer}
 .player-status-card.their-turn{border-color:var(--red)}
 .player-status-card.dead{opacity:.3}
 .ps-avatar{width:20px;height:20px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:10px;overflow:hidden;flex-shrink:0;border:1px solid var(--bord)}
 .ps-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .ps-info{display:flex;flex-direction:column;gap:1px;min-width:0}
 .ps-name{font-size:10px;font-weight:600;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ps-stats{display:flex;gap:4px;font-size:10px;color:var(--text3)}
+.ps-stats{display:flex;gap:3px;font-size:10px;color:var(--text3);flex-wrap:wrap}
 .ps-stats .sv{color:var(--text);font-weight:600}
 .turn-dot-sm{width:5px;height:5px;border-radius:50%;background:var(--red);box-shadow:0 0 4px var(--red);animation:pul 1s ease-in-out infinite;flex-shrink:0}
 @keyframes pul{0%,100%{transform:scale(1)}50%{transform:scale(1.6)}}
 
-/* Mes cartes — prend tout l'espace disponible */
-.my-cards-zone{
-  flex:1;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  padding:6px 12px;gap:5px;
-  overflow:hidden;
-  min-height:0;
-}
+/* My cards zone */
+.my-cards-zone{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 12px;gap:5px;overflow:hidden;min-height:0}
 .my-cards-header{display:flex;align-items:center;gap:8px;width:100%}
-.my-avatar{width:32px;height:32px;border-radius:50%;background:var(--bg4);border:2px solid var(--bord);display:flex;align-items:center;justify-content:center;font-size:14px;overflow:hidden;flex-shrink:0}
+.my-avatar{width:30px;height:30px;border-radius:50%;background:var(--bg4);border:2px solid var(--bord);display:flex;align-items:center;justify-content:center;font-size:13px;overflow:hidden;flex-shrink:0;cursor:pointer}
 .my-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .my-name{font-size:12px;font-weight:600;color:var(--text2)}
-.my-hero-tag{font-size:11px;color:var(--text3);margin-left:auto}
+.my-hero-tag{font-size:11px;color:var(--text3);margin-left:auto;cursor:pointer}
 .charge-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(37,99,168,.2);border:1px solid rgba(96,165,250,.3);border-radius:20px;padding:2px 9px;font-size:11px;color:#60a5fa}
 .my-cards-layout{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
-.card-row-shield{display:flex;justify-content:center}
+.card-row-shield{display:flex;justify-content:center;align-items:center;gap:6px}
 .card-row-pv{display:flex;gap:8px;justify-content:center}
 .card-section-label{font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:3px}
+.guerriere-bonus{font-size:12px;font-weight:700;color:var(--gold);background:var(--gold-bg);border:1px solid rgba(212,160,23,.3);border-radius:8px;padding:2px 7px}
 .potions-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
 .potion-btn{display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--bg3);border:1px solid var(--bord);border-radius:8px;padding:5px 9px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif}
 .potion-btn:hover:not(.used){border-color:var(--bord2)}
@@ -196,8 +149,7 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 .potion-btn .p-emoji{font-size:16px}
 .potion-btn .p-name{font-size:10px;color:var(--text2)}
 
-/* CARDS — tailles calculées par JS via CSS variables */
-:root{--cw:62px;--ch:88px;--csw:88px;--csh:62px;--cfs:10px;--cfsl:12px;--ccc:22px}
+/* CARDS */
 .card{background:#fff;border-radius:7px;border:1px solid rgba(0,0,0,.08);position:relative;flex-shrink:0;user-select:none;box-shadow:0 3px 10px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.8);font-family:'Inter',sans-serif;font-weight:700;color:#111}
 .card.red{color:var(--red)}.card.jkr{color:var(--blue)}
 .card-norm{width:var(--cw);height:var(--ch)}
@@ -211,14 +163,14 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 .card-back{background:linear-gradient(135deg,#1a2a5e,#2a4298);border:1px solid rgba(184,134,11,.3)}
 .card-back .bi{position:absolute;inset:3px;border:1px solid rgba(255,255,255,.15);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:var(--ccc)}
 .card-big{width:120px;height:168px;border-radius:12px;border:2px solid rgba(0,0,0,.1);box-shadow:0 20px 60px rgba(0,0,0,.8),inset 0 2px 0 rgba(255,255,255,.9)}
-.card-big .ctop{position:absolute;top:7px;left:9px;font-size:14px;line-height:1.2}
+.card-big .ctop{position:absolute;top:7px;left:9px;line-height:1.2}
 .card-big .ctop .cv{display:block;font-size:19px;font-weight:800}.card-big .ctop .cs{display:block;font-size:12px}
-.card-big .cbot{position:absolute;bottom:7px;right:9px;font-size:14px;line-height:1.2;transform:rotate(180deg)}
+.card-big .cbot{position:absolute;bottom:7px;right:9px;line-height:1.2;transform:rotate(180deg)}
 .card-big .cbot .cv{display:block;font-size:19px;font-weight:800}.card-big .cbot .cs{display:block;font-size:12px}
 .card-big .ccc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:44px}
 
-/* TURN ZONE — compact, taille fixe */
-.turn-zone{border-top:1px solid var(--bord);padding:8px 12px 10px;display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+/* TURN ZONE */
+.turn-zone{border-top:1px solid var(--bord);padding:7px 12px 10px;display:flex;flex-direction:column;gap:6px;flex-shrink:0}
 .turn-banner{width:100%;text-align:center;padding:9px;border-radius:10px;font-size:13px;font-weight:600}
 .turn-banner.mine{background:var(--red);color:#fff;animation:glowR 2s ease-in-out infinite alternate}
 .turn-banner.wait{background:var(--bg3);border:1px solid var(--bord);color:var(--text3)}
@@ -230,30 +182,15 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 .btn-atk:hover:not(:disabled){background:var(--red2)}
 .btn-shl,.btn-chg{background:var(--bg3);border:1px solid var(--bord);color:var(--text2)}
 .btn-shl.forced,.btn-chg.forced{opacity:.25;cursor:not-allowed;pointer-events:none}
-.charge-warning{font-size:12px;color:#60a5fa;text-align:center;background:rgba(37,99,168,.1);border:1px solid rgba(37,99,168,.2);border-radius:8px;padding:6px 10px}
+.charge-warning{font-size:12px;color:#60a5fa;text-align:center;background:rgba(37,99,168,.1);border:1px solid rgba(37,99,168,.2);border-radius:8px;padding:6px}
 .targets-grid{display:flex;gap:6px;flex-wrap:wrap}
-.tgt-btn{flex:1;min-width:70px;background:var(--bg3);border:1px solid var(--bord);border-radius:9px;padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;transition:all .15s}
+.tgt-btn{flex:1;min-width:70px;background:var(--bg3);border:1px solid var(--bord);border-radius:9px;padding:8px 5px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;transition:all .15s}
 .tgt-btn:hover,.tgt-btn.sel{border-color:var(--red);background:var(--red-bg)}
 .tbt-avatar{width:26px;height:26px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:11px;overflow:hidden;margin-bottom:1px}
 .tbt-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .tbt-name{font-size:12px;font-weight:600;color:var(--text)}
 .tbt-stats{font-size:10px;color:var(--text3)}
 .back-btn{background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;padding:3px;font-family:'Inter',sans-serif;align-self:flex-start}
-
-/* In-game chat toggle */
-.chat-toggle-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:20px;padding:4px 10px;font-size:12px;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;position:relative}
-.chat-unread{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--red);border-radius:50%;font-size:9px;color:#fff;display:flex;align-items:center;justify-content:center;display:none}
-
-/* In-game chat overlay */
-.game-chat-overlay{display:none;position:fixed;inset:0;z-index:170;background:rgba(0,0,0,.8);align-items:flex-end;justify-content:center;padding:0 0 10px}
-.game-chat-overlay.open{display:flex}
-.game-chat-sheet{background:var(--bg2);border:1px solid var(--bord2);border-radius:20px 20px 14px 14px;width:100%;max-width:430px;animation:sUp .3s cubic-bezier(.34,1.2,.64,1);display:flex;flex-direction:column;height:60vh}
-@keyframes sUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.gcs-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--bord)}
-.gcs-title{font-size:15px;font-weight:700}
-.gcs-close{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;font-family:'Inter',sans-serif}
-.gcs-messages{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:5px}
-.gcs-input-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--bord)}
 
 /* REVEAL */
 .reveal-screen{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.97);flex-direction:column;align-items:center;justify-content:center;gap:14px;animation:fadeIn .2s ease}
@@ -270,9 +207,9 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 /* POPUP */
 .result-popup{display:none;position:fixed;inset:0;z-index:210;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:22px;backdrop-filter:blur(6px)}
 .result-popup.show{display:flex}
-.popup-box{background:var(--bg2);border:1px solid var(--bord2);border-radius:18px;padding:26px 20px;width:100%;max-width:310px;text-align:center;animation:popIn .3s cubic-bezier(.34,1.56,.64,1)}
+.popup-box{background:var(--bg2);border:1px solid var(--bord2);border-radius:18px;padding:24px 20px;width:100%;max-width:310px;text-align:center;animation:popIn .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
-.popup-emoji{font-size:42px;display:block;margin-bottom:10px;line-height:1}
+.popup-emoji{font-size:40px;display:block;margin-bottom:10px;line-height:1}
 .popup-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:5px;letter-spacing:-.3px}
 .popup-detail{font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.5}
 .popup-result{display:inline-block;padding:5px 14px;border-radius:20px;font-size:13px;font-weight:600}
@@ -283,10 +220,33 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 .popup-bar-fill{height:100%;background:var(--red);border-radius:2px;animation:pbf 3s linear forwards}
 @keyframes pbf{from{width:100%}to{width:0%}}
 
+/* VICTORY ANIMATION */
+.victory-screen{display:none;position:fixed;inset:0;z-index:290;background:rgba(0,0,0,.9);flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.victory-screen.show{display:flex;animation:fadeIn .4s ease}
+.victory-crown{font-size:60px;animation:crownPop .6s .1s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes crownPop{from{transform:scale(0) rotate(-20deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+.victory-avatar{width:90px;height:90px;border-radius:50%;background:var(--bg3);border:4px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden;animation:avatarPop .5s .3s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes avatarPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.victory-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.victory-name{font-size:28px;font-weight:800;color:var(--text);letter-spacing:-1px;animation:fadeIn .5s .5s both}
+.victory-label{font-size:14px;color:var(--gold);font-weight:600;animation:fadeIn .5s .6s both}
+.victory-wins{font-size:13px;color:var(--text3);animation:fadeIn .5s .7s both}
+
+/* GAME CHAT */
+.game-chat-overlay{display:none;position:fixed;inset:0;z-index:170;background:rgba(0,0,0,.8);align-items:flex-end;justify-content:center;padding:0 0 10px}
+.game-chat-overlay.open{display:flex}
+.game-chat-sheet{background:var(--bg2);border:1px solid var(--bord2);border-radius:20px 20px 14px 14px;width:100%;max-width:430px;animation:sUp .3s cubic-bezier(.34,1.2,.64,1);display:flex;flex-direction:column;height:60vh}
+@keyframes sUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.gcs-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--bord)}
+.gcs-title{font-size:15px;font-weight:700}
+.gcs-close{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;font-family:'Inter',sans-serif}
+.gcs-messages{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:5px}
+.gcs-input-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--bord)}
+
 /* OVERLAYS */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:160;align-items:flex-end;justify-content:center;padding:0 0 12px}
 .overlay.open{display:flex}
-.sheet{background:var(--bg2);border:1px solid var(--bord2);border-radius:20px 20px 14px 14px;padding:18px 16px;width:100%;max-width:430px;animation:sUp .3s cubic-bezier(.34,1.2,.64,1)}
+.sheet{background:var(--bg2);border:1px solid var(--bord2);border-radius:20px 20px 14px 14px;padding:18px 16px;width:100%;max-width:430px;animation:sUp .3s cubic-bezier(.34,1.2,.64,1);max-height:85vh;overflow-y:auto}
 .sheet-title{font-size:15px;font-weight:700;text-align:center;margin-bottom:12px}
 .sheet-note{font-size:13px;color:var(--text2);text-align:center;margin-bottom:10px}
 .sheet .btn{margin-bottom:7px}
@@ -301,11 +261,34 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 .barde-card-btn{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:7px;border:2px solid transparent;border-radius:10px;transition:all .15s}
 .barde-card-btn:hover{border-color:var(--red)}
 .barde-sublbl{font-size:10px;color:var(--text3)}
+
+/* Hero description popup */
+.hero-desc-box{background:var(--bg3);border:1px solid var(--bord);border-radius:12px;padding:14px;margin-bottom:10px}
+.hero-desc-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--bord)}
+.hero-desc-emoji{font-size:28px}
+.hero-desc-name{font-size:15px;font-weight:700}
+.hero-desc-text{font-size:13px;color:var(--text2);line-height:1.6}
+
+/* Discard top display */
+.discard-card{display:flex;flex-direction:column;align-items:center;gap:4px;margin:10px 0}
+
+/* Mage overlay */
 .mage-opts{display:flex;gap:10px;margin:10px 0 14px}
 .mage-opt{flex:1;background:var(--bg3);border:1.5px solid var(--bord);border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:all .15s}
 .mage-opt:hover{border-color:var(--purple);background:var(--purple-bg)}
 .mage-opt .mo-val{font-size:24px;font-weight:800;color:var(--text);margin-bottom:3px}
 .mage-opt .mo-lbl{font-size:11px;color:var(--text3)}
+
+/* CARTOON ANIMATION */
+.anim-overlay{display:none;position:fixed;inset:0;z-index:220;pointer-events:none;overflow:hidden}
+.anim-overlay.show{display:block}
+.anim-scene{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:280px;height:200px}
+@keyframes swordAttack{0%{transform:translate(-120px,-20px) rotate(-40deg) scale(.6);opacity:0}20%{opacity:1}60%{transform:translate(0px,0px) rotate(15deg) scale(1.1)}100%{transform:translate(80px,30px) rotate(25deg) scale(.8);opacity:0}}
+@keyframes swordBlock{0%{transform:translate(-120px,-20px) rotate(-40deg) scale(.6);opacity:0}15%{opacity:1}55%{transform:translate(-10px,5px) rotate(10deg) scale(1.05)}100%{transform:translate(-30px,5px) rotate(0deg) scale(.9);opacity:0}}
+@keyframes shieldBlock{0%{transform:scale(0) rotate(-20deg);opacity:0}30%{transform:scale(1.2) rotate(5deg);opacity:1}55%{transform:scale(1) rotate(0);opacity:1}100%{transform:scale(.8);opacity:0}}
+@keyframes chargeAnim{0%{transform:scale(0) rotate(-15deg);opacity:0}40%{transform:scale(1.3) rotate(5deg);opacity:1}100%{transform:scale(.6) rotate(10deg);opacity:0}}
+@keyframes impactStar{0%{transform:scale(0);opacity:1}60%{transform:scale(1.4);opacity:1}100%{transform:scale(.5);opacity:0}}
+@keyframes impactText{0%{transform:scale(0) rotate(-10deg) translateX(-50%);opacity:0}30%{transform:scale(1.3) rotate(5deg) translateX(-50%);opacity:1}70%{transform:scale(1.1) rotate(-2deg) translateX(-50%);opacity:1}100%{transform:scale(.7) rotate(8deg) translateX(-50%);opacity:0}}
 
 /* GAME OVER */
 .go-screen{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.95);align-items:center;justify-content:center;padding:22px}
@@ -320,72 +303,6 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 .sc-pts{font-size:14px;font-weight:700;color:var(--red)}
 .returning-msg{font-size:12px;color:var(--text3);text-align:center;margin-top:12px;font-style:italic}
 
-/* ── ANIMATION CARTOON ── */
-.anim-overlay{
-  display:none;position:fixed;inset:0;z-index:220;
-  pointer-events:none;overflow:hidden;
-}
-.anim-overlay.show{display:block}
-
-/* Scène cartoon centrée */
-.anim-scene{
-  position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  width:280px;height:200px;
-}
-
-/* Épée SVG animée */
-.sword-el{
-  position:absolute;
-  font-size:0;
-  animation:none;
-}
-.sword-el svg{ display:block; }
-
-/* ATTAQUE : épée qui charge et frappe */
-@keyframes swordAttack{
-  0%  { transform:translate(-120px,-20px) rotate(-40deg) scale(.6); opacity:0; }
-  20% { opacity:1; }
-  60% { transform:translate(0px,0px) rotate(15deg) scale(1.1); }
-  75% { transform:translate(20px,10px) rotate(20deg) scale(1.05); }
-  100%{ transform:translate(80px,30px) rotate(25deg) scale(.8); opacity:0; }
-}
-/* BLOQUÉ : épée arrive mais s'arrête sur bouclier */
-@keyframes swordBlock{
-  0%  { transform:translate(-120px,-20px) rotate(-40deg) scale(.6); opacity:0; }
-  15% { opacity:1; }
-  55% { transform:translate(-10px,5px) rotate(10deg) scale(1.05); }
-  65% { transform:translate(-20px,0px) rotate(5deg) scale(.95); }
-  100%{ transform:translate(-30px,5px) rotate(0deg) scale(.9); opacity:0; }
-}
-/* Bouclier qui apparaît pour bloquer */
-@keyframes shieldBlock{
-  0%  { transform:scale(0) rotate(-20deg); opacity:0; }
-  30% { transform:scale(1.2) rotate(5deg); opacity:1; }
-  55% { transform:scale(1.0) rotate(0deg); opacity:1; }
-  100%{ transform:scale(.8) rotate(-5deg); opacity:0; }
-}
-/* Charge : éclair qui apparaît */
-@keyframes chargeAnim{
-  0%  { transform:scale(0) rotate(-15deg); opacity:0; }
-  40% { transform:scale(1.3) rotate(5deg); opacity:1; }
-  70% { transform:scale(1.0) rotate(-3deg); opacity:1; }
-  100%{ transform:scale(.6) rotate(10deg); opacity:0; }
-}
-/* Impact : étoiles qui explosent */
-@keyframes impactStar{
-  0%  { transform:scale(0); opacity:1; }
-  60% { transform:scale(1.4); opacity:1; }
-  100%{ transform:scale(.5); opacity:0; }
-}
-/* Texte impact */
-@keyframes impactText{
-  0%  { transform:scale(0) rotate(-10deg); opacity:0; }
-  30% { transform:scale(1.3) rotate(5deg); opacity:1; }
-  70% { transform:scale(1.1) rotate(-2deg); opacity:1; }
-  100%{ transform:scale(.7) rotate(8deg); opacity:0; }
-}
-
 /* TOAST */
 .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg3);border:1px solid var(--bord2);color:var(--text2);padding:9px 18px;border-radius:22px;font-size:13px;z-index:400;transition:transform .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}
@@ -393,7 +310,7 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 </head>
 <body>
 
-<!-- ══ HOME ══ -->
+<!-- HOME -->
 <div id="screen-home" class="screen active">
   <div class="home-logo">
     <div class="home-logo-icon">🛡️</div>
@@ -434,7 +351,7 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
   </div>
 </div>
 
-<!-- ══ LOBBY ══ -->
+<!-- LOBBY -->
 <div id="screen-lobby" class="screen">
   <div class="lobby-top">
     <div class="lobby-header">
@@ -445,12 +362,8 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
       <div class="code-label">Code</div>
       <div class="code-val" id="lobby-code">------</div>
     </div>
-    <!-- Mode héros (hôte uniquement) -->
     <div class="hero-mode-row">
-      <div class="hm-info">
-        <div class="hm-name">🦸 Mode héros</div>
-        <div class="hm-sub">Pouvoirs spéciaux pour chaque joueur</div>
-      </div>
+      <div class="hm-info"><div class="hm-name">🦸 Mode héros</div><div class="hm-sub">Pouvoirs spéciaux</div></div>
       <div class="toggle-sw disabled" id="hero-mode-toggle" onclick="toggleHeroMode()"></div>
     </div>
   </div>
@@ -463,37 +376,38 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
     </div>
   </div>
   <div class="lobby-bottom">
-    <div style="font-size:13px;color:var(--text3);text-align:center;margin-bottom:10px;font-style:italic" id="lobby-wait">En attente de joueurs… (min. 2)</div>
+    <div style="font-size:13px;color:var(--text3);text-align:center;margin-bottom:9px;font-style:italic" id="lobby-wait">En attente de joueurs… (min. 2)</div>
     <button class="btn btn-primary" id="btn-start" onclick="doStart()" style="display:none">⚔️ Lancer la partie</button>
   </div>
 </div>
 
-<!-- ══ HERO PICK POPUP ══ -->
+<!-- HERO PICK POPUP -->
 <div class="overlay" id="ov-hero-pick" style="z-index:180">
-  <div class="sheet" style="max-height:85vh;overflow-y:auto">
-    <div class="sheet-title" style="font-size:18px;margin-bottom:4px">🦸 Choisissez votre héros</div>
-    <div style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:16px">Sélectionnez 1 héros parmi les 2 proposés</div>
-    <div id="hero-cards" style="display:flex;gap:10px;width:100%;margin-bottom:16px"></div>
-    <div style="font-size:13px;color:var(--text3);text-align:center;margin-bottom:14px" id="hp-status">En attente de votre choix…</div>
+  <div class="sheet">
+    <div class="sheet-title" style="font-size:18px">🦸 Choisissez votre héros</div>
+    <div style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:14px">Sélectionnez 1 héros parmi les 2 proposés</div>
+    <div id="hero-cards" style="display:flex;gap:10px;width:100%;margin-bottom:14px"></div>
+    <div style="font-size:13px;color:var(--text3);text-align:center;margin-bottom:12px" id="hp-status">En attente de votre choix…</div>
     <div id="hp-waiting-list" style="display:flex;flex-direction:column;gap:7px"></div>
   </div>
 </div>
 
-<!-- ══ JEU ══ -->
+<!-- JEU -->
 <div id="screen-game" class="screen">
   <div class="game-topbar">
-    <div class="game-topbar-title">Le Bouclier</div>
+    <div class="game-topbar-title">🛡️ Le Bouclier</div>
     <div class="game-topbar-right">
-      <div class="chat-toggle-btn" onclick="openGameChat()">💬 <span class="chat-unread" id="chat-unread" style="display:none">0</span></div>
-      <div class="deck-pill" id="deck-pill">Pioche : —</div>
+      <button class="btn-ghost btn-sm" id="btn-abandon" onclick="doAbandon()" style="display:none;padding:5px 10px;font-size:11px;width:auto">🏳️ Abandonner</button>
+      <div class="chat-toggle-btn" onclick="openGameChat()">💬 <span class="chat-unread" id="chat-unread">0</span></div>
+      <div class="deck-pill" id="deck-pill" onclick="showDiscardTop()">Pioche : —</div>
     </div>
   </div>
   <div class="players-status-bar" id="players-status-bar"></div>
   <div class="my-cards-zone">
     <div class="my-cards-header">
-      <div class="my-avatar" id="my-avatar">👤</div>
+      <div class="my-avatar" id="my-avatar" onclick="showMyHeroDesc()">👤</div>
       <div class="my-name" id="my-name-label">Vous</div>
-      <div class="my-hero-tag" id="my-hero-tag" style="display:none"></div>
+      <div class="my-hero-tag" id="my-hero-tag" style="display:none" onclick="showMyHeroDesc()"></div>
       <div id="charge-badge" class="charge-pill" style="display:none">⚡ <span id="charge-count">0</span></div>
     </div>
     <div class="my-cards-layout" id="my-cards-layout"></div>
@@ -521,13 +435,10 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
   </div>
 </div>
 
-<!-- ══ CHAT EN JEU ══ -->
+<!-- GAME CHAT -->
 <div class="game-chat-overlay" id="game-chat-overlay">
   <div class="game-chat-sheet">
-    <div class="gcs-header">
-      <div class="gcs-title">💬 Chat</div>
-      <button class="gcs-close" onclick="closeGameChat()">✕</button>
-    </div>
+    <div class="gcs-header"><div class="gcs-title">💬 Chat</div><button class="gcs-close" onclick="closeGameChat()">✕</button></div>
     <div class="gcs-messages" id="game-chat-messages"></div>
     <div class="gcs-input-row">
       <input class="chat-inp" id="game-chat-inp" type="text" placeholder="Message…" maxlength="200" autocomplete="off">
@@ -536,7 +447,7 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
   </div>
 </div>
 
-<!-- ══ REVEAL ══ -->
+<!-- REVEAL -->
 <div class="reveal-screen" id="reveal-screen">
   <div class="reveal-actor" id="reveal-actor"></div>
   <div class="reveal-action" id="reveal-action"></div>
@@ -544,7 +455,7 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
   <div class="reveal-progress"><div class="reveal-bar" id="reveal-bar"></div></div>
 </div>
 
-<!-- ══ POPUP RÉSULTAT ══ -->
+<!-- POPUP RÉSULTAT -->
 <div class="result-popup" id="result-popup">
   <div class="popup-box">
     <span class="popup-emoji" id="popup-emoji"></span>
@@ -555,7 +466,19 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
   </div>
 </div>
 
-<!-- ══ OVERLAYS HÉROS ══ -->
+<!-- VICTORY ANIMATION -->
+<div class="victory-screen" id="victory-screen">
+  <div class="victory-crown">👑</div>
+  <div class="victory-avatar" id="victory-avatar">👤</div>
+  <div class="victory-name" id="victory-name"></div>
+  <div class="victory-label">Victoire !</div>
+  <div class="victory-wins" id="victory-wins"></div>
+</div>
+
+<!-- CARTOON ANIMATION -->
+<div class="anim-overlay" id="anim-overlay"><div class="anim-scene" id="anim-scene"></div></div>
+
+<!-- OVERLAYS HÉROS -->
 <div class="overlay" id="ov-prt">
   <div class="sheet"><div class="sheet-title">✨ Quelle carte PV soigner ?</div><div class="sheet-note">Sera remplacée par la carte piochée.</div><div id="prt-list"></div><button class="btn btn-ghost" onclick="closeOv('ov-prt')">Annuler</button></div>
 </div>
@@ -585,14 +508,37 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
 <div class="overlay" id="ov-barde">
   <div class="sheet"><div class="sheet-title">🎵 Barde — Choisir une carte</div><div class="sheet-note" id="barde-note"></div><div class="barde-choices" id="barde-choices"></div></div>
 </div>
+<div class="overlay" id="ov-barde-pv">
+  <div class="sheet"><div class="sheet-title">🎵 Barde — Choisir votre nouvelle carte PV</div><div class="sheet-note">Choisissez dans la défausse :</div><div class="barde-choices" id="barde-pv-choices"></div></div>
+</div>
 <div class="overlay" id="ov-mage">
-  <div class="sheet"><div class="sheet-title" style="color:var(--purple)">🔮 Mage — Transformer ?</div><div class="sheet-note" id="mage-note"></div><div class="mage-opts" id="mage-opts"></div></div>
+  <div class="sheet">
+    <div class="sheet-title" style="color:var(--purple)">🔮 Mage — Transformer la carte ?</div>
+    <div class="sheet-note" id="mage-note"></div>
+    <div class="mage-opts" id="mage-opts"></div>
+    <button class="btn btn-ghost" onclick="mageDecide(false)">Ne rien faire</button>
+  </div>
 </div>
 <div class="overlay" id="ov-feu">
   <div class="sheet"><div class="sheet-title" style="color:orange">🔥 Potion de Feu — 2e cible</div><div class="sheet-note">Choisissez une 2e cible pour votre attaque.</div><div id="feu-list"></div><button class="btn btn-ghost" onclick="closeOv('ov-feu')">Annuler</button></div>
 </div>
+<div class="overlay" id="ov-hero-desc">
+  <div class="sheet">
+    <div class="sheet-title">Description des héros</div>
+    <div id="hero-desc-list"></div>
+    <button class="btn btn-ghost" onclick="closeOv('ov-hero-desc')">Fermer</button>
+  </div>
+</div>
+<div class="overlay" id="ov-discard">
+  <div class="sheet">
+    <div class="sheet-title">🃏 Dernière carte de la défausse</div>
+    <div class="discard-card" id="discard-card-preview"></div>
+    <div style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:12px" id="discard-deck-info"></div>
+    <button class="btn btn-ghost" onclick="closeOv('ov-discard')">Fermer</button>
+  </div>
+</div>
 
-<!-- ══ GAME OVER ══ -->
+<!-- GAME OVER -->
 <div class="go-screen" id="go-screen">
   <div class="go-box">
     <div style="font-size:40px;margin-bottom:8px">🏆</div>
@@ -602,11 +548,6 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px;}
     <div id="go-scores"></div>
     <div class="returning-msg">Retour au lobby dans quelques secondes…</div>
   </div>
-</div>
-
-<!-- ══ ANIMATION CARTOON ══ -->
-<div class="anim-overlay" id="anim-overlay">
-  <div class="anim-scene" id="anim-scene"></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -622,45 +563,44 @@ let volState={myType:null,myIdx:0,theirType:null,theirIdx:0,targetId:null};
 let revealT=null, popupT=null;
 let chatUnread=0, gameChatOpen=false;
 let heroMode=false;
-// Cache local des avatars (persistant entre les state_updates)
 const avatarCache={};
 
 // ── AVATAR ──
 document.getElementById('avatar-input').addEventListener('change', function(e){
   const file=e.target.files[0]; if(!file) return;
-  // Redimensionner l'image pour éviter les problèmes de taille
-  const img=new Image();
-  const url=URL.createObjectURL(file);
+  const img=new Image(), url=URL.createObjectURL(file);
   img.onload=function(){
     const canvas=document.createElement('canvas');
-    const size=120; // max 120x120px
-    const ratio=Math.min(size/img.width,size/img.height);
-    canvas.width=Math.round(img.width*ratio);
-    canvas.height=Math.round(img.height*ratio);
-    const ctx=canvas.getContext('2d');
-    ctx.drawImage(img,0,0,canvas.width,canvas.height);
-    myAvatar=canvas.toDataURL('image/jpeg',0.7);
-    URL.revokeObjectURL(url);
+    const size=120, ratio=Math.min(size/img.width,size/img.height);
+    canvas.width=Math.round(img.width*ratio); canvas.height=Math.round(img.height*ratio);
+    canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+    myAvatar=canvas.toDataURL('image/jpeg',0.7); URL.revokeObjectURL(url);
     const prev=document.getElementById('avatar-preview');
     prev.innerHTML=`<img src="${myAvatar}" alt="avatar">`;
   };
   img.src=url;
 });
 
+function getAvatar(id, fallback){
+  if(id===myId) return myAvatar;
+  if(fallback) avatarCache[id]=fallback;
+  return avatarCache[id]||null;
+}
+
 socket.on('connect',()=>{ myId=socket.id; });
 
 // ── LOBBY ──
 socket.on('room_created',({code,heroMode:hm})=>{
-  roomCode=code; isHost=true; heroMode=hm;
+  roomCode=code; isHost=true; heroMode=hm||false;
   document.getElementById('lobby-code').textContent=code;
   document.getElementById('hero-mode-toggle').classList.remove('disabled');
   document.getElementById('hero-mode-toggle').classList.toggle('on',heroMode);
   showScreen('lobby');
 });
-socket.on('room_joined',({code,players,heroMode:hm,isHost:hostId,chatMessages})=>{
-  roomCode=code; isHost=false; heroMode=hm;
+socket.on('room_joined',({code,players,heroMode:hm,hostId,chatMessages})=>{
+  roomCode=code; isHost=(hostId===myId); heroMode=hm||false;
   document.getElementById('lobby-code').textContent=code;
-  document.getElementById('hero-mode-toggle').classList.add('disabled');
+  document.getElementById('hero-mode-toggle').classList.toggle('disabled',!isHost);
   document.getElementById('hero-mode-toggle').classList.toggle('on',heroMode);
   renderLobbyPlayers(players);
   if(chatMessages) chatMessages.forEach(m=>appendChatMsg('lobby-chat-messages',m));
@@ -677,53 +617,48 @@ socket.on('hero_mode_changed',({heroMode:hm})=>{
   document.getElementById('hero-mode-toggle').classList.toggle('on',hm);
   showToast(hm?'🦸 Mode héros activé !':'Mode héros désactivé');
 });
-socket.on('return_to_lobby',({players,heroMode:hm,isHost:hostId})=>{
-  heroMode=hm;
+socket.on('return_to_lobby',({players,heroMode:hm,hostId})=>{
+  heroMode=hm||false; isHost=(hostId===myId);
   document.getElementById('go-screen').classList.remove('show');
+  document.getElementById('victory-screen').classList.remove('show');
   document.getElementById('lobby-code').textContent=roomCode;
   document.getElementById('hero-mode-toggle').classList.toggle('on',hm);
-  if(hostId===myId){ isHost=true; document.getElementById('hero-mode-toggle').classList.remove('disabled'); }
+  document.getElementById('hero-mode-toggle').classList.toggle('disabled',!isHost);
   renderLobbyPlayers(players);
-  showScreen('lobby');
-  showToast('De retour au lobby !');
+  showScreen('lobby'); showToast('De retour au lobby !');
 });
+socket.on('show_toast',({msg})=>showToast(msg));
 
 // ── CHAT ──
 socket.on('chat_message',(msg)=>{
   appendChatMsg('lobby-chat-messages',msg);
   appendChatMsg('game-chat-messages',msg);
   if(!gameChatOpen&&document.getElementById('screen-game').classList.contains('active')){
-    chatUnread++; const u=document.getElementById('chat-unread');
+    chatUnread++;
+    const u=document.getElementById('chat-unread');
     u.style.display='flex'; u.textContent=chatUnread;
   }
 });
-
-function appendChatMsg(containerId,msg){
-  const c=document.getElementById(containerId); if(!c) return;
-  const div=document.createElement('div'); div.className='chat-msg';
+function appendChatMsg(cid,msg){
+  const c=document.getElementById(cid); if(!c) return;
+  const d=document.createElement('div'); d.className='chat-msg';
   const av=document.createElement('div'); av.className='chat-msg-avatar';
-  if(msg.avatar) av.innerHTML=`<img src="${msg.avatar}" alt="">`; else av.textContent='👤';
-  const content=document.createElement('div'); content.className='chat-msg-content';
-  content.innerHTML=`<span class="chat-msg-name">${escHtml(msg.playerName)}</span><span class="chat-msg-text">${escHtml(msg.text)}</span>`;
-  div.appendChild(av); div.appendChild(content); c.appendChild(div);
-  c.scrollTop=c.scrollHeight;
+  const avSrc=getAvatar(msg.playerId,msg.avatar);
+  if(avSrc) av.innerHTML=`<img src="${avSrc}" alt="">`; else av.textContent='👤';
+  const ct=document.createElement('div'); ct.className='chat-msg-content';
+  ct.innerHTML=`<span class="chat-msg-name">${escHtml(msg.playerName)}</span><span class="chat-msg-text">${escHtml(msg.text)}</span>`;
+  d.appendChild(av); d.appendChild(ct); c.appendChild(d); c.scrollTop=c.scrollHeight;
 }
-
 function sendLobbyChat(){
-  const inp=document.getElementById('lobby-chat-inp');
-  const text=inp.value.trim(); if(!text) return;
-  // Afficher immédiatement chez l'expéditeur
+  const inp=document.getElementById('lobby-chat-inp'), text=inp.value.trim(); if(!text) return;
   const localMsg={playerId:myId,playerName:myName,avatar:myAvatar,text};
-  appendChatMsg('lobby-chat-messages',localMsg);
-  appendChatMsg('game-chat-messages',localMsg);
+  appendChatMsg('lobby-chat-messages',localMsg); appendChatMsg('game-chat-messages',localMsg);
   socket.emit('chat_message',{code:roomCode,text}); inp.value='';
 }
 function sendGameChat(){
-  const inp=document.getElementById('game-chat-inp');
-  const text=inp.value.trim(); if(!text) return;
+  const inp=document.getElementById('game-chat-inp'), text=inp.value.trim(); if(!text) return;
   const localMsg={playerId:myId,playerName:myName,avatar:myAvatar,text};
-  appendChatMsg('lobby-chat-messages',localMsg);
-  appendChatMsg('game-chat-messages',localMsg);
+  appendChatMsg('lobby-chat-messages',localMsg); appendChatMsg('game-chat-messages',localMsg);
   socket.emit('chat_message',{code:roomCode,text}); inp.value='';
 }
 function openGameChat(){
@@ -732,43 +667,36 @@ function openGameChat(){
   document.getElementById('game-chat-overlay').classList.add('open');
 }
 function closeGameChat(){ gameChatOpen=false; document.getElementById('game-chat-overlay').classList.remove('open'); }
-
 document.getElementById('lobby-chat-inp').addEventListener('keydown',e=>{ if(e.key==='Enter') sendLobbyChat(); });
 document.getElementById('game-chat-inp').addEventListener('keydown',e=>{ if(e.key==='Enter') sendGameChat(); });
 
 // ── HERO PICK ──
 socket.on('hero_pick_started',({players})=>{
-  // Ouvrir la popup héros par-dessus le lobby
   renderHpWaiting(players);
   document.getElementById('ov-hero-pick').classList.add('open');
 });
 socket.on('pick_hero',({choices})=>{
   const c=document.getElementById('hero-cards'); c.innerHTML='';
   choices.forEach(h=>{
-    const d=document.createElement('div'); d.className='hero-card';
-    d.innerHTML=`<span class="hc-emoji">${h.emoji}</span><div class="hc-name">${h.name}</div><div class="hc-desc">${h.desc}</div>`;
-    d.onclick=()=>pickHero(h.id,d); c.appendChild(d);
+    const d=document.createElement('div');
+    d.style.cssText='flex:1;background:var(--bg3);border:2px solid var(--bord);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s';
+    d.innerHTML=`<div style="font-size:30px;margin-bottom:6px">${h.emoji}</div><div style="font-size:13px;font-weight:700;margin-bottom:4px">${h.name}</div><div style="font-size:11px;color:var(--text2);line-height:1.4">${h.desc}</div>`;
+    d.onclick=()=>{ document.querySelectorAll('#hero-cards>div').forEach(x=>x.style.borderColor='var(--bord)'); d.style.borderColor='var(--red)'; d.style.background='var(--red-bg)'; socket.emit('choose_hero',{code:roomCode,heroId:h.id}); };
+    c.appendChild(d);
   });
 });
-socket.on('hero_chosen',({hero})=>{
-  document.getElementById('hp-status').textContent=`✅ ${hero.emoji} ${hero.name} choisi !`;
-});
+socket.on('hero_chosen',({hero})=>{ document.getElementById('hp-status').textContent=`✅ ${hero.emoji} ${hero.name} choisi !`; });
 socket.on('hero_pick_update',({playerId,playerName,heroEmoji,heroName,allChosen})=>{
   const el=document.getElementById(`hpp-${playerId}`);
-  if(el){ el.className='hp-player-row done'; el.querySelector('.hp-status').textContent=`${heroEmoji} ${heroName}`; }
-  if(allChosen){
-    document.getElementById('hp-status').textContent='Tous prêts ! La partie commence…';
-    setTimeout(()=>document.getElementById('ov-hero-pick').classList.remove('open'), 1000);
-  }
+  if(el){ el.style.color='var(--text)'; el.querySelector('.hp-status').textContent=`${heroEmoji} ${heroName}`; }
+  if(allChosen){ document.getElementById('hp-status').textContent='Tous prêts ! La partie commence…'; setTimeout(()=>closeOv('ov-hero-pick'),1000); }
 });
-function pickHero(heroId,el){
-  document.querySelectorAll('.hero-card').forEach(c=>c.classList.remove('chosen'));
-  el.classList.add('chosen'); socket.emit('choose_hero',{code:roomCode,heroId});
-}
 function renderHpWaiting(players){
   const list=document.getElementById('hp-waiting-list'); list.innerHTML='';
   players.forEach(p=>{
-    const row=document.createElement('div'); row.className='hp-player-row'; row.id=`hpp-${p.id}`;
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--bg3);border:1px solid var(--bord);border-radius:10px;font-size:13px;color:var(--text2)';
+    row.id=`hpp-${p.id}`;
     row.innerHTML=`<span>${p.name}</span><span class="hp-status">En attente…</span>`;
     list.appendChild(row);
   });
@@ -778,13 +706,14 @@ function renderHpWaiting(players){
 socket.on('game_started',({state})=>{
   gs=state; isMyTurn=false; pendingAction=null;
   showScreen('game'); renderAll(); showToast('La partie commence !');
-  // Mettre l'avatar sur l'écran de jeu
   const ma=document.getElementById('my-avatar');
   if(myAvatar) ma.innerHTML=`<img src="${myAvatar}" alt="moi">`; else ma.textContent='👤';
   document.getElementById('my-name-label').textContent=myName;
+  document.getElementById('btn-abandon').style.display=isHost?'block':'none';
+  setTimeout(()=>{ calcCardSize(); setTimeout(calcCardSize,200); },50);
 });
 
-socket.on('choose_action',({deckCount,discardTop,mustAttack,canUsePotion,potions,isBonus,potionFeuActive})=>{
+socket.on('choose_action',({deckCount,discardTop,mustAttack,canUsePotion,potions,isBonus})=>{
   isMyTurn=true; pendingAction=null; pendingTargetId=null;
   if(gs){ gs.deckCount=deckCount; gs.discardTop=discardTop; }
   document.getElementById('deck-pill').textContent=`Pioche : ${deckCount}`;
@@ -798,8 +727,7 @@ socket.on('choose_action',({deckCount,discardTop,mustAttack,canUsePotion,potions
   document.getElementById('charge-warning').style.display=mustAttack?'block':'none';
   if(potions) updatePotions(potions,canUsePotion);
   buildHeroExtra(discardTop);
-  // Recalculer taille cartes car turn-zone a changé de hauteur
-  setTimeout(calcCardSize, 50);
+  setTimeout(calcCardSize,50);
 });
 
 socket.on('wait_turn',({playerName,deckCount})=>{
@@ -812,18 +740,12 @@ socket.on('wait_turn',({playerName,deckCount})=>{
   document.getElementById('step-target').style.display='none';
 });
 
-socket.on('card_reveal',({card,chargeCard,actorName,actionLabel,isCharge})=>{
-  showReveal(card,chargeCard,actorName,actionLabel,isCharge);
+socket.on('card_reveal',({card,chargeCard,actorName,actionLabel,isCharge,targetShieldHidden})=>{
+  showReveal(card,chargeCard,actorName,actionLabel,isCharge,targetShieldHidden);
 });
 socket.on('action_popup',({emoji,main,detail,result,resultType})=>{
   clearTimeout(popupT);
-  popupT=setTimeout(()=>{
-    hideReveal();
-    // Lancer l'animation cartoon selon le type
-    playCartoonAnim(resultType);
-    // La popup arrive 0.8s après l'animation
-    setTimeout(()=>showPopup(emoji,main,detail,result,resultType), 800);
-  },2000);
+  popupT=setTimeout(()=>{ hideReveal(); playCartoonAnim(resultType); setTimeout(()=>showPopup(emoji,main,detail,result,resultType),800); },2000);
 });
 socket.on('state_update',({state})=>{
   gs=state; renderAll();
@@ -833,6 +755,42 @@ socket.on('player_eliminated',({playerId,playerName})=>{
   if(playerId===myId) showToast('Vous êtes éliminé 💀');
   setTimeout(()=>{ hideReveal(); showPopup('💀',`${playerName} est éliminé !`,'Ses cartes sont défaussées.',null,null); },2200);
 });
+socket.on('card_transformed',({original,transformed,mageName})=>{
+  showToast(`🔮 ${mageName} transforme ${original.display} en ${transformed.display} !`);
+});
+
+// Mage intercept
+socket.on('mage_can_transform',({card,actorName,targetName,actionType})=>{
+  const actionLabels={attack:'attaque',shield_swap:'change bouclier',charge:'se charge',necro_discard:'attaque (défausse)'};
+  const aLabel=actionLabels[actionType]||actionType;
+  document.getElementById('mage-note').textContent=`${actorName} ${aLabel}${targetName?' → '+targetName:''} avec ${card.display}${card.suit} (${card.numVal}). Voulez-vous transformer ?`;
+  const opts=document.getElementById('mage-opts'); opts.innerHTML='';
+  const newVal = card.numVal===1?13:1, newDisplay=card.numVal===1?'K':'A';
+  const o1=document.createElement('div'); o1.className='mage-opt';
+  o1.innerHTML=`<div class="mo-val">${card.display}${card.suit}</div><div class="mo-lbl">Garder (${card.numVal})</div>`;
+  o1.onclick=()=>{ closeOv('ov-mage'); mageDecide(false); };
+  const o2=document.createElement('div'); o2.className='mage-opt';
+  o2.innerHTML=`<div class="mo-val">${newDisplay}${card.suit}</div><div class="mo-lbl">→ Transformer (${newVal})</div>`;
+  o2.onclick=()=>{ closeOv('ov-mage'); mageDecide(true); };
+  opts.appendChild(o1); opts.appendChild(o2);
+  document.getElementById('ov-mage').classList.add('open');
+});
+function mageDecide(transform){ socket.emit('mage_decision',{code:roomCode,transform}); }
+
+// Barde choisit PV depuis défausse
+socket.on('barde_pv_prompt',({choices})=>{
+  const c=document.getElementById('barde-pv-choices'); c.innerHTML='';
+  choices.forEach((card,i)=>{
+    const btn=document.createElement('div'); btn.className='barde-card-btn';
+    btn.appendChild(makeBigCard(card));
+    const lbl=document.createElement('div'); lbl.className='barde-sublbl'; lbl.textContent=`${card.display}${card.suit} (${card.numVal})`;
+    btn.appendChild(lbl);
+    btn.onclick=()=>{ closeOv('ov-barde-pv'); socket.emit('barde_pv_pick',{code:roomCode,cardIndex:i}); };
+    c.appendChild(btn);
+  });
+  document.getElementById('ov-barde-pv').classList.add('open');
+});
+
 socket.on('barde_choose',({choices})=>{
   const c=document.getElementById('barde-choices'); c.innerHTML='';
   document.getElementById('barde-note').textContent=`Choisissez parmi ${choices.length} cartes :`;
@@ -850,7 +808,7 @@ socket.on('demoniste_can_reroll',({card,cost,pvLeft})=>{
   const pvAfter=pvLeft-Math.min(cost,pvLeft-1);
   document.getElementById('demon-note').textContent=`Carte : ${card.display}${card.suit} (${card.numVal}). Relancer coûte ${cost} PV → ${pvAfter} PV restants.`;
   const prev=document.getElementById('demon-card-preview'); prev.innerHTML=''; prev.appendChild(makeBigCard(card));
-  const btn=document.getElementById('btn-demon-reroll'); btn.disabled=pvLeft<2;
+  document.getElementById('btn-demon-reroll').disabled=pvLeft<2;
   document.getElementById('ov-demon').classList.add('open');
 });
 socket.on('voleuse_prompt',({targetId,targetName,targetPV,targetShield,myPV,myShield})=>{
@@ -861,20 +819,32 @@ socket.on('voleuse_prompt',({targetId,targetName,targetPV,targetShield,myPV,mySh
   document.getElementById('btn-vol-ok').disabled=true;
   document.getElementById('ov-vol').classList.add('open');
 });
+
 socket.on('game_over',({winner,finalState})=>{
   gs=finalState;
-  const wa=document.getElementById('go-winner-avatar');
-  const winAvSrc=getAvatar(winner.id,winner.avatar);
-  if(winAvSrc) wa.innerHTML=`<img src="${winAvSrc}" alt="">`; else wa.textContent='👤';
-  document.getElementById('go-winner').textContent=`👑 ${winner.name} — ${winner.wins} victoire${winner.wins>1?'s':''}`;
-  const sc=document.getElementById('go-scores'); sc.innerHTML='';
-  finalState.players.slice().sort((a,b)=>totalPV(b)-totalPV(a)).forEach(p=>{
-    const d=document.createElement('div');
-    d.className='sc-row'+(p.id===winner.id?' w':'');
-    d.innerHTML=`<span>${p.id===winner.id?'👑 ':''}${p.heroEmoji?p.heroEmoji+' ':''}${p.name}${p.eliminated?' 💀':''}</span><span class="sc-pts">${totalPV(p)} PV</span>`;
-    sc.appendChild(d);
-  });
-  document.getElementById('go-screen').classList.add('show');
+  // Animation victoire
+  const va=document.getElementById('victory-avatar');
+  const avSrc=getAvatar(winner.id,winner.avatar);
+  if(avSrc) va.innerHTML=`<img src="${avSrc}" alt="">`; else va.textContent='👤';
+  document.getElementById('victory-name').textContent=winner.name;
+  document.getElementById('victory-wins').textContent=`${winner.wins} victoire${winner.wins>1?'s':''}`;
+  document.getElementById('victory-screen').classList.add('show');
+
+  // Puis game over après 4s
+  setTimeout(()=>{
+    document.getElementById('victory-screen').classList.remove('show');
+    const gw=document.getElementById('go-winner');
+    const gwav=document.getElementById('go-winner-avatar');
+    if(avSrc) gwav.innerHTML=`<img src="${avSrc}" alt="">`; else gwav.textContent='👤';
+    gw.textContent=`👑 ${winner.name} — ${winner.wins} victoire${winner.wins>1?'s':''}`;
+    const sc=document.getElementById('go-scores'); sc.innerHTML='';
+    finalState.players.slice().sort((a,b)=>totalPV(b)-totalPV(a)).forEach(p=>{
+      const d=document.createElement('div'); d.className='sc-row'+(p.id===winner.id?' w':'');
+      d.innerHTML=`<span>${p.id===winner.id?'👑 ':''}${p.heroEmoji?p.heroEmoji+' ':''}${p.name}${p.eliminated?' 💀':''}</span><span class="sc-pts">${totalPV(p)} PV</span>`;
+      sc.appendChild(d);
+    });
+    document.getElementById('go-screen').classList.add('show');
+  },4000);
 });
 
 socket.on('err',({msg})=>{ homeErr(msg); showToast(msg); });
@@ -886,18 +856,15 @@ function doCreate(){
   myName=n; socket.emit('create_room',{name:n,heroMode:false,avatar:myAvatar});
 }
 function doJoin(){
-  const n=document.getElementById('inp-name').value.trim(),c=document.getElementById('inp-code').value.trim();
+  const n=document.getElementById('inp-name').value.trim(), c=document.getElementById('inp-code').value.trim();
   if(!n){homeErr('Entrez votre nom !');return;}
   if(c.length!==6){homeErr('Code à 6 chiffres !');return;}
   myName=n; socket.emit('join_room',{name:n,code:c,avatar:myAvatar});
 }
 function doStart(){ socket.emit('start_game',{code:roomCode}); }
 function doLeave(){ socket.emit('leave_room',{code:roomCode}); showScreen('home'); }
-
-function toggleHeroMode(){
-  if(!isHost) return;
-  socket.emit('toggle_hero_mode',{code:roomCode});
-}
+function doAbandon(){ if(confirm('Abandonner la partie et renvoyer tout le monde au lobby ?')) socket.emit('abandon_game',{code:roomCode}); }
+function toggleHeroMode(){ if(!isHost) return; socket.emit('toggle_hero_mode',{code:roomCode}); }
 
 function pickAction(type){
   if(!isMyTurn) return;
@@ -919,16 +886,12 @@ function buildTargets(type){
     const btn=document.createElement('div'); btn.className='tgt-btn';
     const av=document.createElement('div'); av.className='tbt-avatar';
     const avSrc=getAvatar(p.id,p.avatar);
-    if(avSrc) av.innerHTML=`<img src="${avSrc}" alt="">`; else av.textContent='👤';
-    btn.appendChild(av);
+    if(avSrc) av.innerHTML=`<img src="${avSrc}" alt="">`; else av.textContent=p.heroEmoji||'👤';
     const nm=document.createElement('div'); nm.className='tbt-name'; nm.textContent=p.id===myId?'Moi':p.name;
-    const st=document.createElement('div'); st.className='tbt-stats'; st.textContent=`🛡️${p.shieldVal}  ❤️${totalPV(p)}`;
-    btn.appendChild(nm); btn.appendChild(st);
-    btn.onclick=()=>{
-      document.querySelectorAll('.tgt-btn').forEach(b=>b.classList.remove('sel'));
-      btn.classList.add('sel'); pendingTargetId=p.id;
-      setTimeout(()=>emitAction(pendingAction,p.id),120);
-    };
+    const st=document.createElement('div'); st.className='tbt-stats';
+    st.textContent=`🛡️${p.shieldVal}  ❤️${totalPV(p)}`;
+    btn.appendChild(av); btn.appendChild(nm); btn.appendChild(st);
+    btn.onclick=()=>{ document.querySelectorAll('.tgt-btn').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); pendingTargetId=p.id; setTimeout(()=>emitAction(pendingAction,p.id),120); };
     grid.appendChild(btn);
   });
 }
@@ -944,7 +907,6 @@ function openShieldSwap(){
   });
   document.getElementById('ov-shl').classList.add('open');
 }
-
 function openPretresse(){
   const me=getMe(); if(!me) return;
   const list=document.getElementById('prt-list'); list.innerHTML='';
@@ -956,22 +918,20 @@ function openPretresse(){
   });
   document.getElementById('ov-prt').classList.add('open');
 }
-
 function buildHeroExtra(discardTop){
   const me=getMe(); if(!me) return;
   const div=document.getElementById('hero-extra-btns'); div.innerHTML='';
   if(me.heroId==='pretresse'){
-    const b=document.createElement('button'); b.className='btn btn-gold'; b.style.padding='9px'; b.style.fontSize='12px';
+    const b=document.createElement('button'); b.className='btn btn-gold'; b.style.cssText='padding:9px;font-size:12px';
     b.textContent='✨ Soigner un PV'; b.onclick=openPretresse; div.appendChild(b);
   }
   if(me.heroId==='necromancien'&&discardTop){
-    const b=document.createElement('button'); b.className='btn btn-ghost'; b.style.padding='9px'; b.style.fontSize='12px';
+    const b=document.createElement('button'); b.className='btn btn-ghost'; b.style.cssText='padding:9px;font-size:12px';
     b.textContent=`💀 Défausse (${discardTop.display}${discardTop.suit})`;
     b.onclick=()=>{ document.getElementById('step-action').style.display='none'; document.getElementById('step-target').style.display='block'; pendingAction='necro_discard'; buildTargets('attack'); };
     div.appendChild(b);
   }
 }
-
 function updatePotions(potions,canUse){
   const me=getMe(); if(!me||me.heroId!=='alchimiste') return;
   const row=document.getElementById('potions-row'); row.style.display='flex'; row.innerHTML='';
@@ -1000,15 +960,57 @@ function demonReroll(){ socket.emit('demoniste_reroll',{code:roomCode}); }
 function demonConfirm(){ closeOv('ov-demon'); socket.emit('demoniste_confirm',{code:roomCode}); isMyTurn=false; document.getElementById('step-action').style.display='none'; }
 function emitAction(type,targetId,extra){
   isMyTurn=false; socket.emit('action',{code:roomCode,type,targetId,extra});
-  document.getElementById('step-action').style.display='none';
-  document.getElementById('step-target').style.display='none';
+  document.getElementById('step-action').style.display='none'; document.getElementById('step-target').style.display='none';
   const tb=document.getElementById('turn-banner'); tb.className='turn-banner wait'; tb.textContent='Carte en cours…';
 }
 function confirmVol(){ socket.emit('voleuse_exchange',{code:roomCode,...volState}); closeOv('ov-vol'); }
 function closeOv(id){ document.getElementById(id).classList.remove('open'); }
 
+// Voir défausse
+function showDiscardTop(){
+  if(!gs) return;
+  const prev=document.getElementById('discard-card-preview'); prev.innerHTML='';
+  if(gs.discardTop){ prev.appendChild(makeBigCard(gs.discardTop)); }
+  else { prev.innerHTML='<div style="color:var(--text3);font-size:13px">Défausse vide</div>'; }
+  document.getElementById('discard-deck-info').textContent=`Pioche : ${gs.deckCount||'?'} cartes restantes`;
+  document.getElementById('ov-discard').classList.add('open');
+}
+
+// Voir description héros
+function showMyHeroDesc(){
+  if(!gs) return;
+  const list=document.getElementById('hero-desc-list'); list.innerHTML='';
+  gs.players.forEach(p=>{
+    if(!p.heroId||p.eliminated) return;
+    const box=document.createElement('div'); box.className='hero-desc-box';
+    const wounds = gs.players.find(x=>x.id===myId)?.woundMarkers?.[p.id]||0;
+    const woundStr = wounds>0 ? ` <span style="color:var(--red);font-size:11px">(🐾 ×${wounds})</span>` : '';
+    box.innerHTML=`<div class="hero-desc-row"><span class="hero-desc-emoji">${p.heroEmoji}</span><div><div class="hero-desc-name">${p.name}${p.id===myId?' (vous)':''}</div><div style="font-size:11px;color:var(--text3)">${p.heroName}${woundStr}</div></div></div><div class="hero-desc-text">${getHeroDesc(p.heroId)}</div>`;
+    list.appendChild(box);
+  });
+  if(!list.children.length) list.innerHTML='<div style="color:var(--text3);font-size:13px;text-align:center;padding:10px">Mode héros non activé</div>';
+  document.getElementById('ov-hero-desc').classList.add('open');
+}
+function getHeroDesc(id){
+  const h={
+    guerriere:'Cumule plusieurs charges. Bouclier +2 par charge. Doit toutes les utiliser en attaquant.',
+    necromancien:'Peut utiliser la dernière carte de la défausse pour attaquer ou charger.',
+    voleuse:'Après avoir infligé des dégâts, échange une carte avec la cible.',
+    mage:'Quand un As ou Roi est joué en attaque, peut choisir de transformer la carte.',
+    paladin:'Si perd des PV sur une attaque, riposte automatiquement avec 2 attaques.',
+    pretresse:'Peut choisir quelle carte PV échanger contre la première carte de la pioche.',
+    demoniste:'Peut relancer la carte piochée en payant 3 PV.',
+    espionne:'Son bouclier est toujours caché. Si elle est en jeu, tous les boucliers sont cachés.',
+    alchimiste:'3 potions : Feu (2 cibles), Invisibilité (esquive), Vitesse (action bonus).',
+    ogre:'Commence avec 3 cartes PV. Si attaque = bouclier adverse → élimination directe.',
+    barde:'Même couleur → 2 cartes. Même symbole → 3 cartes. Perd des PV → choisit depuis la défausse.',
+    bete:'Chaque attaque qui blesse ajoute un marqueur (+3 dégâts/marqueur aux prochaines attaques).',
+  };
+  return h[id]||'Pouvoir inconnu';
+}
+
 // ── REVEAL ──
-function showReveal(card,chargeCard,actorName,actionLabel,isCharge){
+function showReveal(card,chargeCard,actorName,actionLabel,isCharge,targetShieldHidden){
   clearTimeout(revealT);
   document.getElementById('reveal-actor').textContent=actorName;
   document.getElementById('reveal-action').textContent=actionLabel;
@@ -1026,102 +1028,39 @@ function showReveal(card,chargeCard,actorName,actionLabel,isCharge){
 }
 function hideReveal(){ document.getElementById('reveal-screen').classList.remove('show'); }
 
-// ── ANIMATION CARTOON ──
+// ── CARTOON ANIM ──
 function playCartoonAnim(resultType){
-  const overlay=document.getElementById('anim-overlay');
-  const scene=document.getElementById('anim-scene');
+  const overlay=document.getElementById('anim-overlay'), scene=document.getElementById('anim-scene');
   scene.innerHTML='';
-
   if(resultType==='dmg'){
-    // Épée qui attaque + impact
     scene.innerHTML=`
-      <svg id="anim-sword" style="position:absolute;top:60px;left:60px;animation:swordAttack .9s cubic-bezier(.2,.8,.4,1) forwards" width="120" height="120" viewBox="0 0 120 120">
-        <!-- Épée cartoon -->
-        <g transform="rotate(45,60,60)">
-          <!-- Lame -->
-          <rect x="54" y="8" width="12" height="72" rx="4" fill="#e8e0c8" stroke="#8a7a5a" stroke-width="2"/>
-          <!-- Tranchant -->
-          <polygon points="54,8 60,2 66,8" fill="#fff" stroke="#8a7a5a" stroke-width="1.5"/>
-          <!-- Garde -->
-          <rect x="38" y="76" width="44" height="10" rx="5" fill="#c0392b" stroke="#8b1a1a" stroke-width="2"/>
-          <!-- Poignée -->
-          <rect x="54" y="86" width="12" height="22" rx="4" fill="#8b6914" stroke="#5a4409" stroke-width="2"/>
-          <!-- Pomme -->
-          <circle cx="60" cy="110" r="7" fill="#d4a017" stroke="#8b6914" stroke-width="2"/>
-          <!-- Reflet lame -->
-          <rect x="57" y="12" width="4" height="50" rx="2" fill="rgba(255,255,255,.5)"/>
-        </g>
+      <svg style="position:absolute;top:60px;left:60px;animation:swordAttack .9s cubic-bezier(.2,.8,.4,1) forwards" width="120" height="120" viewBox="0 0 120 120">
+        <g transform="rotate(45,60,60)"><rect x="54" y="8" width="12" height="72" rx="4" fill="#e8e0c8" stroke="#8a7a5a" stroke-width="2"/><polygon points="54,8 60,2 66,8" fill="#fff" stroke="#8a7a5a" stroke-width="1.5"/><rect x="38" y="76" width="44" height="10" rx="5" fill="#c0392b" stroke="#8b1a1a" stroke-width="2"/><rect x="54" y="86" width="12" height="22" rx="4" fill="#8b6914" stroke="#5a4409" stroke-width="2"/><circle cx="60" cy="110" r="7" fill="#d4a017" stroke="#8b6914" stroke-width="2"/><rect x="57" y="12" width="4" height="50" rx="2" fill="rgba(255,255,255,.5)"/></g>
       </svg>
-      <!-- Étoiles d'impact -->
-      <svg style="position:absolute;top:30px;right:20px;animation:impactStar .6s .4s ease-out forwards;opacity:0" width="80" height="80" viewBox="0 0 80 80">
-        <polygon points="40,5 47,28 72,28 52,43 59,66 40,51 21,66 28,43 8,28 33,28" fill="#f0c040" stroke="#d4a017" stroke-width="2"/>
-        <polygon points="40,15 44,26 56,26 47,33 50,45 40,38 30,45 33,33 24,26 36,26" fill="#fff8dc" opacity=".8"/>
-      </svg>
-      <svg style="position:absolute;bottom:30px;right:40px;animation:impactStar .5s .5s ease-out forwards;opacity:0" width="50" height="50" viewBox="0 0 50 50">
-        <polygon points="25,3 29,18 44,18 32,27 37,42 25,33 13,42 18,27 6,18 21,18" fill="#e63946" stroke="#8b1a1a" stroke-width="1.5"/>
-      </svg>
-      <!-- Texte IMPACT -->
-      <div style="position:absolute;top:90px;left:50%;transform:translateX(-50%);animation:impactText .7s .35s cubic-bezier(.34,1.56,.64,1) forwards;opacity:0;font-family:Impact,sans-serif;font-size:36px;font-weight:900;color:#e63946;text-shadow:3px 3px 0 #8b1a1a,-1px -1px 0 #8b1a1a,1px -1px 0 #8b1a1a,-1px 1px 0 #8b1a1a;letter-spacing:2px;white-space:nowrap">TOUCHÉ !</div>
-    `;
+      <svg style="position:absolute;top:30px;right:20px;animation:impactStar .6s .4s ease-out forwards;opacity:0" width="80" height="80" viewBox="0 0 80 80"><polygon points="40,5 47,28 72,28 52,43 59,66 40,51 21,66 28,43 8,28 33,28" fill="#f0c040" stroke="#d4a017" stroke-width="2"/></svg>
+      <div style="position:absolute;top:90px;left:50%;animation:impactText .7s .35s cubic-bezier(.34,1.56,.64,1) forwards;opacity:0;font-family:Impact,sans-serif;font-size:34px;font-weight:900;color:#e63946;text-shadow:3px 3px 0 #8b1a1a;letter-spacing:2px;white-space:nowrap">TOUCHÉ !</div>`;
   } else if(resultType==='block'){
-    // Épée qui arrive + bouclier qui bloque
     scene.innerHTML=`
-      <svg id="anim-sword" style="position:absolute;top:70px;left:40px;animation:swordBlock .9s cubic-bezier(.2,.8,.4,1) forwards" width="100" height="100" viewBox="0 0 100 100">
-        <g transform="rotate(30,50,50)">
-          <rect x="45" y="6" width="10" height="60" rx="3" fill="#e8e0c8" stroke="#8a7a5a" stroke-width="2"/>
-          <polygon points="45,6 50,1 55,6" fill="#fff" stroke="#8a7a5a" stroke-width="1.5"/>
-          <rect x="32" y="63" width="36" height="8" rx="4" fill="#c0392b" stroke="#8b1a1a" stroke-width="2"/>
-          <rect x="45" y="71" width="10" height="18" rx="3" fill="#8b6914" stroke="#5a4409" stroke-width="2"/>
-          <circle cx="50" cy="91" r="5.5" fill="#d4a017" stroke="#8b6914" stroke-width="2"/>
-        </g>
+      <svg style="position:absolute;top:70px;left:40px;animation:swordBlock .9s cubic-bezier(.2,.8,.4,1) forwards" width="100" height="100" viewBox="0 0 100 100">
+        <g transform="rotate(30,50,50)"><rect x="45" y="6" width="10" height="60" rx="3" fill="#e8e0c8" stroke="#8a7a5a" stroke-width="2"/><polygon points="45,6 50,1 55,6" fill="#fff" stroke="#8a7a5a" stroke-width="1.5"/><rect x="32" y="63" width="36" height="8" rx="4" fill="#c0392b" stroke="#8b1a1a" stroke-width="2"/></g>
       </svg>
-      <!-- Bouclier qui bloque -->
-      <svg style="position:absolute;top:40px;right:30px;animation:shieldBlock .8s .2s cubic-bezier(.34,1.56,.64,1) forwards;opacity:0;transform-origin:center" width="110" height="130" viewBox="0 0 110 130">
-        <!-- Bouclier -->
-        <path d="M55,5 L100,25 L100,70 Q100,110 55,125 Q10,110 10,70 L10,25 Z" fill="#2563a8" stroke="#1a3a6b" stroke-width="3"/>
-        <path d="M55,18 L88,33 L88,70 Q88,100 55,112 Q22,100 22,70 L22,33 Z" fill="#3b82f6" stroke="#2563a8" stroke-width="1.5"/>
-        <!-- Croix sur le bouclier -->
-        <rect x="50" y="38" width="10" height="50" rx="3" fill="rgba(255,255,255,.9)"/>
-        <rect x="30" y="58" width="50" height="10" rx="3" fill="rgba(255,255,255,.9)"/>
-        <!-- Reflet -->
-        <path d="M30,30 Q40,22 55,20 Q45,35 35,55 Z" fill="rgba(255,255,255,.25)"/>
+      <svg style="position:absolute;top:40px;right:30px;animation:shieldBlock .8s .2s cubic-bezier(.34,1.56,.64,1) forwards;opacity:0;transform-origin:center" width="100" height="120" viewBox="0 0 100 120">
+        <path d="M50,5 L90,22 L90,65 Q90,100 50,115 Q10,100 10,65 L10,22 Z" fill="#2563a8" stroke="#1a3a6b" stroke-width="3"/>
+        <path d="M50,18 L78,30 L78,65 Q78,90 50,102 Q22,90 22,65 L22,30 Z" fill="#3b82f6" stroke="#2563a8" stroke-width="1.5"/>
+        <rect x="45" y="35" width="10" height="45" rx="3" fill="rgba(255,255,255,.9)"/><rect x="28" y="52" width="44" height="10" rx="3" fill="rgba(255,255,255,.9)"/>
       </svg>
-      <!-- Étincelles choc -->
-      <svg style="position:absolute;top:55px;left:50%;transform:translateX(-50%);animation:impactStar .5s .45s ease-out forwards;opacity:0" width="60" height="60" viewBox="0 0 60 60">
-        <line x1="30" y1="0" x2="30" y2="15" stroke="#f0c040" stroke-width="3" stroke-linecap="round"/>
-        <line x1="60" y1="30" x2="45" y2="30" stroke="#f0c040" stroke-width="3" stroke-linecap="round"/>
-        <line x1="30" y1="60" x2="30" y2="45" stroke="#f0c040" stroke-width="3" stroke-linecap="round"/>
-        <line x1="0" y1="30" x2="15" y2="30" stroke="#f0c040" stroke-width="3" stroke-linecap="round"/>
-        <line x1="51" y1="9" x2="41" y2="19" stroke="#f0c040" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="9" y1="9" x2="19" y2="19" stroke="#f0c040" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="51" y1="51" x2="41" y2="41" stroke="#f0c040" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="9" y1="51" x2="19" y2="41" stroke="#f0c040" stroke-width="2.5" stroke-linecap="round"/>
-      </svg>
-      <!-- Texte BLOQUÉ -->
-      <div style="position:absolute;top:95px;left:50%;transform:translateX(-50%);animation:impactText .7s .4s cubic-bezier(.34,1.56,.64,1) forwards;opacity:0;font-family:Impact,sans-serif;font-size:30px;font-weight:900;color:#60a5fa;text-shadow:3px 3px 0 #1a3a6b,-1px -1px 0 #1a3a6b,1px -1px 0 #1a3a6b;letter-spacing:2px;white-space:nowrap">BLOQUÉ !</div>
-    `;
+      <div style="position:absolute;top:95px;left:50%;animation:impactText .7s .4s cubic-bezier(.34,1.56,.64,1) forwards;opacity:0;font-family:Impact,sans-serif;font-size:28px;font-weight:900;color:#60a5fa;text-shadow:3px 3px 0 #1a3a6b;letter-spacing:2px;white-space:nowrap">BLOQUÉ !</div>`;
   } else if(resultType==='neutral'){
-    // Éclair pour charge/bouclier/soin
     scene.innerHTML=`
-      <svg style="position:absolute;top:20px;left:50%;transform:translateX(-50%);animation:chargeAnim .8s cubic-bezier(.34,1.56,.64,1) forwards;opacity:0;transform-origin:center" width="120" height="150" viewBox="0 0 120 150">
-        <!-- Éclair cartoon -->
-        <polygon points="70,5 45,70 65,70 35,145 90,60 65,60 85,5" fill="#f0c040" stroke="#d4a017" stroke-width="3"/>
-        <polygon points="70,15 50,65 67,65 42,130 85,68 62,68 80,15" fill="#fff8dc" opacity=".7"/>
-      </svg>
-      <!-- Étoiles autour -->
-      <svg style="position:absolute;top:10px;left:20px;animation:impactStar .5s .3s ease-out forwards;opacity:0" width="40" height="40" viewBox="0 0 40 40">
-        <polygon points="20,2 23,14 36,14 26,22 29,34 20,26 11,34 14,22 4,14 17,14" fill="#f0c040" stroke="#d4a017" stroke-width="1.5"/>
-      </svg>
-      <svg style="position:absolute;top:10px;right:20px;animation:impactStar .5s .4s ease-out forwards;opacity:0" width="36" height="36" viewBox="0 0 36 36">
-        <polygon points="18,2 21,12 32,12 23,19 26,30 18,23 10,30 13,19 4,12 15,12" fill="#f0c040" stroke="#d4a017" stroke-width="1.5"/>
-      </svg>
-    `;
+      <svg style="position:absolute;top:20px;left:50%;transform:translateX(-50%);animation:chargeAnim .8s cubic-bezier(.34,1.56,.64,1) forwards;opacity:0;transform-origin:center" width="110" height="140" viewBox="0 0 110 140">
+        <polygon points="65,5 40,65 60,65 32,135 85,55 60,55 78,5" fill="#f0c040" stroke="#d4a017" stroke-width="3"/>
+      </svg>`;
   }
-
   overlay.classList.add('show');
-  setTimeout(()=>{ overlay.classList.remove('show'); scene.innerHTML=''; }, 1200);
+  setTimeout(()=>{ overlay.classList.remove('show'); scene.innerHTML=''; },1200);
 }
 
+// ── POPUP ──
 function showPopup(emoji,main,detail,result,resultType){
   clearTimeout(popupT);
   document.getElementById('popup-emoji').textContent=emoji||'';
@@ -1138,8 +1077,7 @@ function showPopup(emoji,main,detail,result,resultType){
 // ── RENDER ──
 function renderAll(){
   if(!gs) return;
-  renderPlayersStatusBar();
-  renderMyCards();
+  renderPlayersStatusBar(); renderMyCards();
   document.getElementById('deck-pill').textContent=`Pioche : ${gs.deckCount||'?'}`;
   const me=getMe();
   const cb=document.getElementById('charge-badge');
@@ -1152,20 +1090,24 @@ function renderAll(){
   else document.getElementById('potions-row').style.display='none';
 }
 
-// Stats joueurs toujours visibles
 function renderPlayersStatusBar(){
   const bar=document.getElementById('players-status-bar'); bar.innerHTML=''; if(!gs) return;
   gs.players.forEach(p=>{
     const card=document.createElement('div');
     card.className='player-status-card'+(gs.currentTurnId===p.id?' their-turn':'')+(p.eliminated?' dead':'');
-    const av=document.createElement('div'); av.className='ps-avatar';
+    card.onclick=()=>showMyHeroDesc();
     const avSrc=getAvatar(p.id,p.avatar);
+    const av=document.createElement('div'); av.className='ps-avatar';
     if(avSrc) av.innerHTML=`<img src="${avSrc}" alt="">`; else av.textContent=p.heroEmoji||'👤';
     const info=document.createElement('div'); info.className='ps-info';
     const nm=document.createElement('div'); nm.className='ps-name'; nm.textContent=p.id===myId?'Vous':p.name;
     const st=document.createElement('div'); st.className='ps-stats';
     if(!p.eliminated){
-      st.innerHTML=`🛡️<span class="sv">${p.shieldVal}</span> ❤️<span class="sv">${totalPV(p)}</span>${p.hasCharge?` ⚡<span class="sv">${p.chargeCount}</span>`:''}`;
+      // Bête : afficher marqueurs blessure
+      const me=getMe();
+      const wounds = me&&p.id!==myId ? (me.woundMarkers?.[p.id]||0) : 0;
+      const woundStr = wounds>0 ? `<span style="color:var(--red)">🐾${wounds}</span>` : '';
+      st.innerHTML=`🛡️<span class="sv">${p.shieldVal}</span> ❤️<span class="sv">${totalPV(p)}</span>${p.hasCharge?` ⚡<span class="sv">${p.chargeCount}</span>`:''}${woundStr}`;
     } else { st.textContent='💀'; }
     info.appendChild(nm); info.appendChild(st); card.appendChild(av); card.appendChild(info);
     if(gs.currentTurnId===p.id&&!p.eliminated){ const dot=document.createElement('div'); dot.className='turn-dot-sm'; card.appendChild(dot); }
@@ -1176,53 +1118,41 @@ function renderPlayersStatusBar(){
 function renderMyCards(){
   const me=getMe(); if(!me) return;
   const layout=document.getElementById('my-cards-layout'); layout.innerHTML='';
+  // Bouclier en haut
   const shWrap=document.createElement('div');
   const shLbl=document.createElement('div'); shLbl.className='card-section-label'; shLbl.textContent='🛡️ Bouclier';
   const shRow=document.createElement('div'); shRow.className='card-row-shield';
-  shRow.appendChild(me.heroId==='espionne'?makeBackCard():makeCard(me.shield,true));
+  // Espionne voit son bouclier, mais on l'affiche
+  shRow.appendChild(me.shield ? makeCard(me.shield,true) : makeBackCard());
+  // Guerrière bonus visible
+  if(me.heroId==='guerriere'&&me.hasCharge){
+    const bonus=document.createElement('div'); bonus.className='guerriere-bonus';
+    bonus.textContent=`+${me.chargeCount*2}`;
+    shRow.appendChild(bonus);
+  }
   shWrap.appendChild(shLbl); shWrap.appendChild(shRow); layout.appendChild(shWrap);
+  // PV en bas
   const pvWrap=document.createElement('div');
   const pvLbl=document.createElement('div'); pvLbl.className='card-section-label'; pvLbl.textContent='❤️ Points de vie';
   const pvRow=document.createElement('div'); pvRow.className='card-row-pv';
-  me.pv.forEach(c=>pvRow.appendChild(makeCard(c,false))); pvWrap.appendChild(pvLbl); pvWrap.appendChild(pvRow); layout.appendChild(pvWrap);
+  me.pv.forEach(c=>pvRow.appendChild(makeCard(c,false)));
+  pvWrap.appendChild(pvLbl); pvWrap.appendChild(pvRow); layout.appendChild(pvWrap);
+  // Charges
   if(me.charges&&me.charges.length>0){
     const chWrap=document.createElement('div');
     const chLbl=document.createElement('div'); chLbl.className='card-section-label'; chLbl.textContent='⚡ Charge';
     const chRow=document.createElement('div'); chRow.className='card-row-pv';
-    me.charges.forEach(()=>chRow.appendChild(makeBackCard())); chWrap.appendChild(chLbl); chWrap.appendChild(chRow); layout.appendChild(chWrap);
+    me.charges.forEach(()=>chRow.appendChild(makeBackCard()));
+    chWrap.appendChild(chLbl); chWrap.appendChild(chRow); layout.appendChild(chWrap);
   }
 }
 
-function buildVolCards(id,pv,shield,isMine){
-  const c=document.getElementById(id); c.innerHTML='';
-  if(shield){ c.appendChild(mkExItem(`🛡️ ${shield.display}${shield.suit}`,isMine,'shield',0)); }
-  pv.forEach((card,i)=>c.appendChild(mkExItem(`❤️ ${card.display}${card.suit} (${card.numVal})`,isMine,'pv',i)));
-}
-function mkExItem(label,isMine,type,idx){
-  const b=document.createElement('div'); b.className='ex-item'; b.textContent=label;
-  b.onclick=()=>{
-    document.querySelectorAll((isMine?'#vol-my':'#vol-their')+' .ex-item').forEach(x=>x.classList.remove('sel'));
-    b.classList.add('sel');
-    if(isMine){volState.myType=type;volState.myIdx=idx;}
-    else{volState.theirType=type;volState.theirIdx=idx;}
-    document.getElementById('btn-vol-ok').disabled=!(volState.myType&&volState.theirType);
-  };
-  return b;
-}
-
 // ── LOBBY PLAYERS ──
-// Helper avatar : utilise le cache local
-function getAvatar(playerId, fallbackAvatar){
-  if(playerId===myId) return myAvatar;
-  if(fallbackAvatar) avatarCache[playerId]=fallbackAvatar;
-  return avatarCache[playerId]||null;
-}
-
 function renderLobbyPlayers(players){
   const ul=document.getElementById('lobby-players'); ul.innerHTML='';
-  const maxWins=Math.max(...players.map(p=>p.wins||0));
+  const maxWins=Math.max(...players.map(p=>p.wins||0),0);
   players.forEach((p,i)=>{
-    if(p.avatar) avatarCache[p.id]=p.avatar; // mise en cache
+    if(p.avatar) avatarCache[p.id]=p.avatar;
     const li=document.createElement('div'); li.className='lobby-player-item';
     const av=document.createElement('div'); av.className='lp-avatar';
     const avSrc=getAvatar(p.id,p.avatar);
@@ -1263,66 +1193,55 @@ function makeBigCard(card){
 }
 function makeBackCard(){ const el=document.createElement('div'); el.className='card card-norm card-back'; el.innerHTML='<div class="bi">🛡️</div>'; return el; }
 
-// ── UTILS ──
-function getMe(){ return gs?gs.players.find(p=>p.id===myId):null; }
-function totalPV(p){ return p&&p.pv?p.pv.reduce((s,c)=>s+c.numVal,0):0; }
-function escHtml(t){ const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
-// ── TAILLE CARTES ADAPTIVE ──
-function calcCardSize(){
-  // Utiliser visualViewport si dispo (tient compte de la barre Safari)
-  const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+function buildVolCards(id,pv,shield,isMine){
+  const c=document.getElementById(id); c.innerHTML='';
+  if(shield){ c.appendChild(mkExItem(`🛡️ ${shield.display}${shield.suit}`,isMine,'shield',0)); }
+  pv.forEach((card,i)=>c.appendChild(mkExItem(`❤️ ${card.display}${card.suit} (${card.numVal})`,isMine,'pv',i)));
+}
+function mkExItem(label,isMine,type,idx){
+  const b=document.createElement('div'); b.className='ex-item'; b.textContent=label;
+  b.onclick=()=>{
+    document.querySelectorAll((isMine?'#vol-my':'#vol-their')+' .ex-item').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel');
+    if(isMine){volState.myType=type;volState.myIdx=idx;}else{volState.theirType=type;volState.theirIdx=idx;}
+    document.getElementById('btn-vol-ok').disabled=!(volState.myType&&volState.theirType);
+  };
+  return b;
+}
 
-  // Mesurer les zones fixes réelles dans le DOM
+// ── CARD SIZE ADAPTIVE ──
+function calcCardSize(){
+  const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
   const topbar   = document.querySelector('.game-topbar')?.offsetHeight || 40;
   const statusbar= document.querySelector('.players-status-bar')?.offsetHeight || 36;
   const header   = document.querySelector('.my-cards-header')?.offsetHeight || 36;
   const turnzone = document.getElementById('turn-zone')?.offsetHeight || 170;
-  const labels   = 30; // card-section-labels
-  const gaps     = 20; // marges internes
-
+  const labels   = 28; const gaps = 16;
   const available = vh - topbar - statusbar - header - turnzone - labels - gaps;
-
-  // Espace pour bouclier (horiz) + gap + PV (norm) empilés verticalement
-  // bouclier horiz hauteur = h_s, PV norm hauteur = h_p
-  // h_s + 8 + h_p = available, avec h_p = h_s * 1.4
-  // h_s + 8 + h_s*1.4 = available → h_s = (available-8) / 2.4
-  const h_s = Math.max(Math.min(Math.floor((available - 8) / 2.4), 72), 40);
-  const w_s = Math.floor(h_s / 0.714); // ratio carte standard
-  const h_p = Math.max(Math.min(Math.floor(h_s * 1.4), 100), 56);
-  const w_p = Math.floor(h_p * 0.714);
-
-  const root = document.documentElement;
-  root.style.setProperty('--cw',  w_p+'px');
-  root.style.setProperty('--ch',  h_p+'px');
-  root.style.setProperty('--csw', w_s+'px');
-  root.style.setProperty('--csh', h_s+'px');
-
-  const fs  = Math.max(Math.floor(h_p * 0.13), 9)+'px';
-  const fsb = Math.max(Math.floor(h_p * 0.16), 11)+'px';
-  const fcc = Math.max(Math.floor(h_p * 0.26), 14)+'px';
-  root.style.setProperty('--cfs',  fs);
-  root.style.setProperty('--cfsl', fsb);
-  root.style.setProperty('--ccc',  fcc);
+  const h_s = Math.max(Math.min(Math.floor((available-8)/2.4),72),36);
+  const w_s = Math.floor(h_s/0.714);
+  const h_p = Math.max(Math.min(Math.floor(h_s*1.4),100),50);
+  const w_p = Math.floor(h_p*0.714);
+  const root=document.documentElement;
+  root.style.setProperty('--cw',w_p+'px'); root.style.setProperty('--ch',h_p+'px');
+  root.style.setProperty('--csw',w_s+'px'); root.style.setProperty('--csh',h_s+'px');
+  root.style.setProperty('--cfs',Math.max(Math.floor(h_p*.13),9)+'px');
+  root.style.setProperty('--cfsl',Math.max(Math.floor(h_p*.16),11)+'px');
+  root.style.setProperty('--ccc',Math.max(Math.floor(h_p*.26),14)+'px');
 }
+if(window.visualViewport) window.visualViewport.addEventListener('resize',calcCardSize);
+window.addEventListener('resize',calcCardSize);
+window.addEventListener('orientationchange',()=>setTimeout(calcCardSize,300));
 
-// Recalculer quand le viewport change (Safari barre qui monte/descend)
-if(window.visualViewport){
-  window.visualViewport.addEventListener('resize', calcCardSize);
-}
-window.addEventListener('resize', calcCardSize);
-window.addEventListener('orientationchange', ()=>setTimeout(calcCardSize, 300));
-
+// ── UTILS ──
+function getMe(){ return gs?gs.players.find(p=>p.id===myId):null; }
+function totalPV(p){ return p&&p.pv?p.pv.reduce((s,c)=>s+c.numVal,0):0; }
+function escHtml(t){ const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
 function showScreen(n){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(`screen-${n}`).classList.add('active');
-  if(n==='game'){
-    document.body.classList.add('game-active');
-    // Double setTimeout pour laisser le navigateur rendre le DOM complet
-    setTimeout(()=>{ calcCardSize(); setTimeout(calcCardSize, 200); }, 50);
-  } else {
-    document.body.classList.remove('game-active');
-    window.scrollTo(0,0);
-  }
+  if(n==='game'){ document.body.classList.add('game-active'); setTimeout(()=>{ calcCardSize(); setTimeout(calcCardSize,200); },50); }
+  else{ document.body.classList.remove('game-active'); window.scrollTo(0,0); }
 }
 function homeErr(msg){ document.getElementById('home-err').textContent=msg; setTimeout(()=>document.getElementById('home-err').textContent='',3000); }
 let toastT;
