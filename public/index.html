@@ -860,29 +860,31 @@ socket.on('voleuse_prompt',({targetId,targetName,targetPV,targetShield,myPV,mySh
 
 socket.on('game_over',({winner,finalState})=>{
   gs=finalState;
-  // Animation victoire
-  const va=document.getElementById('victory-avatar');
   const avSrc=getAvatar(winner.id,winner.avatar);
-  if(avSrc) va.innerHTML=`<img src="${avSrc}" alt="">`; else va.textContent='👤';
-  document.getElementById('victory-name').textContent=winner.name;
-  document.getElementById('victory-wins').textContent=`${winner.wins} victoire${winner.wins>1?'s':''}`;
-  document.getElementById('victory-screen').classList.add('show');
-
-  // Puis game over après 4s
+  // Préparer les écrans mais ne pas les montrer tout de suite
+  // D'abord laisser le popup d'action se terminer (il dure ~3.2s), puis montrer victoire
   setTimeout(()=>{
-    document.getElementById('victory-screen').classList.remove('show');
-    const gw=document.getElementById('go-winner');
-    const gwav=document.getElementById('go-winner-avatar');
-    if(avSrc) gwav.innerHTML=`<img src="${avSrc}" alt="">`; else gwav.textContent='👤';
-    gw.textContent=`👑 ${winner.name} — ${winner.wins} victoire${winner.wins>1?'s':''}`;
-    const sc=document.getElementById('go-scores'); sc.innerHTML='';
-    finalState.players.slice().sort((a,b)=>totalPV(b)-totalPV(a)).forEach(p=>{
-      const d=document.createElement('div'); d.className='sc-row'+(p.id===winner.id?' w':'');
-      d.innerHTML=`<span>${p.id===winner.id?'👑 ':''}${p.heroEmoji?p.heroEmoji+' ':''}${p.name}${p.eliminated?' 💀':''}</span><span class="sc-pts">${totalPV(p)} PV</span>`;
-      sc.appendChild(d);
-    });
-    document.getElementById('go-screen').classList.add('show');
-  },4000);
+    // Animation victoire
+    const va=document.getElementById('victory-avatar');
+    if(avSrc) va.innerHTML=`<img src="${avSrc}" alt="">`; else va.textContent='👤';
+    document.getElementById('victory-name').textContent=winner.name;
+    document.getElementById('victory-wins').textContent=`${winner.wins} victoire${winner.wins>1?'s':''}`;
+    document.getElementById('victory-screen').classList.add('show');
+    // Puis game over après 4s
+    setTimeout(()=>{
+      document.getElementById('victory-screen').classList.remove('show');
+      const gwav=document.getElementById('go-winner-avatar');
+      if(avSrc) gwav.innerHTML=`<img src="${avSrc}" alt="">`; else gwav.textContent='👤';
+      document.getElementById('go-winner').textContent=`👑 ${winner.name} — ${winner.wins} victoire${winner.wins>1?'s':''}`;
+      const sc=document.getElementById('go-scores'); sc.innerHTML='';
+      finalState.players.slice().sort((a,b)=>totalPV(b)-totalPV(a)).forEach(p=>{
+        const d=document.createElement('div'); d.className='sc-row'+(p.id===winner.id?' w':'');
+        d.innerHTML=`<span>${p.id===winner.id?'👑 ':''}${p.heroEmoji?p.heroEmoji+' ':''}${p.name}${p.eliminated?' 💀':''}</span><span class="sc-pts">${totalPV(p)} PV</span>`;
+        sc.appendChild(d);
+      });
+      document.getElementById('go-screen').classList.add('show');
+    },4000);
+  }, 3500); // Attendre que le popup d'action soit terminé
 });
 
 socket.on('err',({msg})=>{ homeErr(msg); showToast(msg); });
@@ -1130,6 +1132,8 @@ function renderAll(){
 
 function renderPlayersStatusBar(){
   const bar=document.getElementById('players-status-bar'); bar.innerHTML=''; if(!gs) return;
+  // Trouver le joueur Bête pour ses marqueurs
+  const bete = gs.players.find(p=>p.heroId==='bete'&&!p.eliminated);
   gs.players.forEach(p=>{
     const card=document.createElement('div');
     card.className='player-status-card'+(gs.currentTurnId===p.id?' their-turn':'')+(p.eliminated?' dead':'');
@@ -1141,9 +1145,8 @@ function renderPlayersStatusBar(){
     const nm=document.createElement('div'); nm.className='ps-name'; nm.textContent=p.id===myId?'Vous':p.name;
     const st=document.createElement('div'); st.className='ps-stats';
     if(!p.eliminated){
-      // Bête : afficher marqueurs blessure
-      const me=getMe();
-      const wounds = me&&p.id!==myId ? (me.woundMarkers?.[p.id]||0) : 0;
+      // Marqueurs blessure depuis le joueur Bête (visible pour tous)
+      const wounds = bete && p.id!==bete.id ? (bete.woundMarkers?.[p.id]||0) : 0;
       const woundStr = wounds>0 ? `<span style="color:var(--red)">🐾${wounds}</span>` : '';
       st.innerHTML=`🛡️<span class="sv">${p.shieldVal}</span> ❤️<span class="sv">${totalPV(p)}</span>${p.hasCharge?` ⚡<span class="sv">${p.chargeCount}</span>`:''}${woundStr}`;
     } else { st.textContent='💀'; }
