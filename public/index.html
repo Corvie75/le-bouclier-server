@@ -161,26 +161,29 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
 .potion-btn .p-emoji{font-size:16px}
 .potion-btn .p-name{font-size:10px;color:var(--text2)}
 
-/* CARDS */
-.card{background:#fff;border-radius:7px;border:1px solid rgba(0,0,0,.08);position:relative;flex-shrink:0;user-select:none;box-shadow:0 3px 10px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.8);font-family:'Inter',sans-serif;font-weight:700;color:#111}
-.card.red{color:var(--red)}.card.jkr{color:var(--blue)}
+/* CARDS — premium redesign */
+.card{background:#fff;border-radius:10px;border:none;position:relative;flex-shrink:0;user-select:none;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,.55),0 1px 0 rgba(255,255,255,.95) inset;font-family:'Inter',sans-serif;font-weight:900;color:#111}
+.card.red{color:#e63946}.card.jkr{color:#2563a8}
 .card-norm{width:var(--cw);height:var(--ch)}
-.card-norm .ctop{position:absolute;top:4px;left:4px;line-height:1.1}
-.card-norm .ctop .cv{display:block;font-size:var(--cfsl);font-weight:800}.card-norm .ctop .cs{display:block;font-size:var(--cfs)}
-.card-norm .cbot{position:absolute;bottom:4px;right:4px;line-height:1.1;transform:rotate(180deg)}
-.card-norm .cbot .cv{display:block;font-size:var(--cfsl);font-weight:800}.card-norm .cbot .cs{display:block;font-size:var(--cfs)}
-.card-norm .ccc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:var(--ccc)}
-.card-horiz{width:var(--csw);height:var(--csh);display:flex;align-items:center;justify-content:center;gap:4px}
-.card-horiz .hv{font-size:var(--cfsl);font-weight:800}.card-horiz .hs{font-size:var(--cfs)}
-.card-back{background:linear-gradient(135deg,#1a2a5e,#2a4298);border:1px solid rgba(184,134,11,.3)}
-.card-back .bi{position:absolute;inset:3px;border:1px solid rgba(255,255,255,.15);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:var(--ccc)}
-.card-big{width:120px;height:168px;border-radius:12px;border:2px solid rgba(0,0,0,.1);box-shadow:0 20px 60px rgba(0,0,0,.8),inset 0 2px 0 rgba(255,255,255,.9)}
-.card-big .ctop{position:absolute;top:7px;left:9px;line-height:1.2}
-.card-big .ctop .cv{display:block;font-size:19px;font-weight:800}.card-big .ctop .cs{display:block;font-size:12px}
-.card-big .cbot{position:absolute;bottom:7px;right:9px;line-height:1.2;transform:rotate(180deg)}
-.card-big .cbot .cv{display:block;font-size:19px;font-weight:800}.card-big .cbot .cs{display:block;font-size:12px}
-.card-big .ccc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:44px}
-
+.card-norm .ctop{position:absolute;top:5px;left:6px;line-height:1}
+.card-norm .ctop .cv{display:block;font-size:var(--cfsl);font-weight:900;line-height:1}
+.card-norm .ctop .cs{display:block;font-size:var(--cfs);opacity:.5;margin-top:1px}
+.card-norm .cbot{position:absolute;bottom:5px;right:6px;line-height:1;transform:rotate(180deg)}
+.card-norm .cbot .cv{display:block;font-size:var(--cfsl);font-weight:900;line-height:1}
+.card-norm .cbot .cs{display:block;font-size:var(--cfs);opacity:.5;margin-top:1px}
+.card-norm .ccc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:var(--ccc);opacity:.1}
+.card-horiz{width:var(--csw);height:var(--csh);display:flex;align-items:center;justify-content:center;gap:5px}
+.card-horiz .hv{font-size:var(--cfsl);font-weight:900}.card-horiz .hs{font-size:var(--cfs);opacity:.6}
+.card-back{background:#0f0f0f;border:none}
+.card-back .bi{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.card-big{width:120px;height:168px;border-radius:14px;border:none;box-shadow:0 28px 70px rgba(0,0,0,.85),0 2px 0 rgba(255,255,255,.95) inset}
+.card-big .ctop{position:absolute;top:9px;left:11px;line-height:1}
+.card-big .ctop .cv{display:block;font-size:20px;font-weight:900;line-height:1}
+.card-big .ctop .cs{display:block;font-size:13px;opacity:.5;margin-top:2px}
+.card-big .cbot{position:absolute;bottom:9px;right:11px;line-height:1;transform:rotate(180deg)}
+.card-big .cbot .cv{display:block;font-size:20px;font-weight:900;line-height:1}
+.card-big .cbot .cs{display:block;font-size:13px;opacity:.5;margin-top:2px}
+.card-big .ccc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:46px;opacity:.08}
 /* TURN ZONE */
 .turn-zone{border-top:1px solid var(--bord);padding:7px 12px 10px;display:flex;flex-direction:column;gap:6px;flex-shrink:0}
 .turn-banner{width:100%;text-align:center;padding:9px;border-radius:10px;font-size:13px;font-weight:600}
@@ -749,7 +752,7 @@ socket.on('choose_action',({deckCount,discardTop,mustAttack,canUsePotion,potions
   document.getElementById('deck-pill').textContent=`Pioche : ${deckCount}`;
   const tb=document.getElementById('turn-banner');
   tb.className='turn-banner mine';
-  tb.textContent=isBonus?'⚗️ Action bonus !':mustAttack?'⚡ À votre tour — attaque obligatoire !':'⚔️ À votre tour !';
+  tb.textContent=isBonus?'⚗️ Action bonus !':mustAttack?'⚡ À votre tour — attaque obligatoire !':'À votre tour !';
   document.getElementById('step-action').style.display='block';
   document.getElementById('step-target').style.display='none';
   document.getElementById('btn-shl').classList.toggle('forced',mustAttack);
@@ -797,6 +800,11 @@ socket.on('player_eliminated',({playerId,playerName})=>{
 });
 socket.on('card_transformed',({original,transformed,mageName})=>{
   showToast(`🔮 ${mageName} transforme ${original.display} en ${transformed.display} !`);
+});
+
+// Annonces actions héros — visible par tous
+socket.on('hero_action_announce',({emoji,text})=>{
+  showToast(`${emoji} ${text}`);
 });
 
 // ── DERNIÈRE CARTE JOUÉE ──
@@ -1081,7 +1089,7 @@ function showReveal(card,chargeCard,actorName,actionLabel,isCharge,targetShieldH
   const row=document.getElementById('reveal-cards-row'); row.innerHTML='';
   if(isCharge){
     const back=document.createElement('div'); back.className='card card-big card-back';
-    back.innerHTML='<div class="bi" style="font-size:30px">⚡</div>'; row.appendChild(back);
+    back.innerHTML=`<div class="bi"><svg viewBox="0 0 40 48" width="45%" height="45%" xmlns="http://www.w3.org/2000/svg"><path d="M20 2L36 9V22Q36 36 20 46Q4 36 4 22V9Z" fill="#1a0a0b"/><path d="M20 2L36 9V22Q36 36 20 46Q4 36 4 22V9Z" fill="none" stroke="#e63946" stroke-width="1.5"/><path d="M20 7L31 13V22Q31 32 20 40Q9 32 9 22V13Z" fill="#2d0505"/><rect x="18" y="13" width="4" height="20" rx="2" fill="#e63946"/><rect x="11" y="21" width="18" height="4" rx="2" fill="#e63946"/></svg></div>`; row.appendChild(back);
   } else {
     if(chargeCard){ row.appendChild(makeBigCard(chargeCard)); const p=document.createElement('div'); p.className='reveal-plus'; p.textContent='+'; row.appendChild(p); }
     row.appendChild(makeBigCard(card));
@@ -1190,20 +1198,18 @@ function showPlayerCards(playerId){
   // Bouclier
   const shWrap=document.createElement('div');
   const shLbl=document.createElement('div'); shLbl.style.cssText='font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;text-align:center'; shLbl.textContent='🛡️ Bouclier';
-  const shRow=document.createElement('div'); shRow.style.cssText='display:flex;justify-content:center';
-  // Espionne : bouclier caché pour les autres
-  if(p.heroId==='espionne' && p.id!==myId){
+  const shRow=document.createElement('div'); shRow.style.cssText='display:flex;justify-content:center;align-items:center;gap:8px';
+  if(p.shieldHidden){
     shRow.appendChild(makeBackCard());
-    const hint=document.createElement('div'); hint.style.cssText='font-size:11px;color:var(--text3);text-align:center;margin-top:4px'; hint.textContent='(caché — Espionne)';
+    const hint=document.createElement('div'); hint.style.cssText='font-size:11px;color:var(--text3);margin-top:4px;text-align:center'; hint.textContent='(caché)';
     shWrap.appendChild(shLbl); shWrap.appendChild(shRow); shWrap.appendChild(hint);
   } else if(p.shield){
     shRow.appendChild(makeCard(p.shield,true));
-    shWrap.appendChild(shLbl); shWrap.appendChild(shRow);
-    // Guerrière : afficher bonus
     if(p.heroId==='guerriere'&&p.hasCharge){
-      const bonus=document.createElement('div'); bonus.style.cssText='font-size:12px;color:var(--gold);text-align:center;margin-top:4px'; bonus.textContent=`+${p.chargeCount*2} (charge${p.chargeCount>1?'s':''})`;
-      shWrap.appendChild(bonus);
+      const bonus=document.createElement('div'); bonus.style.cssText='font-size:12px;color:var(--gold);font-weight:700'; bonus.textContent=`+${p.chargeCount*2}`;
+      shRow.appendChild(bonus);
     }
+    shWrap.appendChild(shLbl); shWrap.appendChild(shRow);
   } else {
     shRow.appendChild(makeBackCard());
     shWrap.appendChild(shLbl); shWrap.appendChild(shRow);
@@ -1314,7 +1320,11 @@ function makeBigCard(card){
   el.innerHTML=`<div class="ctop"><span class="cv">${card.display}</span><span class="cs">${card.suit}</span></div><div class="ccc">${isJkr?'🃏':card.suit}</div><div class="cbot"><span class="cv">${card.display}</span><span class="cs">${card.suit}</span></div>`;
   return el;
 }
-function makeBackCard(){ const el=document.createElement('div'); el.className='card card-norm card-back'; el.innerHTML='<div class="bi">🛡️</div>'; return el; }
+function makeBackCard(){
+  const el=document.createElement('div'); el.className='card card-norm card-back';
+  el.innerHTML=`<div class="bi"><svg viewBox="0 0 40 48" width="40%" height="40%" xmlns="http://www.w3.org/2000/svg"><path d="M20 2L36 9V22Q36 36 20 46Q4 36 4 22V9Z" fill="#1a0a0b"/><path d="M20 2L36 9V22Q36 36 20 46Q4 36 4 22V9Z" fill="none" stroke="#e63946" stroke-width="1.5"/><path d="M20 7L31 13V22Q31 32 20 40Q9 32 9 22V13Z" fill="#2d0505"/><rect x="18" y="13" width="4" height="20" rx="2" fill="#e63946"/><rect x="11" y="21" width="18" height="4" rx="2" fill="#e63946"/></svg></div>`;
+  return el;
+}
 
 function buildVolCards(id,pv,shield,isMine){
   const c=document.getElementById(id); c.innerHTML='';
