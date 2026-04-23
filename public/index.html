@@ -419,6 +419,8 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
     </div>
   </div>
   <div class="players-status-bar" id="players-status-bar"></div>
+  <!-- Banner "en attente de X" -->
+  <div id="waiting-for-banner" style="display:none;background:rgba(139,92,246,.15);border-bottom:1px solid rgba(139,92,246,.3);padding:6px 14px;font-size:12px;color:var(--purple);align-items:center;justify-content:center;flex-shrink:0"></div>
   <div class="my-cards-zone">
     <div class="my-cards-header">
       <div class="my-avatar" id="my-avatar" onclick="showMyHeroDesc()">👤</div>
@@ -555,6 +557,14 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
     <div class="discard-card" id="discard-card-preview"></div>
     <div style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:12px" id="discard-deck-info"></div>
     <button class="btn btn-ghost" onclick="closeOv('ov-discard')">Fermer</button>
+  </div>
+</div>
+
+<div class="overlay" id="ov-player-cards">
+  <div class="sheet">
+    <div class="sheet-title" id="player-cards-title">Cartes du joueur</div>
+    <div id="player-cards-content" style="display:flex;flex-direction:column;gap:14px;margin-bottom:14px"></div>
+    <button class="btn btn-ghost" onclick="closeOv('ov-player-cards')">Fermer</button>
   </div>
 </div>
 
@@ -767,10 +777,18 @@ socket.on('action_popup',({emoji,main,detail,result,resultType})=>{
   clearTimeout(popupT);
   popupT=setTimeout(()=>{ hideReveal(); playCartoonAnim(resultType); setTimeout(()=>showPopup(emoji,main,detail,result,resultType),800); },2000);
 });
+// Waiting for hero decision
+let mageAutoCloseTimer = null;
+socket.on('waiting_for',(data)=>{
+  const el=document.getElementById('waiting-for-banner');
+  if(!data){ el.style.display='none'; return; }
+  el.style.display='flex';
+  el.innerHTML=`<span>${data.heroEmoji} <strong>${data.playerName}</strong> ${data.reason}</span>`;
+});
+
 socket.on('state_update',({state})=>{
   gs=state; renderAll();
   document.getElementById('deck-pill').textContent=`Pioche : ${gs.deckCount||'?'}`;
-  // Afficher dernière carte jouée
   renderLastCard(gs.discardTop);
 });
 socket.on('player_eliminated',({playerId,playerName})=>{
@@ -801,19 +819,28 @@ socket.on('mage_can_transform',({card,actorName,targetName,actionType})=>{
   const newVal=card.numVal===1?13:1, newDisplay=card.numVal===1?'K':'A';
   const o1=document.createElement('div'); o1.className='mage-opt';
   o1.innerHTML=`<div class="mo-val">${card.display}${card.suit}</div><div class="mo-lbl">Garder (${card.numVal})</div>`;
-  o1.onclick=()=>{ closeOv('ov-mage'); mageDecide(false); };
+  o1.onclick=()=>{ clearTimeout(mageAutoCloseTimer); closeOv('ov-mage'); mageDecide(false); };
   const o2=document.createElement('div'); o2.className='mage-opt';
   o2.innerHTML=`<div class="mo-val">${newDisplay}${card.suit}</div><div class="mo-lbl">→ Transformer (${newVal})</div>`;
-  o2.onclick=()=>{ closeOv('ov-mage'); mageDecide(true); };
+  o2.onclick=()=>{ clearTimeout(mageAutoCloseTimer); closeOv('ov-mage'); mageDecide(true); };
   opts.appendChild(o1); opts.appendChild(o2);
-  // Timer affiché dans le popup
+  // Timer affiché + auto-fermeture à 8s
   document.getElementById('mage-timer-bar').style.display='block';
   const timerFill=document.getElementById('mage-timer-fill');
   timerFill.style.animation='none'; timerFill.offsetHeight;
   timerFill.style.animation='mageTimer 8s linear forwards';
   document.getElementById('ov-mage').classList.add('open');
+  // Auto-fermeture si le temps expire
+  clearTimeout(mageAutoCloseTimer);
+  mageAutoCloseTimer = setTimeout(()=>{
+    closeOv('ov-mage');
+    document.getElementById('waiting-for-banner').style.display='none';
+  }, 8200);
 });
-function mageDecide(transform){ socket.emit('mage_decision',{code:roomCode,transform}); }
+function mageDecide(transform){
+  socket.emit('mage_decision',{code:roomCode,transform});
+  document.getElementById('waiting-for-banner').style.display='none';
+}
 
 // Barde choisit PV depuis défausse
 socket.on('barde_pv_prompt',({choices})=>{
@@ -1129,12 +1156,12 @@ function renderAll(){
 
 function renderPlayersStatusBar(){
   const bar=document.getElementById('players-status-bar'); bar.innerHTML=''; if(!gs) return;
-  // Trouver le joueur Bête pour ses marqueurs
   const bete = gs.players.find(p=>p.heroId==='bete'&&!p.eliminated);
   gs.players.forEach(p=>{
     const card=document.createElement('div');
     card.className='player-status-card'+(gs.currentTurnId===p.id?' their-turn':'')+(p.eliminated?' dead':'');
-    card.onclick=()=>showMyHeroDesc();
+    // Clic → voir les cartes du joueur
+    card.onclick=()=>showPlayerCards(p.id);
     const avSrc=getAvatar(p.id,p.avatar);
     const av=document.createElement('div'); av.className='ps-avatar';
     if(avSrc) av.innerHTML=`<img src="${avSrc}" alt="">`; else av.textContent=p.heroEmoji||'👤';
@@ -1142,7 +1169,6 @@ function renderPlayersStatusBar(){
     const nm=document.createElement('div'); nm.className='ps-name'; nm.textContent=p.id===myId?'Vous':p.name;
     const st=document.createElement('div'); st.className='ps-stats';
     if(!p.eliminated){
-      // Marqueurs blessure depuis le joueur Bête (visible pour tous)
       const wounds = bete && p.id!==bete.id ? (bete.woundMarkers?.[p.id]||0) : 0;
       const woundStr = wounds>0 ? `<span style="color:var(--red)">🐾${wounds}</span>` : '';
       st.innerHTML=`🛡️<span class="sv">${p.shieldVal}</span> ❤️<span class="sv">${totalPV(p)}</span>${p.hasCharge?` ⚡<span class="sv">${p.chargeCount}</span>`:''}${woundStr}`;
@@ -1151,6 +1177,65 @@ function renderPlayersStatusBar(){
     if(gs.currentTurnId===p.id&&!p.eliminated){ const dot=document.createElement('div'); dot.className='turn-dot-sm'; card.appendChild(dot); }
     bar.appendChild(card);
   });
+}
+
+function showPlayerCards(playerId){
+  if(!gs) return;
+  const p = gs.players.find(x=>x.id===playerId); if(!p) return;
+  document.getElementById('player-cards-title').textContent=`${p.heroEmoji?p.heroEmoji+' ':''}${p.name}${p.id===myId?' (vous)':''}`;
+  const content=document.getElementById('player-cards-content'); content.innerHTML='';
+
+  if(p.eliminated){ content.innerHTML='<div style="color:var(--text3);text-align:center;padding:10px">💀 Éliminé</div>'; document.getElementById('ov-player-cards').classList.add('open'); return; }
+
+  // Bouclier
+  const shWrap=document.createElement('div');
+  const shLbl=document.createElement('div'); shLbl.style.cssText='font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;text-align:center'; shLbl.textContent='🛡️ Bouclier';
+  const shRow=document.createElement('div'); shRow.style.cssText='display:flex;justify-content:center';
+  // Espionne : bouclier caché pour les autres
+  if(p.heroId==='espionne' && p.id!==myId){
+    shRow.appendChild(makeBackCard());
+    const hint=document.createElement('div'); hint.style.cssText='font-size:11px;color:var(--text3);text-align:center;margin-top:4px'; hint.textContent='(caché — Espionne)';
+    shWrap.appendChild(shLbl); shWrap.appendChild(shRow); shWrap.appendChild(hint);
+  } else if(p.shield){
+    shRow.appendChild(makeCard(p.shield,true));
+    shWrap.appendChild(shLbl); shWrap.appendChild(shRow);
+    // Guerrière : afficher bonus
+    if(p.heroId==='guerriere'&&p.hasCharge){
+      const bonus=document.createElement('div'); bonus.style.cssText='font-size:12px;color:var(--gold);text-align:center;margin-top:4px'; bonus.textContent=`+${p.chargeCount*2} (charge${p.chargeCount>1?'s':''})`;
+      shWrap.appendChild(bonus);
+    }
+  } else {
+    shRow.appendChild(makeBackCard());
+    shWrap.appendChild(shLbl); shWrap.appendChild(shRow);
+  }
+  content.appendChild(shWrap);
+
+  // PV
+  const pvWrap=document.createElement('div');
+  const pvLbl=document.createElement('div'); pvLbl.style.cssText='font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;text-align:center'; pvLbl.textContent='❤️ Points de vie';
+  const pvRow=document.createElement('div'); pvRow.style.cssText='display:flex;gap:8px;justify-content:center;flex-wrap:wrap';
+  if(p.pv&&p.pv.length>0){ p.pv.forEach(c=>pvRow.appendChild(makeCard(c,false))); }
+  else { pvRow.innerHTML='<div style="color:var(--text3);font-size:13px">Aucun PV</div>'; }
+  pvWrap.appendChild(pvLbl); pvWrap.appendChild(pvRow); content.appendChild(pvWrap);
+
+  // Charges (dos)
+  if(p.hasCharge){
+    const chWrap=document.createElement('div');
+    const chLbl=document.createElement('div'); chLbl.style.cssText='font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;text-align:center'; chLbl.textContent='⚡ Charge(s)';
+    const chRow=document.createElement('div'); chRow.style.cssText='display:flex;gap:8px;justify-content:center';
+    for(let i=0;i<p.chargeCount;i++) chRow.appendChild(makeBackCard());
+    chWrap.appendChild(chLbl); chWrap.appendChild(chRow); content.appendChild(chWrap);
+  }
+
+  // Bête : marqueurs
+  const bete=gs.players.find(x=>x.heroId==='bete'&&!x.eliminated);
+  if(bete && bete.woundMarkers && bete.woundMarkers[p.id]){
+    const wDiv=document.createElement('div'); wDiv.style.cssText='font-size:13px;color:var(--red);text-align:center';
+    wDiv.textContent=`🐾 ${bete.woundMarkers[p.id]} marqueur${bete.woundMarkers[p.id]>1?'s':''} blessure (+${bete.woundMarkers[p.id]*3} dégâts)`;
+    content.appendChild(wDiv);
+  }
+
+  document.getElementById('ov-player-cards').classList.add('open');
 }
 
 function renderMyCards(){
