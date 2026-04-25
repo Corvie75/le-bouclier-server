@@ -851,23 +851,24 @@ socket.on('action_popup',({emoji,main,detail,result,resultType})=>{
   popupT=setTimeout(()=>{ hideReveal(); playCartoonAnim(resultType); setTimeout(()=>showPopup(emoji,main,detail,result,resultType),800); },2000);
 });
 // Nécromancien — choix défausse ou pioche
-socket.on('necro_choose',({lastDiscard, type, targetId})=>{
+socket.on('necro_choose',({lastDiscard, type})=>{
+  const actionLabel = type==='charge' ? 'charger' : type==='attack' ? 'attaquer' : type;
   const div=document.getElementById('hero-extra-btns');
   div.innerHTML=`
     <div style="background:#1a1a1a;border:1px solid #2e2e2e;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:7px">
-      <div style="font-size:11px;color:var(--text3);text-align:center;letter-spacing:1px">💀 NÉCROMANCIEN — CHOISIR LA SOURCE</div>
+      <div style="font-size:11px;color:var(--text3);text-align:center;letter-spacing:1px">💀 NÉCROMANCIEN — SOURCE POUR ${actionLabel.toUpperCase()}</div>
       <div style="display:flex;gap:7px">
-        <button onclick="necroUseDiscard()" class="btn btn-ghost btn-sm" style="flex:1;padding:9px 5px;font-size:12px">
+        <button onclick="necroUseDiscard()" class="btn btn-ghost" style="flex:1;padding:9px 5px;font-size:11px;border-color:var(--red)">
           Défausse<br><span style="color:var(--red);font-weight:700">${lastDiscard.display}${lastDiscard.suit} (${lastDiscard.numVal})</span>
         </button>
-        <button onclick="necroUseRandom()" class="btn btn-ghost btn-sm" style="flex:1;padding:9px 5px;font-size:12px">
-          Pioche<br><span style="color:var(--text3)">Carte aléatoire</span>
+        <button onclick="necroUseRandom()" class="btn btn-ghost" style="flex:1;padding:9px 5px;font-size:11px">
+          Pioche<br><span style="color:var(--text3);font-size:10px">Carte aléatoire</span>
         </button>
       </div>
     </div>`;
 });
-function necroUseDiscard(){ socket.emit('necro_use_discard',{code:roomCode}); document.getElementById('hero-extra-btns').innerHTML=''; }
-function necroUseRandom(){ socket.emit('necro_use_random',{code:roomCode}); document.getElementById('hero-extra-btns').innerHTML=''; }
+function necroUseDiscard(){ document.getElementById('hero-extra-btns').innerHTML=''; socket.emit('necro_use_discard',{code:roomCode}); }
+function necroUseRandom(){ document.getElementById('hero-extra-btns').innerHTML=''; socket.emit('necro_use_random',{code:roomCode}); }
 socket.on('waiting_for',(data)=>{
   const el=document.getElementById('waiting-for-banner');
   if(!data){ el.style.display='none'; return; }
