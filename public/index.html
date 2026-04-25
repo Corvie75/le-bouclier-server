@@ -938,44 +938,52 @@ function mageDecide(transform){
 }
 
 socket.on('barde_pv_prompt',({choices, pvValue})=>{
-  // Recap des cartes actuelles du barde
   const me=getMe();
   const recap=document.getElementById('barde-pv-recap');
   if(recap && me){
     recap.innerHTML='';
-    const title=document.createElement('div');
-    title.style.cssText='font-size:10px;color:var(--text3);letter-spacing:1px;text-align:center;margin-bottom:6px';
-    title.textContent='VOS CARTES ACTUELLES';
-    recap.appendChild(title);
+    // Titre avec valeur cherchée
+    const titleDiv=document.createElement('div');
+    titleDiv.style.cssText='font-size:12px;font-weight:700;color:var(--text);text-align:center;margin-bottom:8px;padding:6px;background:var(--red-bg);border:1px solid rgba(230,57,70,.2);border-radius:8px';
+    titleDiv.textContent=`Chercher un ${pvValue} dans la défausse`;
+    recap.appendChild(titleDiv);
+    // Cartes actuelles
+    const cardTitle=document.createElement('div');
+    cardTitle.style.cssText='font-size:10px;color:var(--text3);letter-spacing:1px;text-align:center;margin-bottom:5px';
+    cardTitle.textContent='VOS CARTES ACTUELLES';
+    recap.appendChild(cardTitle);
     const row=document.createElement('div');
     row.style.cssText='display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:8px';
-    // Bouclier
-    if(me.shield){ const c=makeCard(me.shield,true); row.appendChild(c); }
-    // PV
+    if(me.shield) row.appendChild(makeCard(me.shield,true));
     if(me.pv) me.pv.forEach(c=>row.appendChild(makeCard(c,false)));
     recap.appendChild(row);
     // Bonus actuel
     const isSym=me.pv&&me.shield?checkSymbol(me):false;
     const isCol=me.pv&&me.shield?checkColor(me):false;
     const bonusDiv=document.createElement('div');
-    bonusDiv.style.cssText='font-size:11px;text-align:center;margin-bottom:8px;padding:4px 10px;border-radius:8px;'+(isSym?'background:rgba(139,92,246,.15);color:var(--purple)':isCol?'background:rgba(37,99,168,.12);color:#60a5fa':'background:var(--bg3);color:var(--text3)');
+    bonusDiv.style.cssText='font-size:11px;text-align:center;margin-bottom:10px;padding:4px 10px;border-radius:8px;'+(isSym?'background:rgba(139,92,246,.15);color:var(--purple)':isCol?'background:rgba(37,99,168,.12);color:#60a5fa':'background:var(--bg3);color:var(--text3)');
     bonusDiv.textContent=isSym?'🎵 Même symbole → 3 cartes':isCol?'🎵 Même couleur → 2 cartes':'🎵 Pas de bonus actuellement';
     recap.appendChild(bonusDiv);
-    const hint=document.createElement('div');
-    hint.style.cssText='font-size:11px;color:var(--text2);text-align:center;margin-bottom:4px';
-    hint.textContent=`Choisissez un ${pvValue} dans la défausse :`;
-    recap.appendChild(hint);
+    // Label choix
+    const choiceLabel=document.createElement('div');
+    choiceLabel.style.cssText='font-size:11px;color:var(--text2);text-align:center;margin-bottom:4px';
+    choiceLabel.textContent=choices.length>0?`${choices.length} carte${choices.length>1?'s':''} disponible${choices.length>1?'s':''} :`:'Aucun '+pvValue+' en défausse — carte aléatoire en cours…';
+    recap.appendChild(choiceLabel);
   }
   const c=document.getElementById('barde-pv-choices'); c.innerHTML='';
+  if(choices.length===0){
+    // Aucun choix — fermer auto après 2s
+    setTimeout(()=>closeOv('ov-barde-pv'), 2000);
+  }
   choices.forEach((card,i)=>{
     const btn=document.createElement('div'); btn.className='barde-card-btn';
     btn.appendChild(makeBigCard(card));
-    const lbl=document.createElement('div'); lbl.className='barde-sublbl'; lbl.textContent=`${card.display}${card.suit}`;
+    const lbl=document.createElement('div'); lbl.className='barde-sublbl'; lbl.textContent=`${card.display}${card.suit} (${card.numVal})`;
     btn.appendChild(lbl);
     btn.onclick=()=>{ closeOv('ov-barde-pv'); socket.emit('barde_pv_pick',{code:roomCode,cardIndex:i}); };
     c.appendChild(btn);
   });
-  document.getElementById('ov-barde-pv').classList.add('open');
+  if(choices.length>0) document.getElementById('ov-barde-pv').classList.add('open');
 });
 function checkColor(p){
   const cards=[...p.pv,p.shield].filter(Boolean);
