@@ -601,6 +601,49 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
 const SERVER_URL = 'https://le-bouclier-server-production.up.railway.app';
 const socket = io(SERVER_URL, {transports:['websocket','polling']});
 
+// ── DEV LOG PANEL ──
+// Activer avec ?debug dans l'URL
+const DEV = window.location.search.includes('debug');
+let logCount = 0;
+if(DEV){
+  const panel = document.createElement('div');
+  panel.id='dev-log';
+  panel.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9999;background:rgba(0,0,0,.92);color:#0f0;font-family:monospace;font-size:10px;max-height:35vh;overflow-y:auto;border-top:1px solid #0f0;padding:4px 8px';
+  const header = document.createElement('div');
+  header.style.cssText='display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;position:sticky;top:0;background:rgba(0,0,0,.95);padding:2px 0';
+  header.innerHTML='<span style="color:#0f0;font-weight:bold">🐛 DEV LOG</span><span id="dev-log-count" style="color:#888">0 events</span><button onclick="document.getElementById(\'dev-log-entries\').innerHTML=\'\'" style="background:#111;border:1px solid #333;color:#888;font-size:9px;padding:2px 6px;cursor:pointer;border-radius:3px">Clear</button>';
+  const entries = document.createElement('div');
+  entries.id='dev-log-entries';
+  panel.appendChild(header); panel.appendChild(entries);
+  document.body.appendChild(panel);
+}
+function devLog(type, data){
+  if(!DEV) return;
+  logCount++;
+  document.getElementById('dev-log-count').textContent=logCount+' events';
+  const entries=document.getElementById('dev-log-entries');
+  const row=document.createElement('div');
+  row.style.cssText='border-bottom:1px solid #111;padding:2px 0;line-height:1.4';
+  const time=new Date().toLocaleTimeString('fr',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const colors={socket:'#60a5fa',action:'#f0c040',state:'#22c55e',error:'#e63946',hero:'#a78bfa',system:'#888'};
+  const color=colors[type]||'#fff';
+  let dataStr='';
+  try{ dataStr=typeof data==='object'?JSON.stringify(data,null,0).slice(0,200):String(data); }catch(e){ dataStr='[circular]'; }
+  row.innerHTML=`<span style="color:#555">${time}</span> <span style="color:${color}">[${type.toUpperCase()}]</span> <span style="color:#ddd">${dataStr}</span>`;
+  entries.appendChild(row);
+  entries.scrollTop=entries.scrollHeight;
+}
+
+// Intercepter tous les événements socket
+const _orig_on = socket.on.bind(socket);
+socket.on = function(event, cb){
+  return _orig_on(event, function(...args){
+    const type = ['err','error'].includes(event)?'error':['state_update'].includes(event)?'state':['action_popup','card_reveal','player_eliminated'].includes(event)?'action':['game_started','game_over','return_to_lobby'].includes(event)?'system':['hero_pick_started','pick_hero','hero_chosen','mage_can_transform','voleuse_prompt','barde_choose','demoniste_can_reroll'].includes(event)?'hero':'socket';
+    devLog(type, {ev:event, ...(args[0]||{})});
+    return cb(...args);
+  });
+};
+
 let myId=null, myName='', roomCode='', isHost=false;
 let myAvatar=null;
 let gs=null, isMyTurn=false, pendingAction=null, pendingTargetId=null;
@@ -1066,7 +1109,9 @@ function usePotionClick(type){
 function demonReroll(){ socket.emit('demoniste_reroll',{code:roomCode}); }
 function demonConfirm(){ closeOv('ov-demon'); socket.emit('demoniste_confirm',{code:roomCode}); isMyTurn=false; document.getElementById('step-action').style.display='none'; }
 function emitAction(type,targetId,extra){
-  isMyTurn=false; socket.emit('action',{code:roomCode,type,targetId,extra});
+  isMyTurn=false;
+  devLog('action',{emit:'action',type,targetId,extra});
+  socket.emit('action',{code:roomCode,type,targetId,extra});
   document.getElementById('step-action').style.display='none'; document.getElementById('step-target').style.display='none';
   const tb=document.getElementById('turn-banner'); tb.className='turn-banner wait'; tb.textContent='Carte en cours…';
 }
