@@ -383,6 +383,18 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
       <div class="hm-info"><div class="hm-name">🦸 Mode héros</div><div class="hm-sub">Pouvoirs spéciaux</div></div>
       <div class="toggle-sw disabled" id="hero-mode-toggle" onclick="toggleHeroMode()"></div>
     </div>
+    <div class="hero-mode-row" style="margin-top:6px">
+      <div class="hm-info"><div class="hm-name">⚔️ Meurtre</div><div class="hm-sub">Tuer → action bonus immédiate</div></div>
+      <div class="toggle-sw disabled" id="opt-meurtre-toggle" onclick="toggleOption('optMeurtre')"></div>
+    </div>
+    <div class="hero-mode-row" style="margin-top:6px">
+      <div class="hm-info"><div class="hm-name">🔮 Clairvoyance</div><div class="hm-sub">1 PV → voir 1ère carte pioche</div></div>
+      <div class="toggle-sw disabled" id="opt-clairvoyance-toggle" onclick="toggleOption('optClairvoyance')"></div>
+    </div>
+    <div class="hero-mode-row" style="margin-top:6px">
+      <div class="hm-info"><div class="hm-name">🐉 Réveil du dragon</div><div class="hm-sub">Pioche vide → attaque tous</div></div>
+      <div class="toggle-sw disabled" id="opt-dragon-toggle" onclick="toggleOption('optDragon')"></div>
+    </div>
   </div>
   <div class="lobby-players-list" id="lobby-players"></div>
   <div class="chat-section">
@@ -623,18 +635,20 @@ function getAvatar(id, fallback){
 socket.on('connect',()=>{ myId=socket.id; });
 
 // ── LOBBY ──
-socket.on('room_created',({code,heroMode:hm})=>{
+socket.on('room_created',({code,heroMode:hm,optMeurtre,optClairvoyance,optDragon})=>{
   roomCode=code; isHost=true; heroMode=hm||false;
   document.getElementById('lobby-code').textContent=code;
   document.getElementById('hero-mode-toggle').classList.remove('disabled');
   document.getElementById('hero-mode-toggle').classList.toggle('on',heroMode);
+  setOptionsUI({optMeurtre,optClairvoyance,optDragon}, true);
   showScreen('lobby');
 });
-socket.on('room_joined',({code,players,heroMode:hm,hostId,chatMessages})=>{
+socket.on('room_joined',({code,players,heroMode:hm,hostId,chatMessages,optMeurtre,optClairvoyance,optDragon})=>{
   roomCode=code; isHost=(hostId===myId); heroMode=hm||false;
   document.getElementById('lobby-code').textContent=code;
   document.getElementById('hero-mode-toggle').classList.toggle('disabled',!isHost);
   document.getElementById('hero-mode-toggle').classList.toggle('on',heroMode);
+  setOptionsUI({optMeurtre,optClairvoyance,optDragon}, isHost);
   renderLobbyPlayers(players);
   if(chatMessages) chatMessages.forEach(m=>appendChatMsg('lobby-chat-messages',m));
   showScreen('lobby');
@@ -649,6 +663,13 @@ socket.on('hero_mode_changed',({heroMode:hm})=>{
   heroMode=hm;
   document.getElementById('hero-mode-toggle').classList.toggle('on',hm);
   showToast(hm?'🦸 Mode héros activé !':'Mode héros désactivé');
+});
+socket.on('option_changed',({option,value})=>{
+  const ids={optMeurtre:'opt-meurtre-toggle',optClairvoyance:'opt-clairvoyance-toggle',optDragon:'opt-dragon-toggle'};
+  const labels={optMeurtre:'⚔️ Meurtre',optClairvoyance:'🔮 Clairvoyance',optDragon:'🐉 Dragon'};
+  const el=document.getElementById(ids[option]);
+  if(el) el.classList.toggle('on',value);
+  showToast(`${labels[option]} ${value?'activé':'désactivé'}`);
 });
 socket.on('return_to_lobby',({players,heroMode:hm,hostId})=>{
   heroMode=hm||false; isHost=(hostId===myId);
@@ -746,13 +767,15 @@ socket.on('game_started',({state})=>{
   setTimeout(()=>{ calcCardSize(); setTimeout(calcCardSize,200); },50);
 });
 
-socket.on('choose_action',({deckCount,discardTop,mustAttack,canUsePotion,potions,isBonus})=>{
+socket.on('choose_action',({deckCount,discardTop,mustAttack,canUsePotion,potions,isBonus,clairvoyantCard})=>{
   isMyTurn=true; pendingAction=null; pendingTargetId=null;
   if(gs){ gs.deckCount=deckCount; gs.discardTop=discardTop; }
   document.getElementById('deck-pill').textContent=`Pioche : ${deckCount}`;
   const tb=document.getElementById('turn-banner');
   tb.className='turn-banner mine';
-  tb.textContent=isBonus?'⚗️ Action bonus !':mustAttack?'⚡ À votre tour — attaque obligatoire !':'À votre tour !';
+  let bannerText = isBonus?'⚗️ Action bonus !':mustAttack?'⚡ Attaque obligatoire !':'À votre tour !';
+  if(clairvoyantCard) bannerText += ` 🔮 Prochaine: ${clairvoyantCard.display}${clairvoyantCard.suit}`;
+  tb.textContent=bannerText;
   document.getElementById('step-action').style.display='block';
   document.getElementById('step-target').style.display='none';
   document.getElementById('btn-shl').classList.toggle('forced',mustAttack);
@@ -937,6 +960,18 @@ function doStart(){ socket.emit('start_game',{code:roomCode}); }
 function doLeave(){ socket.emit('leave_room',{code:roomCode}); showScreen('home'); }
 function doAbandon(){ if(confirm('Abandonner la partie et renvoyer tout le monde au lobby ?')) socket.emit('abandon_game',{code:roomCode}); }
 function toggleHeroMode(){ if(!isHost) return; socket.emit('toggle_hero_mode',{code:roomCode}); }
+function toggleOption(opt){ if(!isHost) return; socket.emit('toggle_option',{code:roomCode,option:opt}); }
+
+function setOptionsUI(opts, host){
+  const isH = host;
+  ['opt-meurtre-toggle','opt-clairvoyance-toggle','opt-dragon-toggle'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){ el.classList.toggle('disabled',!isH); }
+  });
+  document.getElementById('opt-meurtre-toggle').classList.toggle('on',opts.optMeurtre||false);
+  document.getElementById('opt-clairvoyance-toggle').classList.toggle('on',opts.optClairvoyance||false);
+  document.getElementById('opt-dragon-toggle').classList.toggle('on',opts.optDragon||false);
+}
 
 function pickAction(type){
   if(!isMyTurn) return;
