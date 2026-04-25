@@ -542,7 +542,11 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
   <div class="sheet"><div class="sheet-title">🎵 Barde — Choisir une carte</div><div class="sheet-note" id="barde-note"></div><div class="barde-choices" id="barde-choices"></div></div>
 </div>
 <div class="overlay" id="ov-barde-pv">
-  <div class="sheet"><div class="sheet-title">🎵 Barde — Choisir votre nouvelle carte PV</div><div class="sheet-note">Choisissez dans la défausse :</div><div class="barde-choices" id="barde-pv-choices"></div></div>
+  <div class="sheet">
+    <div class="sheet-title">🎵 Barde — Choisir votre carte PV</div>
+    <div id="barde-pv-recap"></div>
+    <div class="barde-choices" id="barde-pv-choices"></div>
+  </div>
 </div>
 <div class="overlay" id="ov-mage">
   <div class="sheet">
@@ -846,8 +850,24 @@ socket.on('action_popup',({emoji,main,detail,result,resultType})=>{
   clearTimeout(popupT);
   popupT=setTimeout(()=>{ hideReveal(); playCartoonAnim(resultType); setTimeout(()=>showPopup(emoji,main,detail,result,resultType),800); },2000);
 });
-// Waiting for hero decision
-let mageAutoCloseTimer = null;
+// Nécromancien — choix défausse ou pioche
+socket.on('necro_choose',({lastDiscard, type, targetId})=>{
+  const div=document.getElementById('hero-extra-btns');
+  div.innerHTML=`
+    <div style="background:#1a1a1a;border:1px solid #2e2e2e;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:7px">
+      <div style="font-size:11px;color:var(--text3);text-align:center;letter-spacing:1px">💀 NÉCROMANCIEN — CHOISIR LA SOURCE</div>
+      <div style="display:flex;gap:7px">
+        <button onclick="necroUseDiscard()" class="btn btn-ghost btn-sm" style="flex:1;padding:9px 5px;font-size:12px">
+          Défausse<br><span style="color:var(--red);font-weight:700">${lastDiscard.display}${lastDiscard.suit} (${lastDiscard.numVal})</span>
+        </button>
+        <button onclick="necroUseRandom()" class="btn btn-ghost btn-sm" style="flex:1;padding:9px 5px;font-size:12px">
+          Pioche<br><span style="color:var(--text3)">Carte aléatoire</span>
+        </button>
+      </div>
+    </div>`;
+});
+function necroUseDiscard(){ socket.emit('necro_use_discard',{code:roomCode}); document.getElementById('hero-extra-btns').innerHTML=''; }
+function necroUseRandom(){ socket.emit('necro_use_random',{code:roomCode}); document.getElementById('hero-extra-btns').innerHTML=''; }
 socket.on('waiting_for',(data)=>{
   const el=document.getElementById('waiting-for-banner');
   if(!data){ el.style.display='none'; return; }
@@ -916,19 +936,59 @@ function mageDecide(transform){
   document.getElementById('waiting-for-banner').style.display='none';
 }
 
-// Barde choisit PV depuis défausse
-socket.on('barde_pv_prompt',({choices})=>{
+socket.on('barde_pv_prompt',({choices, pvValue})=>{
+  // Recap des cartes actuelles du barde
+  const me=getMe();
+  const recap=document.getElementById('barde-pv-recap');
+  if(recap && me){
+    recap.innerHTML='';
+    const title=document.createElement('div');
+    title.style.cssText='font-size:10px;color:var(--text3);letter-spacing:1px;text-align:center;margin-bottom:6px';
+    title.textContent='VOS CARTES ACTUELLES';
+    recap.appendChild(title);
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:8px';
+    // Bouclier
+    if(me.shield){ const c=makeCard(me.shield,true); row.appendChild(c); }
+    // PV
+    if(me.pv) me.pv.forEach(c=>row.appendChild(makeCard(c,false)));
+    recap.appendChild(row);
+    // Bonus actuel
+    const isSym=me.pv&&me.shield?checkSymbol(me):false;
+    const isCol=me.pv&&me.shield?checkColor(me):false;
+    const bonusDiv=document.createElement('div');
+    bonusDiv.style.cssText='font-size:11px;text-align:center;margin-bottom:8px;padding:4px 10px;border-radius:8px;'+(isSym?'background:rgba(139,92,246,.15);color:var(--purple)':isCol?'background:rgba(37,99,168,.12);color:#60a5fa':'background:var(--bg3);color:var(--text3)');
+    bonusDiv.textContent=isSym?'🎵 Même symbole → 3 cartes':isCol?'🎵 Même couleur → 2 cartes':'🎵 Pas de bonus actuellement';
+    recap.appendChild(bonusDiv);
+    const hint=document.createElement('div');
+    hint.style.cssText='font-size:11px;color:var(--text2);text-align:center;margin-bottom:4px';
+    hint.textContent=`Choisissez un ${pvValue} dans la défausse :`;
+    recap.appendChild(hint);
+  }
   const c=document.getElementById('barde-pv-choices'); c.innerHTML='';
   choices.forEach((card,i)=>{
     const btn=document.createElement('div'); btn.className='barde-card-btn';
     btn.appendChild(makeBigCard(card));
-    const lbl=document.createElement('div'); lbl.className='barde-sublbl'; lbl.textContent=`${card.display}${card.suit} (${card.numVal})`;
+    const lbl=document.createElement('div'); lbl.className='barde-sublbl'; lbl.textContent=`${card.display}${card.suit}`;
     btn.appendChild(lbl);
     btn.onclick=()=>{ closeOv('ov-barde-pv'); socket.emit('barde_pv_pick',{code:roomCode,cardIndex:i}); };
     c.appendChild(btn);
   });
   document.getElementById('ov-barde-pv').classList.add('open');
 });
+function checkColor(p){
+  const cards=[...p.pv,p.shield].filter(Boolean);
+  const nonJ=cards.filter(c=>c.suit!=='🃏');
+  if(!nonJ.length) return true;
+  const isRed=c=>['♥','♦'].includes(c.suit);
+  return nonJ.every(isRed)||nonJ.every(c=>!isRed(c));
+}
+function checkSymbol(p){
+  const cards=[...p.pv,p.shield].filter(Boolean);
+  const nonJ=cards.filter(c=>c.suit!=='🃏');
+  if(!nonJ.length) return true;
+  return new Set(nonJ.map(c=>c.suit)).size===1;
+}
 
 socket.on('barde_choose',({choices})=>{
   const c=document.getElementById('barde-choices'); c.innerHTML='';
@@ -1075,12 +1135,7 @@ function buildHeroExtra(discardTop){
     const b=document.createElement('button'); b.className='btn btn-gold'; b.style.cssText='padding:9px;font-size:12px';
     b.textContent='✨ Soigner un PV'; b.onclick=openPretresse; div.appendChild(b);
   }
-  if(me.heroId==='necromancien'&&discardTop){
-    const b=document.createElement('button'); b.className='btn btn-ghost'; b.style.cssText='padding:9px;font-size:12px';
-    b.textContent=`💀 Défausse (${discardTop.display}${discardTop.suit})`;
-    b.onclick=()=>{ document.getElementById('step-action').style.display='none'; document.getElementById('step-target').style.display='block'; pendingAction='necro_discard'; buildTargets('attack'); };
-    div.appendChild(b);
-  }
+  // Nécromancien : le choix apparaît via socket event necro_choose, pas ici
 }
 function updatePotions(potions,canUse){
   const me=getMe(); if(!me||me.heroId!=='alchimiste') return;
