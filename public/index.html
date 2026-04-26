@@ -557,7 +557,7 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
     <div id="mage-timer-bar" style="display:none;margin-top:10px;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden">
       <div id="mage-timer-fill" style="height:100%;background:var(--purple);border-radius:2px"></div>
     </div>
-    <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:5px">8 secondes pour décider</div>
+    <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:5px">15 secondes pour décider</div>
   </div>
 </div>
 <div class="overlay" id="ov-feu">
@@ -906,6 +906,7 @@ function renderLastCard(card){
 }
 
 // ── MAGE POPUP (bloquant — attend la décision) ──
+let mageAutoCloseTimer = null;
 socket.on('mage_can_transform',({card,actorName,targetName,actionType})=>{
   const actionLabels={attack:'attaque',shield_swap:'change bouclier',charge:'se charge',necro_discard:'attaque (défausse)'};
   const aLabel=actionLabels[actionType]||actionType;
@@ -919,23 +920,45 @@ socket.on('mage_can_transform',({card,actorName,targetName,actionType})=>{
   o2.innerHTML=`<div class="mo-val">${newDisplay}${card.suit}</div><div class="mo-lbl">→ Transformer (${newVal})</div>`;
   o2.onclick=()=>{ clearTimeout(mageAutoCloseTimer); closeOv('ov-mage'); mageDecide(true); };
   opts.appendChild(o1); opts.appendChild(o2);
-  // Timer affiché + auto-fermeture à 8s
+  // Timer 15s
   document.getElementById('mage-timer-bar').style.display='block';
   const timerFill=document.getElementById('mage-timer-fill');
   timerFill.style.animation='none'; timerFill.offsetHeight;
-  timerFill.style.animation='mageTimer 8s linear forwards';
+  timerFill.style.animation='mageTimer 15s linear forwards';
+  document.getElementById('ov-mage').querySelector('div[style*="secondes"]') && (document.getElementById('ov-mage').querySelector('div[style*="secondes"]').textContent='15 secondes pour décider');
   document.getElementById('ov-mage').classList.add('open');
-  // Auto-fermeture si le temps expire
   clearTimeout(mageAutoCloseTimer);
   mageAutoCloseTimer = setTimeout(()=>{
     closeOv('ov-mage');
     document.getElementById('waiting-for-banner').style.display='none';
-  }, 8200);
+  }, 15200);
 });
 function mageDecide(transform){
   socket.emit('mage_decision',{code:roomCode,transform});
   document.getElementById('waiting-for-banner').style.display='none';
 }
+// Mage timer expiré côté serveur → fermer popup
+socket.on('mage_timer_expired',()=>{
+  clearTimeout(mageAutoCloseTimer);
+  closeOv('ov-mage');
+  document.getElementById('waiting-for-banner').style.display='none';
+});
+
+// Potion feu — choisir la 2e cible pendant l'attaque
+socket.on('potion_feu_pick_target2',({target1,others})=>{
+  const list=document.getElementById('feu-list'); list.innerHTML='';
+  const note=document.createElement('div');
+  note.style.cssText='font-size:12px;color:var(--text2);text-align:center;margin-bottom:10px;padding:6px;background:rgba(230,100,0,.1);border:1px solid rgba(230,100,0,.2);border-radius:8px';
+  note.innerHTML=`🔥 Potion de Feu — <strong>${target1.name}</strong> est votre 1ère cible.<br>Choisissez une 2e cible :`;
+  list.appendChild(note);
+  others.forEach(p=>{
+    const btn=document.createElement('div'); btn.className='pick-item';
+    btn.innerHTML=`<span class="pick-item-name">${p.name}</span><span class="pick-item-stats">🛡️${p.shieldVal}</span>`;
+    btn.onclick=()=>{ closeOv('ov-feu'); socket.emit('potion_feu_target2',{code:roomCode,target2Id:p.id}); };
+    list.appendChild(btn);
+  });
+  document.getElementById('ov-feu').classList.add('open');
+});
 
 socket.on('barde_pv_prompt',({choices, pvValue})=>{
   const me=getMe();
@@ -1159,16 +1182,11 @@ function updatePotions(potions,canUse){
 }
 function usePotionClick(type){
   if(type==='feu'){
-    const list=document.getElementById('feu-list'); list.innerHTML='';
-    gs.players.forEach(p=>{
-      if(p.eliminated||p.id===myId) return;
-      const btn=document.createElement('div'); btn.className='pick-item';
-      btn.innerHTML=`<span class="pick-item-name">${p.name}</span><span class="pick-item-stats">🛡️${p.shieldVal}</span>`;
-      btn.onclick=()=>{ closeOv('ov-feu'); socket.emit('use_potion',{code:roomCode,potionType:'feu',targetId:p.id}); };
-      list.appendChild(btn);
-    });
-    document.getElementById('ov-feu').classList.add('open');
-  } else { socket.emit('use_potion',{code:roomCode,potionType:type}); }
+    // Potion feu : activer directement, la 2e cible sera choisie pendant l'attaque
+    socket.emit('use_potion',{code:roomCode,potionType:'feu'});
+  } else {
+    socket.emit('use_potion',{code:roomCode,potionType:type});
+  }
 }
 function demonReroll(){ socket.emit('demoniste_reroll',{code:roomCode}); }
 function demonConfirm(){ closeOv('ov-demon'); socket.emit('demoniste_confirm',{code:roomCode}); isMyTurn=false; document.getElementById('step-action').style.display='none'; }
