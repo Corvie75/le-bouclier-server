@@ -1165,6 +1165,8 @@ function buildTargets(type){
   gs.players.forEach(p=>{
     if(p.eliminated) return;
     if(type==='attack'&&p.id===myId) return;
+    // Vérifier que le joueur est encore dans la partie (a des PV ou un bouclier)
+    if(type==='attack' && p.pv && p.pv.length===0 && !p.shield) return;
     const btn=document.createElement('div'); btn.className='tgt-btn';
     const av=document.createElement('div'); av.className='tbt-avatar';
     const avSrc=getAvatar(p.id,p.avatar);
