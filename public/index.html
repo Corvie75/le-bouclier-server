@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Le Bouclier</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+:root{
+  --bg:#090909;--bg2:#111;--bg3:#161616;--bg4:#1c1c1c;
+  --bord:#222;--bord2:#2e2e2e;
+  --text:#fff;--text2:#888;--text3:#444;
+  --red:#e63946;--red2:#ff4d58;--red-bg:#1a0a0b;
+  --blue:#2563a8;--blue-bg:rgba(37,99,168,.12);
+  --gold:#d4a017;--gold-bg:rgba(212,160,23,.1);
+  --green:#22c55e;--purple:#8b5cf6;--purple-bg:rgba(139,92,246,.12);
+  --cw:62px;--ch:88px;--csw:88px;--csh:62px;--cfs:10px;--cfsl:13px;--ccc:22px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%;max-width:430px;margin:0 auto;overflow:hidden}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100%;max-width:430px;margin:0 auto;overflow-x:hidden;overflow-y:hidden}
+body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
+.screen{display:none;flex-direction:column;min-height:100vh;overflow-y:auto;overflow-x:hidden}
+.screen.active{display:flex}
+
+/* ── HOME ── */
+#screen-home{align-items:center;justify-content:center;padding:32px 20px}
+.home-logo{display:flex;flex-direction:column;align-items:center;margin-bottom:28px;gap:10px}
+.home-logo-icon{width:60px;height:60px;background:var(--red);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:30px}
+.home-logo-title{font-size:26px;font-weight:800;letter-spacing:-1px}
+.home-logo-sub{font-size:11px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin-top:-4px}
+.home-form{width:100%;display:flex;flex-direction:column;gap:11px}
+.avatar-picker{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--bord);border-radius:10px;padding:12px 14px;cursor:pointer}
+.avatar-preview{width:48px;height:48px;border-radius:50%;background:var(--bg4);border:2px solid var(--bord);display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden;flex-shrink:0}
+.avatar-preview img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.avatar-picker-info{display:flex;flex-direction:column;gap:2px}
+.avatar-picker-title{font-size:14px;font-weight:600}
+.avatar-picker-sub{font-size:11px;color:var(--text3)}
+#avatar-input{display:none}
+.input-group{display:flex;flex-direction:column;gap:6px}
+.input-label{font-size:11px;font-weight:600;color:var(--text2);letter-spacing:1px;text-transform:uppercase}
+.inp{width:100%;background:var(--bg3);border:1px solid var(--bord);border-radius:10px;padding:13px 15px;color:var(--text);font-family:'Inter',sans-serif;font-size:15px;outline:none;transition:border-color .2s}
+.inp:focus{border-color:var(--bord2)}
+.inp::placeholder{color:var(--text3)}
+.inp-code{text-align:center;letter-spacing:8px;font-size:22px;font-weight:700}
+.sep{display:flex;align-items:center;gap:12px;color:var(--text3);font-size:12px}
+.sep::before,.sep::after{content:'';flex:1;height:1px;background:var(--bord)}
+.btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:'Inter',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:-.2px}
+.btn:active:not(:disabled){transform:scale(.98)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-primary{background:var(--red);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--red2)}
+.btn-ghost{background:var(--bg3);border:1px solid var(--bord);color:var(--text2)}
+.btn-ghost:hover:not(:disabled){border-color:var(--bord2);color:var(--text)}
+.btn-blue{background:var(--blue-bg);border:1px solid rgba(37,99,168,.3);color:#60a5fa}
+.btn-gold{background:var(--gold-bg);border:1px solid rgba(212,160,23,.3);color:var(--gold)}
+.btn-purple{background:var(--purple-bg);border:1px solid rgba(139,92,246,.3);color:var(--purple)}
+.btn-sm{padding:9px 13px;font-size:13px;width:auto}
+.err-msg{font-size:13px;color:var(--red);text-align:center;min-height:18px}
+.rules-toggle{font-size:12px;color:var(--text3);text-align:center;cursor:pointer;text-decoration:underline;padding:4px}
+.rules-content{display:none;background:var(--bg3);border:1px solid var(--bord);border-radius:10px;padding:13px;font-size:13px;line-height:1.7;color:var(--text2)}
+.rules-content.open{display:block}
+.rules-content strong{color:var(--text)}
+
+/* ── LOBBY ── */
+#screen-lobby{padding:0;display:flex;flex-direction:column;height:100vh}
+.lobby-top{padding:16px 16px 12px;border-bottom:1px solid var(--bord)}
+.lobby-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.lobby-header h2{font-size:18px;font-weight:700}
+.lobby-leave{background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;font-family:'Inter',sans-serif}
+.code-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.code-label{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase}
+.code-val{font-size:22px;font-weight:800;letter-spacing:6px;color:var(--red)}
+.hero-mode-row{display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--bord);border-radius:10px;padding:9px 13px}
+.hm-info{display:flex;flex-direction:column;gap:2px}
+.hm-name{font-size:13px;font-weight:600}
+.hm-sub{font-size:11px;color:var(--text3)}
+.toggle-sw{width:40px;height:24px;background:var(--bg4);border:1px solid var(--bord);border-radius:12px;position:relative;cursor:pointer;transition:all .2s;flex-shrink:0}
+.toggle-sw.on{background:var(--red);border-color:var(--red)}
+.toggle-sw::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s}
+.toggle-sw.on::after{transform:translateX(16px)}
+.toggle-sw.disabled{opacity:.4;cursor:not-allowed}
+.lobby-players-list{flex:1;overflow-y:auto;padding:8px 14px}
+.lobby-player-item{display:flex;align-items:center;gap:9px;padding:9px 11px;background:var(--bg3);border:1px solid var(--bord);border-radius:10px;margin-bottom:7px}
+.lp-avatar{width:38px;height:38px;border-radius:50%;background:var(--bg4);border:2px solid var(--bord);display:flex;align-items:center;justify-content:center;font-size:17px;overflow:hidden;flex-shrink:0}
+.lp-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.lp-info{flex:1;min-width:0}
+.lp-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lp-wins{font-size:11px;color:var(--text3);margin-top:1px}
+.lp-badge{font-size:15px;flex-shrink:0}
+.chat-section{border-top:1px solid var(--bord);display:flex;flex-direction:column;height:160px}
+.chat-messages{flex:1;overflow-y:auto;padding:7px 13px;display:flex;flex-direction:column;gap:3px}
+.chat-msg{display:flex;align-items:flex-start;gap:6px}
+.chat-msg-avatar{width:20px;height:20px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:9px;overflow:hidden;flex-shrink:0}
+.chat-msg-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.chat-msg-content{font-size:12px;line-height:1.4}
+.chat-msg-name{font-weight:600;color:var(--red);margin-right:4px}
+.chat-msg-text{color:var(--text2)}
+.chat-input-row{display:flex;gap:7px;padding:7px 13px;border-top:1px solid var(--bord)}
+.chat-inp{flex:1;background:var(--bg3);border:1px solid var(--bord);border-radius:8px;padding:7px 11px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;outline:none}
+.chat-inp::placeholder{color:var(--text3)}
+.chat-send{background:var(--red);border:none;border-radius:8px;padding:7px 13px;color:#fff;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;flex-shrink:0}
+.lobby-bottom{padding:9px 14px 20px;border-top:1px solid var(--bord)}
+.lobby-bottom .btn{margin-bottom:7px}
+
+/* ── GAME ── */
+#screen-game{position:fixed;inset:0;z-index:50;max-width:430px;margin:0 auto;background:var(--bg)}
+#screen-game.active{display:flex;flex-direction:column;overflow:hidden;height:100dvh;height:100vh}
+.game-topbar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px 7px;border-bottom:1px solid var(--bord);flex-shrink:0}
+.game-topbar-title{font-size:13px;font-weight:700}
+.game-topbar-right{display:flex;align-items:center;gap:7px}
+.deck-pill{font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--bord);border-radius:20px;padding:3px 9px;cursor:pointer}
+.deck-pill:hover{border-color:var(--bord2)}
+.chat-toggle-btn{background:var(--bg3);border:1px solid var(--bord);border-radius:20px;padding:4px 10px;font-size:12px;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;position:relative}
+.chat-unread{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--red);border-radius:50%;font-size:9px;color:#fff;display:none;align-items:center;justify-content:center}
+
+/* Dernière carte jouée mini */
+.last-card-mini{
+  width:24px;height:34px;background:#fff;border-radius:4px;
+  border:1px solid rgba(0,0,0,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:800;font-family:'Inter',sans-serif;
+  box-shadow:0 2px 6px rgba(0,0,0,.4);
+  flex-shrink:0;
+  color:#111;
+}
+.last-card-mini.red{color:var(--red)}
+.last-card-mini.jkr{color:var(--blue)}
+
+/* Toujours visible : état des autres joueurs — compact */
+.players-status-bar{display:flex;gap:4px;padding:5px 10px;border-bottom:1px solid var(--bord);flex-wrap:wrap;flex-shrink:0}
+.player-status-card{display:flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--bord);border-radius:7px;padding:4px 6px;flex:1;min-width:75px;transition:border-color .2s;cursor:pointer}
+.player-status-card.their-turn{border-color:var(--red)}
+.player-status-card.dead{opacity:.3}
+.ps-avatar{width:20px;height:20px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:10px;overflow:hidden;flex-shrink:0;border:1px solid var(--bord)}
+.ps-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.ps-info{display:flex;flex-direction:column;gap:1px;min-width:0}
+.ps-name{font-size:10px;font-weight:600;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ps-stats{display:flex;gap:3px;font-size:10px;color:var(--text3);flex-wrap:wrap}
+.ps-stats .sv{color:var(--text);font-weight:600}
+.turn-dot-sm{width:5px;height:5px;border-radius:50%;background:var(--red);box-shadow:0 0 4px var(--red);animation:pul 1s ease-in-out infinite;flex-shrink:0}
+@keyframes pul{0%,100%{transform:scale(1)}50%{transform:scale(1.6)}}
+
+/* My cards zone */
+.my-cards-zone{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 12px;gap:5px;overflow:hidden;min-height:0}
+.my-cards-header{display:flex;align-items:center;gap:8px;width:100%}
+.my-avatar{width:30px;height:30px;border-radius:50%;background:var(--bg4);border:2px solid var(--bord);display:flex;align-items:center;justify-content:center;font-size:13px;overflow:hidden;flex-shrink:0;cursor:pointer}
+.my-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.my-name{font-size:12px;font-weight:600;color:var(--text2)}
+.my-hero-tag{font-size:11px;color:var(--text3);margin-left:auto;cursor:pointer}
+.charge-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(37,99,168,.2);border:1px solid rgba(96,165,250,.3);border-radius:20px;padding:2px 9px;font-size:11px;color:#60a5fa}
+.my-cards-layout{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
+.card-row-shield{display:flex;justify-content:center;align-items:center;gap:6px}
+.card-row-pv{display:flex;gap:8px;justify-content:center}
+.card-section-label{font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:3px}
+.guerriere-bonus{font-size:12px;font-weight:700;color:var(--gold);background:var(--gold-bg);border:1px solid rgba(212,160,23,.3);border-radius:8px;padding:2px 7px}
+.potions-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.potion-btn{display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--bg3);border:1px solid var(--bord);border-radius:8px;padding:5px 9px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif}
+.potion-btn:hover:not(.used){border-color:var(--bord2)}
+.potion-btn.used{opacity:.3;cursor:not-allowed}
+.potion-btn .p-emoji{font-size:16px}
+.potion-btn .p-name{font-size:10px;color:var(--text2)}
+
+/* CARDS — premium redesign */
+.card{background:#fff;border-radius:10px;border:none;position:relative;flex-shrink:0;user-select:none;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,.55),0 1px 0 rgba(255,255,255,.95) inset;font-family:'Inter',sans-serif;font-weight:900;color:#111}
+.card.red{color:#e63946}.card.jkr{color:#2563a8}
+.card-norm{width:var(--cw);height:var(--ch)}
+.card-norm .ctop{position:absolute;top:5px;left:6px;line-height:1}
+.card-norm .ctop .cv{display:block;font-size:var(--cfsl);font-weight:900;line-height:1}
+.card-norm .ctop .cs{display:block;font-size:var(--cfs);opacity:.5;margin-top:1px}
+.card-norm .cbot{position:absolute;bottom:5px;right:6px;line-height:1;transform:rotate(180deg)}
+.card-norm .cbot .cv{display:block;font-size:var(--cfsl);font-weight:900;line-height:1}
+.card-norm .cbot .cs{display:block;font-size:var(--cfs);opacity:.5;margin-top:1px}
+.card-norm .ccc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:var(--ccc);opacity:.1}
+.card-horiz{width:var(--csw);height:var(--csh);display:flex;align-items:center;justify-content:center;gap:5px}
+.card-horiz .hv{font-size:var(--cfsl);font-weight:900}.card-horiz .hs{font-size:var(--cfs);opacity:.6}
+.card-back{background:#0f0f0f;border:none}
+.card-back .bi{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.card-big{width:120px;height:168px;border-radius:14px;border:none;box-shadow:0 28px 70px rgba(0,0,0,.85),0 2px 0 rgba(255,255,255,.95) inset}
+.card-big .ctop{position:absolute;top:9px;left:11px;line-height:1}
+.card-big .ctop .cv{display:block;font-size:20px;font-weight:900;line-height:1}
+.card-big .ctop .cs{display:block;font-size:13px;opacity:.5;margin-top:2px}
+.card-big .cbot{position:absolute;bottom:9px;right:11px;line-height:1;transform:rotate(180deg)}
+.card-big .cbot .cv{display:block;font-size:20px;font-weight:900;line-height:1}
+.card-big .cbot .cs{display:block;font-size:13px;opacity:.5;margin-top:2px}
+.card-big .ccc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:46px;opacity:.08}
+/* TURN ZONE */
+.turn-zone{border-top:1px solid var(--bord);padding:7px 12px 10px;display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.turn-banner{width:100%;text-align:center;padding:9px;border-radius:10px;font-size:13px;font-weight:600}
+.turn-banner.mine{background:var(--red);color:#fff;animation:glowR 2s ease-in-out infinite alternate}
+.turn-banner.wait{background:var(--bg3);border:1px solid var(--bord);color:var(--text3)}
+@keyframes glowR{from{box-shadow:0 0 0 rgba(230,57,70,0)}to{box-shadow:0 0 14px rgba(230,57,70,.4)}}
+.step-label{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;text-align:center}
+.action-btns{display:flex;gap:6px}
+.action-btns .btn{flex:1;padding:10px 5px;font-size:12px}
+.btn-atk{background:var(--red);color:#fff;border:none}
+.btn-atk:hover:not(:disabled){background:var(--red2)}
+.btn-shl,.btn-chg{background:var(--bg3);border:1px solid var(--bord);color:var(--text2)}
+.btn-shl.forced,.btn-chg.forced{opacity:.25;cursor:not-allowed;pointer-events:none}
+.charge-warning{font-size:12px;color:#60a5fa;text-align:center;background:rgba(37,99,168,.1);border:1px solid rgba(37,99,168,.2);border-radius:8px;padding:6px}
+.targets-grid{display:flex;gap:6px;flex-wrap:wrap}
+.tgt-btn{flex:1;min-width:70px;background:var(--bg3);border:1px solid var(--bord);border-radius:9px;padding:8px 5px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;transition:all .15s}
+.tgt-btn:hover,.tgt-btn.sel{border-color:var(--red);background:var(--red-bg)}
+.tbt-avatar{width:26px;height:26px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:11px;overflow:hidden;margin-bottom:1px}
+.tbt-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.tbt-name{font-size:12px;font-weight:600;color:var(--text)}
+.tbt-stats{font-size:10px;color:var(--text3)}
+.back-btn{background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;padding:3px;font-family:'Inter',sans-serif;align-self:flex-start}
+
+/* REVEAL */
+.reveal-screen{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.97);flex-direction:column;align-items:center;justify-content:center;gap:14px;animation:fadeIn .2s ease}
+.reveal-screen.show{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.reveal-actor{font-size:13px;color:var(--text3)}
+.reveal-action{font-size:17px;font-weight:700;letter-spacing:-.3px;text-align:center;padding:0 20px}
+.reveal-cards-row{display:flex;align-items:center;gap:14px}
+.reveal-plus{font-size:22px;color:var(--text3)}
+.reveal-progress{width:130px;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.reveal-bar{height:100%;background:var(--red);border-radius:2px;animation:revBar 2s linear forwards}
+@keyframes revBar{from{width:100%}to{width:0%}}
+
+/* POPUP */
+.result-popup{display:none;position:fixed;inset:0;z-index:210;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:22px;backdrop-filter:blur(6px)}
+.result-popup.show{display:flex}
+.popup-box{background:var(--bg2);border:1px solid var(--bord2);border-radius:18px;padding:24px 20px;width:100%;max-width:310px;text-align:center;animation:popIn .3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.popup-emoji{font-size:40px;display:block;margin-bottom:10px;line-height:1}
+.popup-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:5px;letter-spacing:-.3px}
+.popup-detail{font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.5}
+.popup-result{display:inline-block;padding:5px 14px;border-radius:20px;font-size:13px;font-weight:600}
+.popup-result.dmg{background:rgba(230,57,70,.15);color:var(--red2);border:1px solid rgba(230,57,70,.25)}
+.popup-result.block{background:rgba(37,99,168,.15);color:#60a5fa;border:1px solid rgba(37,99,168,.25)}
+.popup-result.neutral{background:rgba(255,255,255,.06);color:var(--text2);border:1px solid var(--bord)}
+.popup-bar{height:2px;background:var(--bg4);border-radius:2px;margin-top:14px;overflow:hidden}
+.popup-bar-fill{height:100%;background:var(--red);border-radius:2px;animation:pbf 3s linear forwards}
+@keyframes pbf{from{width:100%}to{width:0%}}
+
+/* VICTORY ANIMATION */
+.victory-screen{display:none;position:fixed;inset:0;z-index:290;background:rgba(0,0,0,.9);flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.victory-screen.show{display:flex;animation:fadeIn .4s ease}
+.victory-crown{font-size:60px;animation:crownPop .6s .1s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes crownPop{from{transform:scale(0) rotate(-20deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+.victory-avatar{width:90px;height:90px;border-radius:50%;background:var(--bg3);border:4px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden;animation:avatarPop .5s .3s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes avatarPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.victory-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.victory-name{font-size:28px;font-weight:800;color:var(--text);letter-spacing:-1px;animation:fadeIn .5s .5s both}
+.victory-label{font-size:14px;color:var(--gold);font-weight:600;animation:fadeIn .5s .6s both}
+.victory-wins{font-size:13px;color:var(--text3);animation:fadeIn .5s .7s both}
+
+/* GAME CHAT */
+.game-chat-overlay{display:none;position:fixed;inset:0;z-index:170;background:rgba(0,0,0,.8);align-items:flex-end;justify-content:center;padding:0 0 10px}
+.game-chat-overlay.open{display:flex}
+.game-chat-sheet{background:var(--bg2);border:1px solid var(--bord2);border-radius:20px 20px 14px 14px;width:100%;max-width:430px;animation:sUp .3s cubic-bezier(.34,1.2,.64,1);display:flex;flex-direction:column;height:60vh}
+@keyframes sUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.gcs-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--bord)}
+.gcs-title{font-size:15px;font-weight:700}
+.gcs-close{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;font-family:'Inter',sans-serif}
+.gcs-messages{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:5px}
+.gcs-input-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--bord)}
+
+/* OVERLAYS */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:160;align-items:flex-end;justify-content:center;padding:0 0 12px}
+.overlay.open{display:flex}
+.sheet{background:var(--bg2);border:1px solid var(--bord2);border-radius:20px 20px 14px 14px;padding:18px 16px;width:100%;max-width:430px;animation:sUp .3s cubic-bezier(.34,1.2,.64,1);max-height:85vh;overflow-y:auto}
+.sheet-title{font-size:15px;font-weight:700;text-align:center;margin-bottom:12px}
+.sheet-note{font-size:13px;color:var(--text2);text-align:center;margin-bottom:10px}
+.sheet .btn{margin-bottom:7px}
+.pick-item{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;background:var(--bg3);border:1px solid var(--bord);border-radius:10px;margin-bottom:7px;cursor:pointer;transition:all .15s}
+.pick-item:hover{border-color:var(--bord2)}
+.pick-item-name{font-size:14px;font-weight:500}
+.pick-item-stats{font-size:12px;color:var(--text3)}
+.ex-item{display:flex;align-items:center;gap:7px;padding:9px 11px;background:var(--bg3);border:1px solid var(--bord);border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:13px;transition:all .15s}
+.ex-item:hover,.ex-item.sel{border-color:var(--red);background:var(--red-bg)}
+.demoniste-sheet{background:var(--bg2);border:1px solid rgba(139,92,246,.4);border-radius:20px 20px 14px 14px;padding:18px 16px;width:100%;max-width:430px;animation:sUp .3s cubic-bezier(.34,1.2,.64,1)}
+.barde-choices{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:10px 0 14px}
+.barde-card-btn{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:7px;border:2px solid transparent;border-radius:10px;transition:all .15s}
+.barde-card-btn:hover{border-color:var(--red)}
+.barde-sublbl{font-size:10px;color:var(--text3)}
+
+/* Hero description popup */
+.hero-desc-box{background:var(--bg3);border:1px solid var(--bord);border-radius:12px;padding:14px;margin-bottom:10px}
+.hero-desc-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--bord)}
+.hero-desc-emoji{font-size:28px}
+.hero-desc-name{font-size:15px;font-weight:700}
+.hero-desc-text{font-size:13px;color:var(--text2);line-height:1.6}
+
+/* Discard top display */
+.discard-card{display:flex;flex-direction:column;align-items:center;gap:4px;margin:10px 0}
+
+/* Mage overlay */
+.mage-opts{display:flex;gap:10px;margin:10px 0 14px}
+.mage-opt{flex:1;background:var(--bg3);border:1.5px solid var(--bord);border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:all .15s}
+.mage-opt:hover{border-color:var(--purple);background:var(--purple-bg)}
+.mage-opt .mo-val{font-size:24px;font-weight:800;color:var(--text);margin-bottom:3px}
+.mage-opt .mo-lbl{font-size:11px;color:var(--text3)}
+
+@keyframes mageTimer{from{width:100%}to{width:0%}}
+
+/* CARTOON ANIMATION */
+.anim-overlay{display:none;position:fixed;inset:0;z-index:220;pointer-events:none;overflow:hidden}
+.anim-overlay.show{display:block}
+.anim-scene{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:280px;height:200px}
+@keyframes swordAttack{0%{transform:translate(-120px,-20px) rotate(-40deg) scale(.6);opacity:0}20%{opacity:1}60%{transform:translate(0px,0px) rotate(15deg) scale(1.1)}100%{transform:translate(80px,30px) rotate(25deg) scale(.8);opacity:0}}
+@keyframes swordBlock{0%{transform:translate(-120px,-20px) rotate(-40deg) scale(.6);opacity:0}15%{opacity:1}55%{transform:translate(-10px,5px) rotate(10deg) scale(1.05)}100%{transform:translate(-30px,5px) rotate(0deg) scale(.9);opacity:0}}
+@keyframes shieldBlock{0%{transform:scale(0) rotate(-20deg);opacity:0}30%{transform:scale(1.2) rotate(5deg);opacity:1}55%{transform:scale(1) rotate(0);opacity:1}100%{transform:scale(.8);opacity:0}}
+@keyframes chargeAnim{0%{transform:scale(0) rotate(-15deg);opacity:0}40%{transform:scale(1.3) rotate(5deg);opacity:1}100%{transform:scale(.6) rotate(10deg);opacity:0}}
+@keyframes impactStar{0%{transform:scale(0);opacity:1}60%{transform:scale(1.4);opacity:1}100%{transform:scale(.5);opacity:0}}
+@keyframes impactText{0%{transform:scale(0) rotate(-10deg) translateX(-50%);opacity:0}30%{transform:scale(1.3) rotate(5deg) translateX(-50%);opacity:1}70%{transform:scale(1.1) rotate(-2deg) translateX(-50%);opacity:1}100%{transform:scale(.7) rotate(8deg) translateX(-50%);opacity:0}}
+
+/* GAME OVER */
+.go-screen{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.95);align-items:center;justify-content:center;padding:22px}
+.go-screen.show{display:flex}
+.go-box{background:var(--bg2);border:1px solid var(--bord2);border-radius:20px;padding:28px 20px;width:100%;max-width:340px;text-align:center}
+.go-box h2{font-size:24px;font-weight:800;margin-bottom:5px;letter-spacing:-1px}
+.go-winner-avatar{width:64px;height:64px;border-radius:50%;background:var(--bg3);border:3px solid var(--red);display:flex;align-items:center;justify-content:center;font-size:28px;overflow:hidden;margin:0 auto 10px}
+.go-winner-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.go-winner{font-size:18px;color:var(--red);font-weight:700;margin-bottom:16px}
+.sc-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--bg3);border:1px solid var(--bord);border-radius:8px;margin-bottom:6px;font-size:13px}
+.sc-row.w{border-color:var(--red);background:var(--red-bg)}
+.sc-pts{font-size:14px;font-weight:700;color:var(--red)}
+.returning-msg{font-size:12px;color:var(--text3);text-align:center;margin-top:12px;font-style:italic}
+
+/* TOAST */
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg3);border:1px solid var(--bord2);color:var(--text2);padding:9px 18px;border-radius:22px;font-size:13px;z-index:400;transition:transform .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="screen-home" class="screen active">
+  <div class="home-logo">
+    <div class="home-logo-icon">🛡️</div>
+    <div class="home-logo-title">Le Bouclier</div>
+    <div class="home-logo-sub">Jeu de cartes</div>
+  </div>
+  <div class="home-form">
+    <div class="avatar-picker" onclick="document.getElementById('avatar-input').click()">
+      <div class="avatar-preview" id="avatar-preview">👤</div>
+      <div class="avatar-picker-info">
+        <div class="avatar-picker-title">Photo de profil</div>
+        <div class="avatar-picker-sub">Optionnel — caméra ou galerie</div>
+      </div>
+      <input type="file" id="avatar-input" accept="image/*">
+    </div>
+    <div class="input-group">
+      <div class="input-label">Votre nom</div>
+      <input id="inp-name" class="inp" type="text" placeholder="Ex: Toine…" maxlength="12" autocomplete="off">
+    </div>
+    <button class="btn btn-primary" onclick="doCreate()">Créer une partie</button>
+    <div class="sep">ou rejoindre</div>
+    <div class="input-group">
+      <div class="input-label">Code de la partie</div>
+      <input id="inp-code" class="inp inp-code" type="text" placeholder="· · · · · ·" maxlength="6" autocomplete="off" inputmode="numeric">
+    </div>
+    <button class="btn btn-ghost" onclick="doJoin()">Rejoindre →</button>
+    <div class="err-msg" id="home-err"></div>
+    <div class="rules-toggle" onclick="document.getElementById('rules-content').classList.toggle('open')">📖 Voir les règles</div>
+    <div class="rules-content" id="rules-content">
+      <strong>Mise en place :</strong> 3 cartes — 2 plus grandes = PV, la plus faible = Bouclier.<br><br>
+      <strong>À votre tour :</strong> Choisissez action puis cible.<br>
+      ⚔️ <strong>Attaquer</strong> — carte > bouclier → perd la différence en PV<br>
+      🛡️ <strong>Bouclier</strong> — remplace n'importe quel bouclier<br>
+      ⚡ <strong>Charger</strong> — carte cachée pour la prochaine attaque<br>
+      <strong>⚠️ Si vous avez une charge, vous devez attaquer !</strong><br>
+      <strong>Valeurs :</strong> As=1 · J=11 · Q=12 · K=13 · Joker=15
+    </div>
+  </div>
+</div>
+
+<!-- LOBBY -->
+<div id="screen-lobby" class="screen">
+  <div class="lobby-top">
+    <div class="lobby-header">
+      <h2>Salle d'attente</h2>
+      <button class="lobby-leave" onclick="doLeave()">← Quitter</button>
+    </div>
+    <div class="code-row">
+      <div class="code-label">Code</div>
+      <div class="code-val" id="lobby-code">------</div>
+    </div>
+    <div class="hero-mode-row">
+      <div class="hm-info"><div class="hm-name">🦸 Mode héros</div><div class="hm-sub">Pouvoirs spéciaux</div></div>
+      <div class="toggle-sw disabled" id="hero-mode-toggle" onclick="toggleHeroMode()"></div>
+    </div>
+    <div class="hero-mode-row" style="margin-top:6px">
+      <div class="hm-info"><div class="hm-name">⚔️ Meurtre</div><div class="hm-sub">Tuer → action bonus immédiate</div></div>
+      <div class="toggle-sw disabled" id="opt-meurtre-toggle" onclick="toggleOption('optMeurtre')"></div>
+    </div>
+    <div class="hero-mode-row" style="margin-top:6px">
+      <div class="hm-info"><div class="hm-name">🔮 Clairvoyance</div><div class="hm-sub">1 PV → voir 1ère carte pioche</div></div>
+      <div class="toggle-sw disabled" id="opt-clairvoyance-toggle" onclick="toggleOption('optClairvoyance')"></div>
+    </div>
+    <div class="hero-mode-row" style="margin-top:6px">
+      <div class="hm-info"><div class="hm-name">🐉 Réveil du dragon</div><div class="hm-sub">Pioche vide → attaque tous</div></div>
+      <div class="toggle-sw disabled" id="opt-dragon-toggle" onclick="toggleOption('optDragon')"></div>
+    </div>
+  </div>
+  <div class="lobby-players-list" id="lobby-players"></div>
+  <div class="chat-section">
+    <div class="chat-messages" id="lobby-chat-messages"></div>
+    <div class="chat-input-row">
+      <input class="chat-inp" id="lobby-chat-inp" type="text" placeholder="Message…" maxlength="200" autocomplete="off">
+      <button class="chat-send" onclick="sendLobbyChat()">→</button>
+    </div>
+  </div>
+  <div class="lobby-bottom">
+    <div style="font-size:13px;color:var(--text3);text-align:center;margin-bottom:9px;font-style:italic" id="lobby-wait">En attente de joueurs… (min. 2)</div>
+    <button class="btn btn-primary" id="btn-start" onclick="doStart()" style="display:none">⚔️ Lancer la partie</button>
+  </div>
+</div>
+
+<!-- HERO PICK POPUP -->
+<div class="overlay" id="ov-hero-pick" style="z-index:180">
+  <div class="sheet">
+    <div class="sheet-title" style="font-size:18px">🦸 Choisissez votre héros</div>
+    <div style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:14px">Sélectionnez 1 héros parmi les 2 proposés</div>
+    <div id="hero-cards" style="display:flex;gap:10px;width:100%;margin-bottom:14px"></div>
+    <div style="font-size:13px;color:var(--text3);text-align:center;margin-bottom:12px" id="hp-status">En attente de votre choix…</div>
+    <div id="hp-waiting-list" style="display:flex;flex-direction:column;gap:7px"></div>
+  </div>
+</div>
+
+<!-- JEU -->
+<div id="screen-game" class="screen">
+  <div class="game-topbar">
+    <div class="game-topbar-title">🛡️ Le Bouclier</div>
+    <div class="game-topbar-right">
+      <button class="btn-ghost btn-sm" id="btn-abandon" onclick="doAbandon()" style="display:none;padding:5px 10px;font-size:11px;width:auto">🏳️ Abandonner</button>
+      <div class="chat-toggle-btn" onclick="openGameChat()">💬 <span class="chat-unread" id="chat-unread">0</span></div>
+      <!-- Dernière carte jouée -->
+      <div id="last-card-mini" style="display:none;cursor:pointer" onclick="showDiscardTop()" title="Dernière carte jouée"></div>
+      <div class="deck-pill" id="deck-pill" onclick="showDiscardTop()">Pioche : —</div>
+    </div>
+  </div>
+  <div class="players-status-bar" id="players-status-bar"></div>
+  <!-- Banner "en attente de X" -->
+  <div id="waiting-for-banner" style="display:none;background:rgba(139,92,246,.15);border-bottom:1px solid rgba(139,92,246,.3);padding:6px 14px;font-size:12px;color:var(--purple);align-items:center;justify-content:center;flex-shrink:0"></div>
+  <div class="my-cards-zone">
+    <div class="my-cards-header">
+      <div class="my-avatar" id="my-avatar" onclick="showMyHeroDesc()">👤</div>
+      <div class="my-name" id="my-name-label">Vous</div>
+      <div class="my-hero-tag" id="my-hero-tag" style="display:none" onclick="showMyHeroDesc()"></div>
+      <div id="charge-badge" class="charge-pill" style="display:none">⚡ <span id="charge-count">0</span></div>
+    </div>
+    <div class="my-cards-layout" id="my-cards-layout"></div>
+    <div class="potions-row" id="potions-row" style="display:none"></div>
+  </div>
+  <div class="turn-zone" id="turn-zone">
+    <div class="turn-banner wait" id="turn-banner">En attente…</div>
+    <!-- Panel Nécromancien dédié -->
+    <div id="necro-panel" style="display:none;flex-direction:column;gap:6px;padding:2px 0"></div>
+    <div id="step-action" style="display:none">
+      <div class="step-label" style="margin-bottom:6px">1 · Quelle action ?</div>
+      <div class="charge-warning" id="charge-warning" style="display:none">⚡ Charge active — vous devez attaquer !</div>
+      <div class="action-btns" style="margin-top:6px">
+        <button class="btn btn-atk" id="btn-atk" onclick="pickAction('attack')">⚔️ Attaquer</button>
+        <button class="btn btn-shl" id="btn-shl" onclick="pickAction('shield_swap')">🛡️ Bouclier</button>
+        <button class="btn btn-chg" id="btn-chg" onclick="pickAction('charge')">⚡ Charger</button>
+      </div>
+      <div id="hero-extra-btns" style="margin-top:6px;display:flex;flex-direction:column;gap:5px"></div>
+    </div>
+    <div id="step-target" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <button class="back-btn" onclick="backToAction()">← Retour</button>
+        <div class="step-label">2 · Choisir une cible</div>
+      </div>
+      <div class="targets-grid" id="targets-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- GAME CHAT -->
+<div class="game-chat-overlay" id="game-chat-overlay">
+  <div class="game-chat-sheet">
+    <div class="gcs-header"><div class="gcs-title">💬 Chat</div><button class="gcs-close" onclick="closeGameChat()">✕</button></div>
+    <div class="gcs-messages" id="game-chat-messages"></div>
+    <div class="gcs-input-row">
+      <input class="chat-inp" id="game-chat-inp" type="text" placeholder="Message…" maxlength="200" autocomplete="off">
+      <button class="chat-send" onclick="sendGameChat()">→</button>
+    </div>
+  </div>
+</div>
+
+<!-- REVEAL -->
+<div class="reveal-screen" id="reveal-screen">
+  <div class="reveal-actor" id="reveal-actor"></div>
+  <div class="reveal-action" id="reveal-action"></div>
+  <div class="reveal-cards-row" id="reveal-cards-row"></div>
+  <div class="reveal-progress"><div class="reveal-bar" id="reveal-bar"></div></div>
+</div>
+
+<!-- POPUP RÉSULTAT -->
+<div class="result-popup" id="result-popup">
+  <div class="popup-box">
+    <span class="popup-emoji" id="popup-emoji"></span>
+    <div class="popup-title" id="popup-title"></div>
+    <div class="popup-detail" id="popup-detail"></div>
+    <div class="popup-result" id="popup-result" style="display:none"></div>
+    <div class="popup-bar"><div class="popup-bar-fill" id="popup-bar-fill"></div></div>
+  </div>
+</div>
+
+<!-- VICTORY ANIMATION -->
+<div class="victory-screen" id="victory-screen">
+  <div class="victory-crown">👑</div>
+  <div class="victory-avatar" id="victory-avatar">👤</div>
+  <div class="victory-name" id="victory-name"></div>
+  <div class="victory-label">Victoire !</div>
+  <div class="victory-wins" id="victory-wins"></div>
+</div>
+
+<!-- CARTOON ANIMATION -->
+<div class="anim-overlay" id="anim-overlay"><div class="anim-scene" id="anim-scene"></div></div>
+
+<!-- OVERLAYS HÉROS -->
+<div class="overlay" id="ov-prt">
+  <div class="sheet"><div class="sheet-title">✨ Quelle carte PV soigner ?</div><div class="sheet-note">Sera remplacée par la carte piochée.</div><div id="prt-list"></div><button class="btn btn-ghost" onclick="closeOv('ov-prt')">Annuler</button></div>
+</div>
+<div class="overlay" id="ov-shl">
+  <div class="sheet"><div class="sheet-title">🛡️ Choisir un bouclier</div><div id="shl-list"></div><button class="btn btn-ghost" onclick="closeOv('ov-shl')">Annuler</button></div>
+</div>
+<div class="overlay" id="ov-vol">
+  <div class="sheet">
+    <div class="sheet-title">🗡️ Échanger une carte</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div><div style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:5px">Votre carte</div><div id="vol-my"></div></div>
+      <div><div style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:5px" id="vol-their-lbl">Leur carte</div><div id="vol-their"></div></div>
+    </div>
+    <button class="btn btn-primary" id="btn-vol-ok" onclick="confirmVol()" disabled>Confirmer</button>
+    <button class="btn btn-ghost" onclick="closeOv('ov-vol')">Passer</button>
+  </div>
+</div>
+<div class="overlay" id="ov-demon">
+  <div class="demoniste-sheet">
+    <div class="sheet-title" style="color:var(--purple)">🔥 Démoniste — Relancer ?</div>
+    <div class="sheet-note" id="demon-note"></div>
+    <div style="display:flex;justify-content:center;margin:10px 0 14px" id="demon-card-preview"></div>
+    <button class="btn btn-purple" id="btn-demon-reroll" onclick="demonReroll()">🔄 Relancer</button>
+    <button class="btn btn-primary" onclick="demonConfirm()" style="margin-top:0">✓ Jouer cette carte</button>
+  </div>
+</div>
+<div class="overlay" id="ov-barde">
+  <div class="sheet"><div class="sheet-title">🎵 Barde — Choisir une carte</div><div class="sheet-note" id="barde-note"></div><div class="barde-choices" id="barde-choices"></div></div>
+</div>
+<div class="overlay" id="ov-barde-pv">
+  <div class="sheet">
+    <div class="sheet-title">🎵 Barde — Choisir votre carte PV</div>
+    <div id="barde-pv-recap"></div>
+    <div class="barde-choices" id="barde-pv-choices"></div>
+  </div>
+</div>
+<div class="overlay" id="ov-mage">
+  <div class="sheet">
+    <div class="sheet-title" style="color:var(--purple)">🔮 Mage — Transformer la carte ?</div>
+    <div class="sheet-note" id="mage-note"></div>
+    <div class="mage-opts" id="mage-opts"></div>
+    <button class="btn btn-ghost" onclick="mageDecide(false)">Ne rien faire</button>
+    <div id="mage-timer-bar" style="display:none;margin-top:10px;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden">
+      <div id="mage-timer-fill" style="height:100%;background:var(--purple);border-radius:2px"></div>
+    </div>
+    <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:5px">15 secondes pour décider</div>
+  </div>
+</div>
+<div class="overlay" id="ov-feu">
+  <div class="sheet"><div class="sheet-title" style="color:orange">🔥 Potion de Feu — 2e cible</div><div class="sheet-note">Choisissez une 2e cible pour votre attaque.</div><div id="feu-list"></div><button class="btn btn-ghost" onclick="closeOv('ov-feu')">Annuler</button></div>
+</div>
+<div class="overlay" id="ov-hero-desc">
+  <div class="sheet">
+    <div class="sheet-title">Description des héros</div>
+    <div id="hero-desc-list"></div>
+    <button class="btn btn-ghost" onclick="closeOv('ov-hero-desc')">Fermer</button>
+  </div>
+</div>
+<div class="overlay" id="ov-discard">
+  <div class="sheet">
+    <div class="sheet-title">🃏 Dernière carte de la défausse</div>
+    <div class="discard-card" id="discard-card-preview"></div>
+    <div style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:12px" id="discard-deck-info"></div>
+    <button class="btn btn-ghost" onclick="closeOv('ov-discard')">Fermer</button>
+  </div>
+</div>
+
+<div class="overlay" id="ov-player-cards">
+  <div class="sheet">
+    <div class="sheet-title" id="player-cards-title">Cartes du joueur</div>
+    <div id="player-cards-content" style="display:flex;flex-direction:column;gap:14px;margin-bottom:14px"></div>
+    <button class="btn btn-ghost" onclick="closeOv('ov-player-cards')">Fermer</button>
+  </div>
+</div>
+
+<!-- GAME OVER -->
+<div class="go-screen" id="go-screen">
+  <div class="go-box">
+    <div style="font-size:40px;margin-bottom:8px">🏆</div>
+    <h2>Victoire !</h2>
+    <div class="go-winner-avatar" id="go-winner-avatar">👤</div>
+    <div class="go-winner" id="go-winner"></div>
+    <div id="go-scores"></div>
+    <div class="returning-msg">Retour au lobby dans quelques secondes…</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SERVER_URL = 'https://le-bouclier-server-production.up.railway.app';
+const socket = io(SERVER_URL, {transports:['websocket','polling']});
+
+// ── DEV LOG PANEL ──
+// Activer avec ?debug dans l'URL
+const DEV = window.location.search.includes('debug');
+let logCount = 0;
+if(DEV){
+  const panel = document.createElement('div');
+  panel.id='dev-log';
+  panel.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9999;background:rgba(0,0,0,.92);color:#0f0;font-family:monospace;font-size:10px;max-height:35vh;overflow-y:auto;border-top:1px solid #0f0;padding:4px 8px';
+  const header = document.createElement('div');
+  header.style.cssText='display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;position:sticky;top:0;background:rgba(0,0,0,.95);padding:2px 0;gap:4px';
+  header.innerHTML=`
+    <span style="color:#0f0;font-weight:bold;flex-shrink:0">🐛 DEV</span>
+    <span id="dev-log-count" style="color:#888;flex-shrink:0">0</span>
+    <button onclick="document.getElementById('dev-log-entries').innerHTML='';logCount=0;document.getElementById('dev-log-count').textContent='0'" style="background:#111;border:1px solid #333;color:#888;font-size:9px;padding:2px 5px;cursor:pointer;border-radius:3px;flex-shrink:0">Clear</button>
+    <button id="dev-toggle-btn" onclick="toggleDevLog()" style="background:#111;border:1px solid #0f0;color:#0f0;font-size:9px;padding:2px 5px;cursor:pointer;border-radius:3px;flex-shrink:0">Cacher</button>`;
+  const entries = document.createElement('div');
+  entries.id='dev-log-entries';
+  panel.appendChild(header); panel.appendChild(entries);
+  document.body.appendChild(panel);
+}
+let devLogVisible = true;
+function toggleDevLog(){
+  devLogVisible=!devLogVisible;
+  const entries=document.getElementById('dev-log-entries');
+  const btn=document.getElementById('dev-toggle-btn');
+  const panel=document.getElementById('dev-log');
+  if(devLogVisible){
+    entries.style.display='block';
+    panel.style.maxHeight='35vh';
+    if(btn) btn.textContent='Cacher';
+  } else {
+    entries.style.display='none';
+    panel.style.maxHeight='28px';
+    if(btn) btn.textContent='Afficher';
+  }
+}
+function devLog(type, data){
+  if(!DEV) return;
+  logCount++;
+  document.getElementById('dev-log-count').textContent=logCount+' events';
+  const entries=document.getElementById('dev-log-entries');
+  const row=document.createElement('div');
+  row.style.cssText='border-bottom:1px solid #111;padding:2px 0;line-height:1.4';
+  const time=new Date().toLocaleTimeString('fr',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const colors={socket:'#60a5fa',action:'#f0c040',state:'#22c55e',error:'#e63946',hero:'#a78bfa',system:'#888'};
+  const color=colors[type]||'#fff';
+  let dataStr='';
+  try{ dataStr=typeof data==='object'?JSON.stringify(data,null,0).slice(0,200):String(data); }catch(e){ dataStr='[circular]'; }
+  row.innerHTML=`<span style="color:#555">${time}</span> <span style="color:${color}">[${type.toUpperCase()}]</span> <span style="color:#ddd">${dataStr}</span>`;
+  entries.appendChild(row);
+  entries.scrollTop=entries.scrollHeight;
+}
+
+// Intercepter tous les événements socket
+const _orig_on = socket.on.bind(socket);
+socket.on = function(event, cb){
+  return _orig_on(event, function(...args){
+    const type = ['err','error'].includes(event)?'error':['state_update'].includes(event)?'state':['action_popup','card_reveal','player_eliminated'].includes(event)?'action':['game_started','game_over','return_to_lobby'].includes(event)?'system':['hero_pick_started','pick_hero','hero_chosen','mage_can_transform','voleuse_prompt','barde_choose','demoniste_can_reroll'].includes(event)?'hero':'socket';
+    devLog(type, {ev:event, ...(args[0]||{})});
+    return cb(...args);
+  });
+};
+
+let myId=null, myName='', roomCode='', isHost=false;
+let myAvatar=null;
+let gs=null, isMyTurn=false, pendingAction=null, pendingTargetId=null;
+let volState={myType:null,myIdx:0,theirType:null,theirIdx:0,targetId:null};
+let revealT=null, popupT=null;
+let chatUnread=0, gameChatOpen=false;
+let heroMode=false;
+const avatarCache={};
+
+// ── AVATAR ──
+document.getElementById('avatar-input').addEventListener('change', function(e){
+  const file=e.target.files[0]; if(!file) return;
+  const img=new Image(), url=URL.createObjectURL(file);
+  img.onload=function(){
+    const canvas=document.createElement('canvas');
+    const size=120, ratio=Math.min(size/img.width,size/img.height);
+    canvas.width=Math.round(img.width*ratio); canvas.height=Math.round(img.height*ratio);
+    canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+    myAvatar=canvas.toDataURL('image/jpeg',0.7); URL.revokeObjectURL(url);
+    const prev=document.getElementById('avatar-preview');
+    prev.innerHTML=`<img src="${myAvatar}" alt="avatar">`;
+  };
+  img.src=url;
+});
+
+function getAvatar(id, fallback){
+  if(id===myId) return myAvatar;
+  if(fallback) avatarCache[id]=fallback;
+  return avatarCache[id]||null;
+}
+
+socket.on('connect',()=>{ myId=socket.id; });
+
+// ── LOBBY ──
+socket.on('room_created',({code,heroMode:hm,optMeurtre,optClairvoyance,optDragon})=>{
+  roomCode=code; isHost=true; heroMode=hm||false;
+  document.getElementById('lobby-code').textContent=code;
+  document.getElementById('hero-mode-toggle').classList.remove('disabled');
+  document.getElementById('hero-mode-toggle').classList.toggle('on',heroMode);
+  setOptionsUI({optMeurtre,optClairvoyance,optDragon}, true);
+  showScreen('lobby');
+});
+socket.on('room_joined',({code,players,heroMode:hm,hostId,chatMessages,optMeurtre,optClairvoyance,optDragon})=>{
+  roomCode=code; isHost=(hostId===myId); heroMode=hm||false;
+  document.getElementById('lobby-code').textContent=code;
+  document.getElementById('hero-mode-toggle').classList.toggle('disabled',!isHost);
+  document.getElementById('hero-mode-toggle').classList.toggle('on',heroMode);
+  setOptionsUI({optMeurtre,optClairvoyance,optDragon}, isHost);
+  renderLobbyPlayers(players);
+  if(chatMessages) chatMessages.forEach(m=>appendChatMsg('lobby-chat-messages',m));
+  showScreen('lobby');
+});
+socket.on('player_joined',({players})=>renderLobbyPlayers(players));
+socket.on('player_left',({players,newHost})=>{
+  renderLobbyPlayers(players);
+  if(newHost===myId){ isHost=true; document.getElementById('hero-mode-toggle').classList.remove('disabled'); }
+  showToast('Un joueur a quitté');
+});
+socket.on('hero_mode_changed',({heroMode:hm})=>{
+  heroMode=hm;
+  document.getElementById('hero-mode-toggle').classList.toggle('on',hm);
+  showToast(hm?'🦸 Mode héros activé !':'Mode héros désactivé');
+});
+socket.on('option_changed',({option,value})=>{
+  const ids={optMeurtre:'opt-meurtre-toggle',optClairvoyance:'opt-clairvoyance-toggle',optDragon:'opt-dragon-toggle'};
+  const labels={optMeurtre:'⚔️ Meurtre',optClairvoyance:'🔮 Clairvoyance',optDragon:'🐉 Dragon'};
+  const el=document.getElementById(ids[option]);
+  if(el) el.classList.toggle('on',value);
+  showToast(`${labels[option]} ${value?'activé':'désactivé'}`);
+});
+socket.on('return_to_lobby',({players,heroMode:hm,hostId})=>{
+  heroMode=hm||false; isHost=(hostId===myId);
+  document.getElementById('go-screen').classList.remove('show');
+  document.getElementById('victory-screen').classList.remove('show');
+  document.getElementById('lobby-code').textContent=roomCode;
+  document.getElementById('hero-mode-toggle').classList.toggle('on',hm);
+  document.getElementById('hero-mode-toggle').classList.toggle('disabled',!isHost);
+  renderLobbyPlayers(players);
+  showScreen('lobby'); showToast('De retour au lobby !');
+});
+socket.on('show_toast',({msg})=>showToast(msg));
+
+// ── CHAT ──
+socket.on('chat_message',(msg)=>{
+  appendChatMsg('lobby-chat-messages',msg);
+  appendChatMsg('game-chat-messages',msg);
+  if(!gameChatOpen&&document.getElementById('screen-game').classList.contains('active')){
+    chatUnread++;
+    const u=document.getElementById('chat-unread');
+    u.style.display='flex'; u.textContent=chatUnread;
+  }
+});
+function appendChatMsg(cid,msg){
+  const c=document.getElementById(cid); if(!c) return;
+  const d=document.createElement('div'); d.className='chat-msg';
+  const av=document.createElement('div'); av.className='chat-msg-avatar';
+  const avSrc=getAvatar(msg.playerId,msg.avatar);
+  if(avSrc) av.innerHTML=`<img src="${avSrc}" alt="">`; else av.textContent='👤';
+  const ct=document.createElement('div'); ct.className='chat-msg-content';
+  ct.innerHTML=`<span class="chat-msg-name">${escHtml(msg.playerName)}</span><span class="chat-msg-text">${escHtml(msg.text)}</span>`;
+  d.appendChild(av); d.appendChild(ct); c.appendChild(d); c.scrollTop=c.scrollHeight;
+}
+function sendLobbyChat(){
+  const inp=document.getElementById('lobby-chat-inp'), text=inp.value.trim(); if(!text) return;
+  const localMsg={playerId:myId,playerName:myName,avatar:myAvatar,text};
+  appendChatMsg('lobby-chat-messages',localMsg); appendChatMsg('game-chat-messages',localMsg);
+  socket.emit('chat_message',{code:roomCode,text}); inp.value='';
+}
+function sendGameChat(){
+  const inp=document.getElementById('game-chat-inp'), text=inp.value.trim(); if(!text) return;
+  const localMsg={playerId:myId,playerName:myName,avatar:myAvatar,text};
+  appendChatMsg('lobby-chat-messages',localMsg); appendChatMsg('game-chat-messages',localMsg);
+  socket.emit('chat_message',{code:roomCode,text}); inp.value='';
+}
+function openGameChat(){
+  gameChatOpen=true; chatUnread=0;
+  document.getElementById('chat-unread').style.display='none';
+  document.getElementById('game-chat-overlay').classList.add('open');
+}
+function closeGameChat(){ gameChatOpen=false; document.getElementById('game-chat-overlay').classList.remove('open'); }
+document.getElementById('lobby-chat-inp').addEventListener('keydown',e=>{ if(e.key==='Enter') sendLobbyChat(); });
+document.getElementById('game-chat-inp').addEventListener('keydown',e=>{ if(e.key==='Enter') sendGameChat(); });
+
+// ── HERO PICK ──
+socket.on('hero_pick_started',({players})=>{
+  renderHpWaiting(players);
+  document.getElementById('ov-hero-pick').classList.add('open');
+});
+socket.on('pick_hero',({choices})=>{
+  const c=document.getElementById('hero-cards'); c.innerHTML='';
+  choices.forEach(h=>{
+    const d=document.createElement('div');
+    d.style.cssText='flex:1;background:var(--bg3);border:2px solid var(--bord);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s';
+    d.innerHTML=`<div style="font-size:30px;margin-bottom:6px">${h.emoji}</div><div style="font-size:13px;font-weight:700;margin-bottom:4px">${h.name}</div><div style="font-size:11px;color:var(--text2);line-height:1.4">${h.desc}</div>`;
+    d.onclick=()=>{ document.querySelectorAll('#hero-cards>div').forEach(x=>x.style.borderColor='var(--bord)'); d.style.borderColor='var(--red)'; d.style.background='var(--red-bg)'; socket.emit('choose_hero',{code:roomCode,heroId:h.id}); };
+    c.appendChild(d);
+  });
+});
+socket.on('hero_chosen',({hero})=>{ document.getElementById('hp-status').textContent=`✅ ${hero.emoji} ${hero.name} choisi !`; });
+socket.on('hero_pick_update',({playerId,playerName,heroEmoji,heroName,allChosen})=>{
+  const el=document.getElementById(`hpp-${playerId}`);
+  if(el){ el.style.color='var(--text)'; el.querySelector('.hp-status').textContent=`${heroEmoji} ${heroName}`; }
+  if(allChosen){ document.getElementById('hp-status').textContent='Tous prêts ! La partie commence…'; setTimeout(()=>closeOv('ov-hero-pick'),1000); }
+});
+function renderHpWaiting(players){
+  const list=document.getElementById('hp-waiting-list'); list.innerHTML='';
+  players.forEach(p=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--bg3);border:1px solid var(--bord);border-radius:10px;font-size:13px;color:var(--text2)';
+    row.id=`hpp-${p.id}`;
+    row.innerHTML=`<span>${p.name}</span><span class="hp-status">En attente…</span>`;
+    list.appendChild(row);
+  });
+}
+
+// ── GAME ──
+socket.on('game_started',({state})=>{
+  gs=state; isMyTurn=false; pendingAction=null;
+  showScreen('game'); renderAll(); showToast('La partie commence !');
+  const ma=document.getElementById('my-avatar');
+  if(myAvatar) ma.innerHTML=`<img src="${myAvatar}" alt="moi">`; else ma.textContent='👤';
+  document.getElementById('my-name-label').textContent=myName;
+  document.getElementById('btn-abandon').style.display=isHost?'block':'none';
+  setTimeout(()=>{ calcCardSize(); setTimeout(calcCardSize,200); },50);
+});
+
+socket.on('choose_action',({deckCount,discardTop,mustAttack,canUsePotion,potions,isBonus,clairvoyantCard})=>{
+  clearTimeout(stuckTimer);
+  isMyTurn=true; pendingAction=null; pendingTargetId=null;
+  document.getElementById('necro-panel').style.display='none';
+  if(gs){ gs.deckCount=deckCount; gs.discardTop=discardTop; }
+  document.getElementById('deck-pill').textContent=`Pioche : ${deckCount}`;
+  const tb=document.getElementById('turn-banner');
+  tb.className='turn-banner mine';
+  let bannerText = isBonus?'⚗️ Action bonus !':mustAttack?'⚡ Attaque obligatoire !':'À votre tour !';
+  if(clairvoyantCard) bannerText += ` 🔮 Prochaine: ${clairvoyantCard.display}${clairvoyantCard.suit}`;
+  tb.textContent=bannerText;
+  document.getElementById('step-action').style.display='block';
+  document.getElementById('step-target').style.display='none';
+  document.getElementById('btn-shl').classList.toggle('forced',mustAttack);
+  document.getElementById('btn-chg').classList.toggle('forced',mustAttack);
+  document.getElementById('charge-warning').style.display=mustAttack?'block':'none';
+  if(potions) updatePotions(potions,canUsePotion);
+  buildHeroExtra(discardTop);
+  setTimeout(calcCardSize,50);
+});
+
+socket.on('wait_turn',({playerName,deckCount})=>{
+  isMyTurn=false; pendingAction=null;
+  if(gs) gs.deckCount=deckCount;
+  document.getElementById('deck-pill').textContent=`Pioche : ${deckCount}`;
+  const tb=document.getElementById('turn-banner');
+  tb.className='turn-banner wait'; tb.textContent=`Tour de ${playerName}…`;
+  document.getElementById('step-action').style.display='none';
+  document.getElementById('step-target').style.display='none';
+});
+
+socket.on('card_reveal',({card,chargeCard,actorName,actionLabel,isCharge,targetShieldHidden})=>{
+  clearTimeout(stuckTimer);
+  showReveal(card,chargeCard,actorName,actionLabel,isCharge,targetShieldHidden);
+});
+socket.on('action_popup',({emoji,main,detail,result,resultType})=>{
+  clearTimeout(popupT);
+  popupT=setTimeout(()=>{ hideReveal(); playCartoonAnim(resultType); setTimeout(()=>showPopup(emoji,main,detail,result,resultType),800); },2000);
+});
+// Nécromancien — choix défausse ou pioche
+socket.on('necro_choose',({lastDiscard, type})=>{
+  // Restaurer le tour pour que le joueur puisse interagir
+  isMyTurn=true;
+  const tb=document.getElementById('turn-banner');
+  tb.className='turn-banner mine';
+  tb.textContent='💀 Nécromancien — Choisir la source';
+  // Cacher step-action/target, afficher le panel necro dédié
+  document.getElementById('step-action').style.display='none';
+  document.getElementById('step-target').style.display='none';
+  const actionLabel = type==='charge' ? 'charger' : 'attaquer';
+  const panel = document.getElementById('necro-panel');
+  panel.style.display='flex';
+  panel.innerHTML=`
+    <div style="font-size:11px;color:var(--text3);text-align:center;letter-spacing:1px;margin-bottom:7px">💀 SOURCE POUR ${actionLabel.toUpperCase()}</div>
+    <div style="display:flex;gap:7px">
+      <button onclick="necroUseDiscard()" class="btn btn-atk" style="flex:1;padding:9px 5px;font-size:11px">
+        Défausse<br><span style="font-weight:900">${lastDiscard.display}${lastDiscard.suit} (${lastDiscard.numVal})</span>
+      </button>
+      <button onclick="necroUseRandom()" class="btn btn-ghost" style="flex:1;padding:9px 5px;font-size:11px">
+        Pioche<br><span style="color:var(--text3);font-size:10px">Carte aléatoire</span>
+      </button>
+    </div>`;
+});
+function necroUseDiscard(){
+  document.getElementById('necro-panel').style.display='none';
+  socket.emit('necro_use_discard',{code:roomCode});
+}
+function necroUseRandom(){
+  document.getElementById('necro-panel').style.display='none';
+  socket.emit('necro_use_random',{code:roomCode});
+}
+
+let mageAutoCloseTimer = null;
+socket.on('waiting_for',(data)=>{
+  const el=document.getElementById('waiting-for-banner');
+  if(!data){ el.style.display='none'; return; }
+  el.style.display='flex';
+  el.innerHTML=`<span>${data.heroEmoji} <strong>${data.playerName}</strong> ${data.reason}</span>`;
+});
+
+socket.on('state_update',({state})=>{
+  gs=state; renderAll();
+  document.getElementById('deck-pill').textContent=`Pioche : ${gs.deckCount||'?'}`;
+  renderLastCard(gs.discardTop);
+});
+socket.on('player_eliminated',({playerId,playerName})=>{
+  if(playerId===myId) showToast('Vous êtes éliminé 💀');
+  setTimeout(()=>{ hideReveal(); showPopup('💀',`${playerName} est éliminé !`,'Ses cartes sont défaussées.',null,null); },2200);
+});
+socket.on('card_transformed',({original,transformed,mageName})=>{
+  showToast(`🔮 ${mageName} transforme ${original.display} en ${transformed.display} !`);
+});
+
+// Annonces actions héros — visible par tous
+socket.on('hero_action_announce',({emoji,text})=>{
+  showToast(`${emoji} ${text}`);
+});
+
+// ── DERNIÈRE CARTE JOUÉE ──
+function renderLastCard(card){
+  const el=document.getElementById('last-card-mini');
+  if(!card){ el.style.display='none'; return; }
+  el.style.display='flex';
+  const isRed=['♥','♦'].includes(card.suit), isJkr=card.suit==='🃏';
+  el.className='last-card-mini'+(isRed?' red':'')+(isJkr?' jkr':'');
+  el.textContent=card.display;
+  el.title=`Dernière carte : ${card.display}${card.suit} (${card.numVal})`;
+}
+
+// ── MAGE POPUP (bloquant — attend la décision) ──
+socket.on('mage_can_transform',({card,actorName,targetName,actionType})=>{
+  const actionLabels={attack:'attaque',shield_swap:'change bouclier',charge:'se charge',necro_discard:'attaque (défausse)'};
+  const aLabel=actionLabels[actionType]||actionType;
+  document.getElementById('mage-note').textContent=`${actorName} ${aLabel}${targetName?' → '+targetName:''} avec ${card.display}${card.suit} (${card.numVal})`;
+  const opts=document.getElementById('mage-opts'); opts.innerHTML='';
+  const newVal=card.numVal===1?13:1, newDisplay=card.numVal===1?'K':'A';
+  const o1=document.createElement('div'); o1.className='mage-opt';
+  o1.innerHTML=`<div class="mo-val">${card.display}${card.suit}</div><div class="mo-lbl">Garder (${card.numVal})</div>`;
+  o1.onclick=()=>{ clearTimeout(mageAutoCloseTimer); closeOv('ov-mage'); mageDecide(false); };
+  const o2=document.createElement('div'); o2.className='mage-opt';
+  o2.innerHTML=`<div class="mo-val">${newDisplay}${card.suit}</div><div class="mo-lbl">→ Transformer (${newVal})</div>`;
+  o2.onclick=()=>{ clearTimeout(mageAutoCloseTimer); closeOv('ov-mage'); mageDecide(true); };
+  opts.appendChild(o1); opts.appendChild(o2);
+  // Timer 15s
+  document.getElementById('mage-timer-bar').style.display='block';
+  const timerFill=document.getElementById('mage-timer-fill');
+  timerFill.style.animation='none'; timerFill.offsetHeight;
+  timerFill.style.animation='mageTimer 15s linear forwards';
+  document.getElementById('ov-mage').querySelector('div[style*="secondes"]') && (document.getElementById('ov-mage').querySelector('div[style*="secondes"]').textContent='15 secondes pour décider');
+  document.getElementById('ov-mage').classList.add('open');
+  clearTimeout(mageAutoCloseTimer);
+  mageAutoCloseTimer = setTimeout(()=>{
+    closeOv('ov-mage');
+    document.getElementById('waiting-for-banner').style.display='none';
+  }, 15200);
+});
+function mageDecide(transform){
+  socket.emit('mage_decision',{code:roomCode,transform});
+  document.getElementById('waiting-for-banner').style.display='none';
+}
+// Mage timer expiré côté serveur → fermer popup
+socket.on('mage_timer_expired',()=>{
+  clearTimeout(mageAutoCloseTimer);
+  closeOv('ov-mage');
+  document.getElementById('waiting-for-banner').style.display='none';
+});
+
+// Potion feu — choisir la 2e cible pendant l'attaque
+socket.on('potion_feu_pick_target2',({target1,others})=>{
+  const list=document.getElementById('feu-list'); list.innerHTML='';
+  const note=document.createElement('div');
+  note.style.cssText='font-size:12px;color:var(--text2);text-align:center;margin-bottom:10px;padding:6px;background:rgba(230,100,0,.1);border:1px solid rgba(230,100,0,.2);border-radius:8px';
+  note.innerHTML=`🔥 Potion de Feu — <strong>${target1.name}</strong> est votre 1ère cible.<br>Choisissez une 2e cible :`;
+  list.appendChild(note);
+  others.forEach(p=>{
+    const btn=document.createElement('div'); btn.className='pick-item';
+    btn.innerHTML=`<span class="pick-item-name">${p.name}</span><span class="pick-item-stats">🛡️${p.shieldVal}</span>`;
+    btn.onclick=()=>{ closeOv('ov-feu'); socket.emit('potion_feu_target2',{code:roomCode,target2Id:p.id}); };
+    list.appendChild(btn);
+  });
+  document.getElementById('ov-feu').classList.add('open');
+});
+
+socket.on('barde_pv_prompt',({choices, pvValue})=>{
+  const me=getMe();
+  const recap=document.getElementById('barde-pv-recap');
+  if(recap && me){
+    recap.innerHTML='';
+    // Titre avec valeur cherchée
+    const titleDiv=document.createElement('div');
+    titleDiv.style.cssText='font-size:12px;font-weight:700;color:var(--text);text-align:center;margin-bottom:8px;padding:6px;background:var(--red-bg);border:1px solid rgba(230,57,70,.2);border-radius:8px';
+    titleDiv.textContent=`Chercher un ${pvValue} dans la défausse`;
+    recap.appendChild(titleDiv);
+    // Cartes actuelles
+    const cardTitle=document.createElement('div');
+    cardTitle.style.cssText='font-size:10px;color:var(--text3);letter-spacing:1px;text-align:center;margin-bottom:5px';
+    cardTitle.textContent='VOS CARTES ACTUELLES';
+    recap.appendChild(cardTitle);
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:8px';
+    if(me.shield) row.appendChild(makeCard(me.shield,true));
+    if(me.pv) me.pv.forEach(c=>row.appendChild(makeCard(c,false)));
+    recap.appendChild(row);
+    // Bonus actuel
+    const isSym=me.pv&&me.shield?checkSymbol(me):false;
+    const isCol=me.pv&&me.shield?checkColor(me):false;
+    const bonusDiv=document.createElement('div');
+    bonusDiv.style.cssText='font-size:11px;text-align:center;margin-bottom:10px;padding:4px 10px;border-radius:8px;'+(isSym?'background:rgba(139,92,246,.15);color:var(--purple)':isCol?'background:rgba(37,99,168,.12);color:#60a5fa':'background:var(--bg3);color:var(--text3)');
+    bonusDiv.textContent=isSym?'🎵 Même symbole → 3 cartes':isCol?'🎵 Même couleur → 2 cartes':'🎵 Pas de bonus actuellement';
+    recap.appendChild(bonusDiv);
+    // Label choix
+    const choiceLabel=document.createElement('div');
+    choiceLabel.style.cssText='font-size:11px;color:var(--text2);text-align:center;margin-bottom:4px';
+    choiceLabel.textContent=choices.length>0?`${choices.length} carte${choices.length>1?'s':''} disponible${choices.length>1?'s':''} :`:'Aucun '+pvValue+' en défausse — carte aléatoire en cours…';
+    recap.appendChild(choiceLabel);
+  }
+  const c=document.getElementById('barde-pv-choices'); c.innerHTML='';
+  if(choices.length===0){
+    // Aucun choix — fermer auto après 2s
+    setTimeout(()=>closeOv('ov-barde-pv'), 2000);
+  }
+  choices.forEach((card,i)=>{
+    const btn=document.createElement('div'); btn.className='barde-card-btn';
+    btn.appendChild(makeBigCard(card));
+    const lbl=document.createElement('div'); lbl.className='barde-sublbl'; lbl.textContent=`${card.display}${card.suit} (${card.numVal})`;
+    btn.appendChild(lbl);
+    btn.onclick=()=>{ closeOv('ov-barde-pv'); socket.emit('barde_pv_pick',{code:roomCode,cardIndex:i}); };
+    c.appendChild(btn);
+  });
+  if(choices.length>0) document.getElementById('ov-barde-pv').classList.add('open');
+});
+function checkColor(p){
+  const cards=[...p.pv,p.shield].filter(Boolean);
+  const nonJ=cards.filter(c=>c.suit!=='🃏');
+  if(!nonJ.length) return true;
+  const isRed=c=>['♥','♦'].includes(c.suit);
+  return nonJ.every(isRed)||nonJ.every(c=>!isRed(c));
+}
+function checkSymbol(p){
+  const cards=[...p.pv,p.shield].filter(Boolean);
+  const nonJ=cards.filter(c=>c.suit!=='🃏');
+  if(!nonJ.length) return true;
+  return new Set(nonJ.map(c=>c.suit)).size===1;
+}
+
+socket.on('barde_choose',({choices})=>{
+  const c=document.getElementById('barde-choices'); c.innerHTML='';
+  document.getElementById('barde-note').textContent=`Choisissez parmi ${choices.length} cartes :`;
+  choices.forEach((card,i)=>{
+    const btn=document.createElement('div'); btn.className='barde-card-btn';
+    btn.appendChild(makeBigCard(card));
+    const lbl=document.createElement('div'); lbl.className='barde-sublbl'; lbl.textContent=`${card.display}${card.suit} (${card.numVal})`;
+    btn.appendChild(lbl);
+    btn.onclick=()=>{ closeOv('ov-barde'); socket.emit('barde_pick',{code:roomCode,cardIndex:i}); };
+    c.appendChild(btn);
+  });
+  document.getElementById('ov-barde').classList.add('open');
+});
+socket.on('demoniste_can_reroll',({card,cost,pvLeft})=>{
+  const pvAfter=pvLeft-Math.min(cost,pvLeft-1);
+  document.getElementById('demon-note').textContent=`Carte : ${card.display}${card.suit} (${card.numVal}). Relancer coûte ${cost} PV → ${pvAfter} PV restants.`;
+  const prev=document.getElementById('demon-card-preview'); prev.innerHTML=''; prev.appendChild(makeBigCard(card));
+  document.getElementById('btn-demon-reroll').disabled=pvLeft<2;
+  document.getElementById('ov-demon').classList.add('open');
+});
+socket.on('voleuse_prompt',({targetId,targetName,targetPV,targetShield,myPV,myShield})=>{
+  volState={myType:null,myIdx:0,theirType:null,theirIdx:0,targetId};
+  document.getElementById('vol-their-lbl').textContent=targetName;
+  buildVolCards('vol-my',myPV,myShield,true);
+  buildVolCards('vol-their',targetPV,targetShield,false);
+  document.getElementById('btn-vol-ok').disabled=true;
+  document.getElementById('ov-vol').classList.add('open');
+});
+
+socket.on('game_over',({winner,finalState})=>{
+  gs=finalState;
+  const avSrc=getAvatar(winner.id,winner.avatar);
+  // game_over arrive APRÈS le popup (délai géré côté serveur)
+  // On affiche directement l'animation victoire
+  const va=document.getElementById('victory-avatar');
+  if(avSrc) va.innerHTML=`<img src="${avSrc}" alt="">`; else va.textContent='👤';
+  document.getElementById('victory-name').textContent=winner.name;
+  document.getElementById('victory-wins').textContent=`${winner.wins} victoire${winner.wins>1?'s':''}`;
+  document.getElementById('victory-screen').classList.add('show');
+  // Puis game over après 3s
+  setTimeout(()=>{
+    document.getElementById('victory-screen').classList.remove('show');
+    const gwav=document.getElementById('go-winner-avatar');
+    if(avSrc) gwav.innerHTML=`<img src="${avSrc}" alt="">`; else gwav.textContent='👤';
+    document.getElementById('go-winner').textContent=`👑 ${winner.name} — ${winner.wins} victoire${winner.wins>1?'s':''}`;
+    const sc=document.getElementById('go-scores'); sc.innerHTML='';
+    finalState.players.slice().sort((a,b)=>totalPV(b)-totalPV(a)).forEach(p=>{
+      const d=document.createElement('div'); d.className='sc-row'+(p.id===winner.id?' w':'');
+      d.innerHTML=`<span>${p.id===winner.id?'👑 ':''}${p.heroEmoji?p.heroEmoji+' ':''}${p.name}${p.eliminated?' 💀':''}</span><span class="sc-pts">${totalPV(p)} PV</span>`;
+      sc.appendChild(d);
+    });
+    document.getElementById('go-screen').classList.add('show');
+  },3000);
+});
+
+socket.on('err',({msg})=>{ homeErr(msg); showToast(msg); });
+
+// ── ACTIONS ──
+function doCreate(){
+  const n=document.getElementById('inp-name').value.trim();
+  if(!n){homeErr('Entrez votre nom !');return;}
+  myName=n; socket.emit('create_room',{name:n,heroMode:false,avatar:myAvatar});
+}
+function doJoin(){
+  const n=document.getElementById('inp-name').value.trim(), c=document.getElementById('inp-code').value.trim();
+  if(!n){homeErr('Entrez votre nom !');return;}
+  if(c.length!==6){homeErr('Code à 6 chiffres !');return;}
+  myName=n; socket.emit('join_room',{name:n,code:c,avatar:myAvatar});
+}
+function doStart(){ socket.emit('start_game',{code:roomCode}); }
+function doLeave(){ socket.emit('leave_room',{code:roomCode}); showScreen('home'); }
+function doAbandon(){ if(confirm('Abandonner la partie et renvoyer tout le monde au lobby ?')) socket.emit('abandon_game',{code:roomCode}); }
+function toggleHeroMode(){ if(!isHost) return; socket.emit('toggle_hero_mode',{code:roomCode}); }
+function toggleOption(opt){ if(!isHost) return; socket.emit('toggle_option',{code:roomCode,option:opt}); }
+
+function setOptionsUI(opts, host){
+  const isH = host;
+  ['opt-meurtre-toggle','opt-clairvoyance-toggle','opt-dragon-toggle'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){ el.classList.toggle('disabled',!isH); }
+  });
+  document.getElementById('opt-meurtre-toggle').classList.toggle('on',opts.optMeurtre||false);
+  document.getElementById('opt-clairvoyance-toggle').classList.toggle('on',opts.optClairvoyance||false);
+  document.getElementById('opt-dragon-toggle').classList.toggle('on',opts.optDragon||false);
+}
+
+function pickAction(type){
+  if(!isMyTurn) return;
+  pendingAction=type;
+  if(type==='charge'){ emitAction('charge',null); return; }
+  if(type==='heal_pv'){ openPretresse(); return; }
+  if(type==='shield_swap'){ openShieldSwap(); return; }
+  document.getElementById('step-action').style.display='none';
+  document.getElementById('step-target').style.display='block';
+  buildTargets(type);
+}
+function backToAction(){ pendingAction=null; document.getElementById('step-target').style.display='none'; document.getElementById('step-action').style.display='block'; }
+
+function buildTargets(type){
+  const grid=document.getElementById('targets-grid'); grid.innerHTML='';
+  gs.players.forEach(p=>{
+    if(p.eliminated) return;
+    if(type==='attack'&&p.id===myId) return;
+    // Vérifier que le joueur est encore dans la partie (a des PV ou un bouclier)
+    if(type==='attack' && p.pv && p.pv.length===0 && !p.shield) return;
+    const btn=document.createElement('div'); btn.className='tgt-btn';
+    const av=document.createElement('div'); av.className='tbt-avatar';
+    const avSrc=getAvatar(p.id,p.avatar);
+    if(avSrc) av.innerHTML=`<img src="${avSrc}" alt="">`; else av.textContent=p.heroEmoji||'👤';
+    const nm=document.createElement('div'); nm.className='tbt-name'; nm.textContent=p.id===myId?'Moi':p.name;
+    const st=document.createElement('div'); st.className='tbt-stats';
+    st.textContent=`🛡️${p.shieldVal}  ❤️${totalPV(p)}`;
+    btn.appendChild(av); btn.appendChild(nm); btn.appendChild(st);
+    btn.onclick=()=>{ document.querySelectorAll('.tgt-btn').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); pendingTargetId=p.id; setTimeout(()=>emitAction(pendingAction,p.id),120); };
+    grid.appendChild(btn);
+  });
+}
+
+function openShieldSwap(){
+  const list=document.getElementById('shl-list'); list.innerHTML='';
+  gs.players.forEach(p=>{
+    if(p.eliminated) return;
+    const btn=document.createElement('div'); btn.className='pick-item';
+    btn.innerHTML=`<span class="pick-item-name">${p.id===myId?'Moi':p.name}</span><span class="pick-item-stats">🛡️ ${p.shieldVal}</span>`;
+    btn.onclick=()=>{ closeOv('ov-shl'); emitAction('shield_swap',p.id); };
+    list.appendChild(btn);
+  });
+  document.getElementById('ov-shl').classList.add('open');
+}
+function openPretresse(){
+  const me=getMe(); if(!me) return;
+  const list=document.getElementById('prt-list'); list.innerHTML='';
+  me.pv.forEach((c,i)=>{
+    const btn=document.createElement('div'); btn.className='pick-item';
+    btn.innerHTML=`<span class="pick-item-name">Carte PV ${i+1} : ${c.display}${c.suit}</span><span class="pick-item-stats">${c.numVal} PV</span>`;
+    btn.onclick=()=>{ closeOv('ov-prt'); emitAction('heal_pv',null,{pvIdx:i}); };
+    list.appendChild(btn);
+  });
+  document.getElementById('ov-prt').classList.add('open');
+}
+function buildHeroExtra(discardTop){
+  const me=getMe(); if(!me) return;
+  const div=document.getElementById('hero-extra-btns'); div.innerHTML='';
+  if(me.heroId==='pretresse'){
+    const b=document.createElement('button'); b.className='btn btn-gold'; b.style.cssText='padding:9px;font-size:12px';
+    b.textContent='✨ Soigner un PV'; b.onclick=openPretresse; div.appendChild(b);
+  }
+  // Nécromancien : le choix apparaît via socket event necro_choose, pas ici
+}
+function updatePotions(potions,canUse){
+  const me=getMe(); if(!me||me.heroId!=='alchimiste') return;
+  const row=document.getElementById('potions-row'); row.style.display='flex'; row.innerHTML='';
+  const labels={feu:{emoji:'🔥',name:'Feu'},invisibilite:{emoji:'👻',name:'Invisib.'},vitesse:{emoji:'💨',name:'Vitesse'}};
+  potions.forEach(p=>{
+    const btn=document.createElement('div'); btn.className='potion-btn'+(p.used?' used':'');
+    btn.innerHTML=`<span class="p-emoji">${labels[p.type].emoji}</span><span class="p-name">${labels[p.type].name}</span>`;
+    if(!p.used&&canUse&&isMyTurn) btn.onclick=()=>usePotionClick(p.type);
+    row.appendChild(btn);
+  });
+}
+function usePotionClick(type){
+  if(type==='feu'){
+    // Potion feu : activer directement, la 2e cible sera choisie pendant l'attaque
+    socket.emit('use_potion',{code:roomCode,potionType:'feu'});
+  } else {
+    socket.emit('use_potion',{code:roomCode,potionType:type});
+  }
+}
+function demonReroll(){ socket.emit('demoniste_reroll',{code:roomCode}); }
+function demonConfirm(){ closeOv('ov-demon'); socket.emit('demoniste_confirm',{code:roomCode}); isMyTurn=false; document.getElementById('step-action').style.display='none'; }
+let stuckTimer = null;
+function emitAction(type,targetId,extra){
+  isMyTurn=false;
+  devLog('action',{emit:'action',type,targetId,extra});
+  socket.emit('action',{code:roomCode,type,targetId,extra});
+  document.getElementById('step-action').style.display='none';
+  document.getElementById('step-target').style.display='none';
+  const tb=document.getElementById('turn-banner'); tb.className='turn-banner wait'; tb.textContent='Carte en cours…';
+  // Timeout de sécurité : si rien ne se passe en 20s, demander le state
+  clearTimeout(stuckTimer);
+  stuckTimer = setTimeout(()=>{
+    if(!isMyTurn) socket.emit('request_state',{code:roomCode});
+  }, 20000);
+}
+function confirmVol(){ socket.emit('voleuse_exchange',{code:roomCode,...volState}); closeOv('ov-vol'); }
+function closeOv(id){ document.getElementById(id).classList.remove('open'); }
+
+// Voir défausse
+function showDiscardTop(){
+  if(!gs) return;
+  const prev=document.getElementById('discard-card-preview'); prev.innerHTML='';
+  if(gs.discardTop){ prev.appendChild(makeBigCard(gs.discardTop)); }
+  else { prev.innerHTML='<div style="color:var(--text3);font-size:13px">Défausse vide</div>'; }
+  document.getElementById('discard-deck-info').textContent=`Pioche : ${gs.deckCount||'?'} cartes restantes`;
+  document.getElementById('ov-discard').classList.add('open');
+}
+
+// Voir description héros
+function showMyHeroDesc(){
+  if(!gs) return;
+  const list=document.getElementById('hero-desc-list'); list.innerHTML='';
+  gs.players.forEach(p=>{
+    if(!p.heroId||p.eliminated) return;
+    const box=document.createElement('div'); box.className='hero-desc-box';
+    const wounds = gs.players.find(x=>x.id===myId)?.woundMarkers?.[p.id]||0;
+    const woundStr = wounds>0 ? ` <span style="color:var(--red);font-size:11px">(🐾 ×${wounds})</span>` : '';
+    box.innerHTML=`<div class="hero-desc-row"><span class="hero-desc-emoji">${p.heroEmoji}</span><div><div class="hero-desc-name">${p.name}${p.id===myId?' (vous)':''}</div><div style="font-size:11px;color:var(--text3)">${p.heroName}${woundStr}</div></div></div><div class="hero-desc-text">${getHeroDesc(p.heroId)}</div>`;
+    list.appendChild(box);
+  });
+  if(!list.children.length) list.innerHTML='<div style="color:var(--text3);font-size:13px;text-align:center;padding:10px">Mode héros non activé</div>';
+  document.getElementById('ov-hero-desc').classList.add('open');
+}
+function getHeroDesc(id){
+  const h={
+    guerriere:'Cumule plusieurs charges. Bouclier +2 par charge. Doit toutes les utiliser en attaquant.',
+    necromancien:'Peut utiliser la dernière carte de la défausse pour attaquer ou charger.',
+    voleuse:'Après avoir infligé des dégâts, échange une carte avec la cible.',
+    mage:'Quand un As ou Roi est joué en attaque, peut choisir de transformer la carte.',
+    paladin:'Si perd des PV sur une attaque, riposte automatiquement avec 2 attaques.',
+    pretresse:'Peut choisir quelle carte PV échanger contre la première carte de la pioche.',
+    demoniste:'Peut relancer la carte piochée en payant 3 PV.',
+    espionne:'Son bouclier est toujours caché. Si elle est en jeu, tous les boucliers sont cachés.',
+    alchimiste:'3 potions : Feu (2 cibles), Invisibilité (esquive), Vitesse (action bonus).',
+    ogre:'Commence avec 3 cartes PV. Si attaque = bouclier adverse → élimination directe.',
+    barde:'Même couleur → 2 cartes. Même symbole → 3 cartes. Perd des PV → choisit depuis la défausse.',
+    bete:'Chaque attaque qui blesse ajoute un marqueur (+3 dégâts/marqueur aux prochaines attaques).',
+  };
+  return h[id]||'Pouvoir inconnu';
+}
+
+// ── REVEAL ──
+function showReveal(card,chargeCard,actorName,actionLabel,isCharge,targetShieldHidden){
+  clearTimeout(revealT);
+  document.getElementById('reveal-actor').textContent=actorName;
+  document.getElementById('reveal-action').textContent=actionLabel;
+  const row=document.getElementById('reveal-cards-row'); row.innerHTML='';
+  if(isCharge){
+    const back=document.createElement('div'); back.className='card card-big card-back';
+    back.innerHTML=`<div class="bi"><svg viewBox="0 0 40 48" width="45%" height="45%" xmlns="http://www.w3.org/2000/svg"><path d="M20 2L36 9V22Q36 36 20 46Q4 36 4 22V9Z" fill="#1a0a0b"/><path d="M20 2L36 9V22Q36 36 20 46Q4 36 4 22V9Z" fill="none" stroke="#e63946" stroke-width="1.5"/><path d="M20 7L31 13V22Q31 32 20 40Q9 32 9 22V13Z" fill="#2d0505"/><rect x="18" y="13" width="4" height="20" rx="2" fill="#e63946"/><rect x="11" y="21" width="18" height="4" rx="2" fill="#e63946"/></svg></div>`; row.appendChild(back);
+  } else {
+    if(chargeCard){ row.appendChild(makeBigCard(chargeCard)); const p=document.createElement('div'); p.className='reveal-plus'; p.textContent='+'; row.appendChild(p); }
+    row.appendChild(makeBigCard(card));
+  }
+  const bar=document.getElementById('reveal-bar'); bar.style.animation='none'; bar.offsetHeight; bar.style.animation='revBar 2s linear forwards';
+  document.getElementById('reveal-screen').classList.add('show');
+  revealT=setTimeout(hideReveal,2200);
+}
+function hideReveal(){ document.getElementById('reveal-screen').classList.remove('show'); }
+
+// ── CARTOON ANIM ──
+function playCartoonAnim(resultType){
+  const overlay=document.getElementById('anim-overlay'), scene=document.getElementById('anim-scene');
+  scene.innerHTML='';
+  if(resultType==='dmg'){
+    scene.innerHTML=`
+      <svg style="position:absolute;top:60px;left:60px;animation:swordAttack .9s cubic-bezier(.2,.8,.4,1) forwards" width="120" height="120" viewBox="0 0 120 120">
+        <g transform="rotate(45,60,60)"><rect x="54" y="8" width="12" height="72" rx="4" fill="#e8e0c8" stroke="#8a7a5a" stroke-width="2"/><polygon points="54,8 60,2 66,8" fill="#fff" stroke="#8a7a5a" stroke-width="1.5"/><rect x="38" y="76" width="44" height="10" rx="5" fill="#c0392b" stroke="#8b1a1a" stroke-width="2"/><rect x="54" y="86" width="12" height="22" rx="4" fill="#8b6914" stroke="#5a4409" stroke-width="2"/><circle cx="60" cy="110" r="7" fill="#d4a017" stroke="#8b6914" stroke-width="2"/><rect x="57" y="12" width="4" height="50" rx="2" fill="rgba(255,255,255,.5)"/></g>
+      </svg>
+      <svg style="position:absolute;top:30px;right:20px;animation:impactStar .6s .4s ease-out forwards;opacity:0" width="80" height="80" viewBox="0 0 80 80"><polygon points="40,5 47,28 72,28 52,43 59,66 40,51 21,66 28,43 8,28 33,28" fill="#f0c040" stroke="#d4a017" stroke-width="2"/></svg>
+      <div style="position:absolute;top:90px;left:50%;animation:impactText .7s .35s cubic-bezier(.34,1.56,.64,1) forwards;opacity:0;font-family:Impact,sans-serif;font-size:34px;font-weight:900;color:#e63946;text-shadow:3px 3px 0 #8b1a1a;letter-spacing:2px;white-space:nowrap">TOUCHÉ !</div>`;
+  } else if(resultType==='block'){
+    scene.innerHTML=`
+      <svg style="position:absolute;top:70px;left:40px;animation:swordBlock .9s cubic-bezier(.2,.8,.4,1) forwards" width="100" height="100" viewBox="0 0 100 100">
+        <g transform="rotate(30,50,50)"><rect x="45" y="6" width="10" height="60" rx="3" fill="#e8e0c8" stroke="#8a7a5a" stroke-width="2"/><polygon points="45,6 50,1 55,6" fill="#fff" stroke="#8a7a5a" stroke-width="1.5"/><rect x="32" y="63" width="36" height="8" rx="4" fill="#c0392b" stroke="#8b1a1a" stroke-width="2"/></g>
+      </svg>
+      <svg style="position:absolute;top:40px;right:30px;animation:shieldBlock .8s .2s cubic-bezier(.34,1.56,.64,1) forwards;opacity:0;transform-origin:center" width="100" height="120" viewBox="0 0 100 120">
+        <path d="M50,5 L90,22 L90,65 Q90,100 50,115 Q10,100 10,65 L10,22 Z" fill="#2563a8" stroke="#1a3a6b" stroke-width="3"/>
+        <path d="M50,18 L78,30 L78,65 Q78,90 50,102 Q22,90 22,65 L22,30 Z" fill="#3b82f6" stroke="#2563a8" stroke-width="1.5"/>
+        <rect x="45" y="35" width="10" height="45" rx="3" fill="rgba(255,255,255,.9)"/><rect x="28" y="52" width="44" height="10" rx="3" fill="rgba(255,255,255,.9)"/>
+      </svg>
+      <div style="position:absolute;top:95px;left:50%;animation:impactText .7s .4s cubic-bezier(.34,1.56,.64,1) forwards;opacity:0;font-family:Impact,sans-serif;font-size:28px;font-weight:900;color:#60a5fa;text-shadow:3px 3px 0 #1a3a6b;letter-spacing:2px;white-space:nowrap">BLOQUÉ !</div>`;
+  } else if(resultType==='neutral'){
+    scene.innerHTML=`
+      <svg style="position:absolute;top:20px;left:50%;transform:translateX(-50%);animation:chargeAnim .8s cubic-bezier(.34,1.56,.64,1) forwards;opacity:0;transform-origin:center" width="110" height="140" viewBox="0 0 110 140">
+        <polygon points="65,5 40,65 60,65 32,135 85,55 60,55 78,5" fill="#f0c040" stroke="#d4a017" stroke-width="3"/>
+      </svg>`;
+  }
+  overlay.classList.add('show');
+  setTimeout(()=>{ overlay.classList.remove('show'); scene.innerHTML=''; },1200);
+}
+
+// ── POPUP ──
+function showPopup(emoji,main,detail,result,resultType){
+  clearTimeout(popupT);
+  document.getElementById('popup-emoji').textContent=emoji||'';
+  document.getElementById('popup-title').textContent=main||'';
+  document.getElementById('popup-detail').textContent=detail||'';
+  const pr=document.getElementById('popup-result');
+  if(result){ pr.style.display='inline-block'; pr.className='popup-result '+(resultType||'neutral'); pr.textContent=result; }
+  else pr.style.display='none';
+  const bar=document.getElementById('popup-bar-fill'); bar.style.animation='none'; bar.offsetHeight; bar.style.animation='pbf 3s linear forwards';
+  document.getElementById('result-popup').classList.add('show');
+  popupT=setTimeout(()=>document.getElementById('result-popup').classList.remove('show'),3200);
+}
+
+// ── RENDER ──
+function renderAll(){
+  if(!gs) return;
+  renderPlayersStatusBar(); renderMyCards();
+  document.getElementById('deck-pill').textContent=`Pioche : ${gs.deckCount||'?'}`;
+  const me=getMe();
+  const cb=document.getElementById('charge-badge');
+  if(me&&me.hasCharge){ cb.style.display='inline-flex'; document.getElementById('charge-count').textContent=me.chargeCount; }
+  else cb.style.display='none';
+  const ht=document.getElementById('my-hero-tag');
+  if(me&&me.heroId){ ht.style.display='block'; ht.textContent=`${me.heroEmoji} ${me.heroName}`; }
+  else ht.style.display='none';
+  if(me&&me.heroId==='alchimiste'&&me.potions) updatePotions(me.potions,me.potions.some(p=>!p.used));
+  else document.getElementById('potions-row').style.display='none';
+}
+
+function renderPlayersStatusBar(){
+  const bar=document.getElementById('players-status-bar'); bar.innerHTML=''; if(!gs) return;
+  const bete = gs.players.find(p=>p.heroId==='bete'&&!p.eliminated);
+  gs.players.forEach(p=>{
+    const card=document.createElement('div');
+    card.className='player-status-card'+(gs.currentTurnId===p.id?' their-turn':'')+(p.eliminated?' dead':'');
+    // Clic → voir les cartes du joueur
+    card.onclick=()=>showPlayerCards(p.id);
+    const avSrc=getAvatar(p.id,p.avatar);
+    const av=document.createElement('div'); av.className='ps-avatar';
+    if(avSrc) av.innerHTML=`<img src="${avSrc}" alt="">`; else av.textContent=p.heroEmoji||'👤';
+    const info=document.createElement('div'); info.className='ps-info';
+    const nm=document.createElement('div'); nm.className='ps-name'; nm.textContent=p.id===myId?'Vous':p.name;
+    const st=document.createElement('div'); st.className='ps-stats';
+    if(!p.eliminated){
+      const wounds = bete && p.id!==bete.id ? (bete.woundMarkers?.[p.id]||0) : 0;
+      const woundStr = wounds>0 ? `<span style="color:var(--red)">🐾${wounds}</span>` : '';
+      st.innerHTML=`🛡️<span class="sv">${p.shieldVal}</span> ❤️<span class="sv">${totalPV(p)}</span>${p.hasCharge?` ⚡<span class="sv">${p.chargeCount}</span>`:''}${woundStr}`;
+    } else { st.textContent='💀'; }
+    info.appendChild(nm); info.appendChild(st); card.appendChild(av); card.appendChild(info);
+    if(gs.currentTurnId===p.id&&!p.eliminated){ const dot=document.createElement('div'); dot.className='turn-dot-sm'; card.appendChild(dot); }
+    bar.appendChild(card);
+  });
+}
+
+function showPlayerCards(playerId){
+  if(!gs) return;
+  const p = gs.players.find(x=>x.id===playerId); if(!p) return;
+  document.getElementById('player-cards-title').textContent=`${p.heroEmoji?p.heroEmoji+' ':''}${p.name}${p.id===myId?' (vous)':''}`;
+  const content=document.getElementById('player-cards-content'); content.innerHTML='';
+
+  if(p.eliminated){ content.innerHTML='<div style="color:var(--text3);text-align:center;padding:10px">💀 Éliminé</div>'; document.getElementById('ov-player-cards').classList.add('open'); return; }
+
+  // Bouclier
+  const shWrap=document.createElement('div');
+  const shLbl=document.createElement('div'); shLbl.style.cssText='font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;text-align:center'; shLbl.textContent='🛡️ Bouclier';
+  const shRow=document.createElement('div'); shRow.style.cssText='display:flex;justify-content:center;align-items:center;gap:8px';
+  if(p.shieldHidden){
+    shRow.appendChild(makeBackCard());
+    const hint=document.createElement('div'); hint.style.cssText='font-size:11px;color:var(--text3);margin-top:4px;text-align:center'; hint.textContent='(caché)';
+    shWrap.appendChild(shLbl); shWrap.appendChild(shRow); shWrap.appendChild(hint);
+  } else if(p.shield){
+    shRow.appendChild(makeCard(p.shield,true));
+    if(p.heroId==='guerriere'&&p.hasCharge){
+      const bonus=document.createElement('div'); bonus.style.cssText='font-size:12px;color:var(--gold);font-weight:700'; bonus.textContent=`+${p.chargeCount*2}`;
+      shRow.appendChild(bonus);
+    }
+    shWrap.appendChild(shLbl); shWrap.appendChild(shRow);
+  } else {
+    shRow.appendChild(makeBackCard());
+    shWrap.appendChild(shLbl); shWrap.appendChild(shRow);
+  }
+  content.appendChild(shWrap);
+
+  // PV
+  const pvWrap=document.createElement('div');
+  const pvLbl=document.createElement('div'); pvLbl.style.cssText='font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;text-align:center'; pvLbl.textContent='❤️ Points de vie';
+  const pvRow=document.createElement('div'); pvRow.style.cssText='display:flex;gap:8px;justify-content:center;flex-wrap:wrap';
+  if(p.pv&&p.pv.length>0){ p.pv.forEach(c=>pvRow.appendChild(makeCard(c,false))); }
+  else { pvRow.innerHTML='<div style="color:var(--text3);font-size:13px">Aucun PV</div>'; }
+  pvWrap.appendChild(pvLbl); pvWrap.appendChild(pvRow); content.appendChild(pvWrap);
+
+  // Charges (dos)
+  if(p.hasCharge){
+    const chWrap=document.createElement('div');
+    const chLbl=document.createElement('div'); chLbl.style.cssText='font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;text-align:center'; chLbl.textContent='⚡ Charge(s)';
+    const chRow=document.createElement('div'); chRow.style.cssText='display:flex;gap:8px;justify-content:center';
+    for(let i=0;i<p.chargeCount;i++) chRow.appendChild(makeBackCard());
+    chWrap.appendChild(chLbl); chWrap.appendChild(chRow); content.appendChild(chWrap);
+  }
+
+  // Bête : marqueurs
+  const bete=gs.players.find(x=>x.heroId==='bete'&&!x.eliminated);
+  if(bete && bete.woundMarkers && bete.woundMarkers[p.id]){
+    const wDiv=document.createElement('div'); wDiv.style.cssText='font-size:13px;color:var(--red);text-align:center';
+    wDiv.textContent=`🐾 ${bete.woundMarkers[p.id]} marqueur${bete.woundMarkers[p.id]>1?'s':''} blessure (+${bete.woundMarkers[p.id]*3} dégâts)`;
+    content.appendChild(wDiv);
+  }
+
+  document.getElementById('ov-player-cards').classList.add('open');
+}
+
+function renderMyCards(){
+  const me=getMe(); if(!me) return;
+  const layout=document.getElementById('my-cards-layout'); layout.innerHTML='';
+  // Bouclier en haut
+  const shWrap=document.createElement('div');
+  const shLbl=document.createElement('div'); shLbl.className='card-section-label'; shLbl.textContent='🛡️ Bouclier';
+  const shRow=document.createElement('div'); shRow.className='card-row-shield';
+  // Espionne voit son bouclier, mais on l'affiche
+  shRow.appendChild(me.shield ? makeCard(me.shield,true) : makeBackCard());
+  // Guerrière bonus visible
+  if(me.heroId==='guerriere'&&me.hasCharge){
+    const bonus=document.createElement('div'); bonus.className='guerriere-bonus';
+    bonus.textContent=`+${me.chargeCount*2}`;
+    shRow.appendChild(bonus);
+  }
+  shWrap.appendChild(shLbl); shWrap.appendChild(shRow); layout.appendChild(shWrap);
+  // PV en bas
+  const pvWrap=document.createElement('div');
+  const pvLbl=document.createElement('div'); pvLbl.className='card-section-label'; pvLbl.textContent='❤️ Points de vie';
+  const pvRow=document.createElement('div'); pvRow.className='card-row-pv';
+  me.pv.forEach(c=>pvRow.appendChild(makeCard(c,false)));
+  pvWrap.appendChild(pvLbl); pvWrap.appendChild(pvRow); layout.appendChild(pvWrap);
+  // Charges
+  if(me.charges&&me.charges.length>0){
+    const chWrap=document.createElement('div');
+    const chLbl=document.createElement('div'); chLbl.className='card-section-label'; chLbl.textContent='⚡ Charge';
+    const chRow=document.createElement('div'); chRow.className='card-row-pv';
+    me.charges.forEach(()=>chRow.appendChild(makeBackCard()));
+    chWrap.appendChild(chLbl); chWrap.appendChild(chRow); layout.appendChild(chWrap);
+  }
+}
+
+// ── LOBBY PLAYERS ──
+function renderLobbyPlayers(players){
+  const ul=document.getElementById('lobby-players'); ul.innerHTML='';
+  const maxWins=Math.max(...players.map(p=>p.wins||0),0);
+  players.forEach((p,i)=>{
+    if(p.avatar) avatarCache[p.id]=p.avatar;
+    const li=document.createElement('div'); li.className='lobby-player-item';
+    const av=document.createElement('div'); av.className='lp-avatar';
+    const avSrc=getAvatar(p.id,p.avatar);
+    if(avSrc) av.innerHTML=`<img src="${avSrc}" alt="">`; else av.textContent='👤';
+    const info=document.createElement('div'); info.className='lp-info';
+    const nm=document.createElement('div'); nm.className='lp-name'; nm.textContent=p.name+(p.id===myId?' (vous)':'');
+    const wins=document.createElement('div'); wins.className='lp-wins';
+    wins.textContent=`${p.wins||0} victoire${(p.wins||0)!==1?'s':''}`;
+    info.appendChild(nm); info.appendChild(wins);
+    const badge=document.createElement('div'); badge.className='lp-badge';
+    if(i===0) badge.textContent='👑';
+    else if(maxWins>0&&(p.wins||0)===maxWins) badge.textContent='🏆';
+    li.appendChild(av); li.appendChild(info); li.appendChild(badge);
+    ul.appendChild(li);
+  });
+  const can=isHost&&players.length>=2;
+  document.getElementById('btn-start').style.display=can?'block':'none';
+  document.getElementById('lobby-wait').style.display=can?'none':'block';
+}
+
+// ── CARDS ──
+function makeCard(card,horiz=false){
+  if(!card) return makeBackCard();
+  const el=document.createElement('div');
+  const isRed=['♥','♦'].includes(card.suit),isJkr=card.suit==='🃏';
+  el.className='card'+(horiz?' card-horiz':' card-norm')+(isRed?' red':'')+(isJkr?' jkr':'');
+  if(horiz){ el.innerHTML=`<span class="hv">${card.display}</span><span class="hs">${card.suit}</span>`; }
+  else{ el.innerHTML=`<div class="ctop"><span class="cv">${card.display}</span><span class="cs">${card.suit}</span></div><div class="ccc">${isJkr?'🃏':card.suit}</div><div class="cbot"><span class="cv">${card.display}</span><span class="cs">${card.suit}</span></div>`; }
+  return el;
+}
+function makeBigCard(card){
+  if(!card) return makeBackCard();
+  const el=document.createElement('div');
+  const isRed=['♥','♦'].includes(card.suit),isJkr=card.suit==='🃏';
+  el.className='card card-big'+(isRed?' red':'')+(isJkr?' jkr':'');
+  el.innerHTML=`<div class="ctop"><span class="cv">${card.display}</span><span class="cs">${card.suit}</span></div><div class="ccc">${isJkr?'🃏':card.suit}</div><div class="cbot"><span class="cv">${card.display}</span><span class="cs">${card.suit}</span></div>`;
+  return el;
+}
+function makeBackCard(){
+  const el=document.createElement('div'); el.className='card card-norm card-back';
+  el.innerHTML=`<div class="bi"><svg viewBox="0 0 40 48" width="40%" height="40%" xmlns="http://www.w3.org/2000/svg"><path d="M20 2L36 9V22Q36 36 20 46Q4 36 4 22V9Z" fill="#1a0a0b"/><path d="M20 2L36 9V22Q36 36 20 46Q4 36 4 22V9Z" fill="none" stroke="#e63946" stroke-width="1.5"/><path d="M20 7L31 13V22Q31 32 20 40Q9 32 9 22V13Z" fill="#2d0505"/><rect x="18" y="13" width="4" height="20" rx="2" fill="#e63946"/><rect x="11" y="21" width="18" height="4" rx="2" fill="#e63946"/></svg></div>`;
+  return el;
+}
+
+function buildVolCards(id,pv,shield,isMine){
+  const c=document.getElementById(id); c.innerHTML='';
+  if(shield){ c.appendChild(mkExItem(`🛡️ ${shield.display}${shield.suit}`,isMine,'shield',0)); }
+  pv.forEach((card,i)=>c.appendChild(mkExItem(`❤️ ${card.display}${card.suit} (${card.numVal})`,isMine,'pv',i)));
+}
+function mkExItem(label,isMine,type,idx){
+  const b=document.createElement('div'); b.className='ex-item'; b.textContent=label;
+  b.onclick=()=>{
+    document.querySelectorAll((isMine?'#vol-my':'#vol-their')+' .ex-item').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel');
+    if(isMine){volState.myType=type;volState.myIdx=idx;}else{volState.theirType=type;volState.theirIdx=idx;}
+    document.getElementById('btn-vol-ok').disabled=!(volState.myType&&volState.theirType);
+  };
+  return b;
+}
+
+// ── CARD SIZE ADAPTIVE ──
+function calcCardSize(){
+  const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  const topbar   = document.querySelector('.game-topbar')?.offsetHeight || 40;
+  const statusbar= document.querySelector('.players-status-bar')?.offsetHeight || 36;
+  const header   = document.querySelector('.my-cards-header')?.offsetHeight || 36;
+  const turnzone = document.getElementById('turn-zone')?.offsetHeight || 170;
+  const labels   = 28; const gaps = 16;
+  const available = vh - topbar - statusbar - header - turnzone - labels - gaps;
+  const h_s = Math.max(Math.min(Math.floor((available-8)/2.4),72),36);
+  const w_s = Math.floor(h_s/0.714);
+  const h_p = Math.max(Math.min(Math.floor(h_s*1.4),100),50);
+  const w_p = Math.floor(h_p*0.714);
+  const root=document.documentElement;
+  root.style.setProperty('--cw',w_p+'px'); root.style.setProperty('--ch',h_p+'px');
+  root.style.setProperty('--csw',w_s+'px'); root.style.setProperty('--csh',h_s+'px');
+  root.style.setProperty('--cfs',Math.max(Math.floor(h_p*.13),9)+'px');
+  root.style.setProperty('--cfsl',Math.max(Math.floor(h_p*.16),11)+'px');
+  root.style.setProperty('--ccc',Math.max(Math.floor(h_p*.26),14)+'px');
+}
+if(window.visualViewport) window.visualViewport.addEventListener('resize',calcCardSize);
+window.addEventListener('resize',calcCardSize);
+window.addEventListener('orientationchange',()=>setTimeout(calcCardSize,300));
+
+// ── UTILS ──
+function getMe(){ return gs?gs.players.find(p=>p.id===myId):null; }
+function totalPV(p){ return p&&p.pv?p.pv.reduce((s,c)=>s+c.numVal,0):0; }
+function escHtml(t){ const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+function showScreen(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(`screen-${n}`).classList.add('active');
+  if(n==='game'){ document.body.classList.add('game-active'); setTimeout(()=>{ calcCardSize(); setTimeout(calcCardSize,200); },50); }
+  else{ document.body.classList.remove('game-active'); window.scrollTo(0,0); }
+}
+function homeErr(msg){ document.getElementById('home-err').textContent=msg; setTimeout(()=>document.getElementById('home-err').textContent='',3000); }
+let toastT;
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3000); }
+document.getElementById('inp-name').focus();
+document.getElementById('inp-code').addEventListener('input',function(){ this.value=this.value.replace(/\D/g,'').slice(0,6); });
+</script>
+</body>
+</html>
