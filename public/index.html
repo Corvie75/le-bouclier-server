@@ -614,12 +614,32 @@ if(DEV){
   panel.id='dev-log';
   panel.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9999;background:rgba(0,0,0,.92);color:#0f0;font-family:monospace;font-size:10px;max-height:35vh;overflow-y:auto;border-top:1px solid #0f0;padding:4px 8px';
   const header = document.createElement('div');
-  header.style.cssText='display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;position:sticky;top:0;background:rgba(0,0,0,.95);padding:2px 0';
-  header.innerHTML='<span style="color:#0f0;font-weight:bold">🐛 DEV LOG</span><span id="dev-log-count" style="color:#888">0 events</span><button onclick="document.getElementById(\'dev-log-entries\').innerHTML=\'\'" style="background:#111;border:1px solid #333;color:#888;font-size:9px;padding:2px 6px;cursor:pointer;border-radius:3px">Clear</button>';
+  header.style.cssText='display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;position:sticky;top:0;background:rgba(0,0,0,.95);padding:2px 0;gap:4px';
+  header.innerHTML=`
+    <span style="color:#0f0;font-weight:bold;flex-shrink:0">🐛 DEV</span>
+    <span id="dev-log-count" style="color:#888;flex-shrink:0">0</span>
+    <button onclick="document.getElementById('dev-log-entries').innerHTML='';logCount=0;document.getElementById('dev-log-count').textContent='0'" style="background:#111;border:1px solid #333;color:#888;font-size:9px;padding:2px 5px;cursor:pointer;border-radius:3px;flex-shrink:0">Clear</button>
+    <button id="dev-toggle-btn" onclick="toggleDevLog()" style="background:#111;border:1px solid #0f0;color:#0f0;font-size:9px;padding:2px 5px;cursor:pointer;border-radius:3px;flex-shrink:0">Cacher</button>`;
   const entries = document.createElement('div');
   entries.id='dev-log-entries';
   panel.appendChild(header); panel.appendChild(entries);
   document.body.appendChild(panel);
+}
+let devLogVisible = true;
+function toggleDevLog(){
+  devLogVisible=!devLogVisible;
+  const entries=document.getElementById('dev-log-entries');
+  const btn=document.getElementById('dev-toggle-btn');
+  const panel=document.getElementById('dev-log');
+  if(devLogVisible){
+    entries.style.display='block';
+    panel.style.maxHeight='35vh';
+    if(btn) btn.textContent='Cacher';
+  } else {
+    entries.style.display='none';
+    panel.style.maxHeight='28px';
+    if(btn) btn.textContent='Afficher';
+  }
 }
 function devLog(type, data){
   if(!DEV) return;
@@ -815,6 +835,7 @@ socket.on('game_started',({state})=>{
 });
 
 socket.on('choose_action',({deckCount,discardTop,mustAttack,canUsePotion,potions,isBonus,clairvoyantCard})=>{
+  clearTimeout(stuckTimer);
   isMyTurn=true; pendingAction=null; pendingTargetId=null;
   if(gs){ gs.deckCount=deckCount; gs.discardTop=discardTop; }
   document.getElementById('deck-pill').textContent=`Pioche : ${deckCount}`;
@@ -844,6 +865,7 @@ socket.on('wait_turn',({playerName,deckCount})=>{
 });
 
 socket.on('card_reveal',({card,chargeCard,actorName,actionLabel,isCharge,targetShieldHidden})=>{
+  clearTimeout(stuckTimer);
   showReveal(card,chargeCard,actorName,actionLabel,isCharge,targetShieldHidden);
 });
 socket.on('action_popup',({emoji,main,detail,result,resultType})=>{
@@ -851,8 +873,16 @@ socket.on('action_popup',({emoji,main,detail,result,resultType})=>{
   popupT=setTimeout(()=>{ hideReveal(); playCartoonAnim(resultType); setTimeout(()=>showPopup(emoji,main,detail,result,resultType),800); },2000);
 });
 // Nécromancien — choix défausse ou pioche
+let mageAutoCloseTimer = null;
 socket.on('necro_choose',({lastDiscard, type})=>{
-  const actionLabel = type==='charge' ? 'charger' : type==='attack' ? 'attaquer' : type;
+  // Restaurer le tour pour que le joueur puisse interagir
+  isMyTurn=true;
+  const tb=document.getElementById('turn-banner');
+  tb.className='turn-banner mine';
+  tb.textContent='💀 Nécromancien — Choisir la source';
+  document.getElementById('step-action').style.display='none';
+  document.getElementById('step-target').style.display='none';
+  const actionLabel = type==='charge' ? 'charger' : 'attaquer';
   const div=document.getElementById('hero-extra-btns');
   div.innerHTML=`
     <div style="background:#1a1a1a;border:1px solid #2e2e2e;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:7px">
@@ -1190,10 +1220,20 @@ function usePotionClick(type){
 }
 function demonReroll(){ socket.emit('demoniste_reroll',{code:roomCode}); }
 function demonConfirm(){ closeOv('ov-demon'); socket.emit('demoniste_confirm',{code:roomCode}); isMyTurn=false; document.getElementById('step-action').style.display='none'; }
+let stuckTimer = null;
 function emitAction(type,targetId,extra){
   isMyTurn=false;
   devLog('action',{emit:'action',type,targetId,extra});
   socket.emit('action',{code:roomCode,type,targetId,extra});
+  document.getElementById('step-action').style.display='none';
+  document.getElementById('step-target').style.display='none';
+  const tb=document.getElementById('turn-banner'); tb.className='turn-banner wait'; tb.textContent='Carte en cours…';
+  // Timeout de sécurité : si rien ne se passe en 20s, demander le state
+  clearTimeout(stuckTimer);
+  stuckTimer = setTimeout(()=>{
+    if(!isMyTurn) socket.emit('request_state',{code:roomCode});
+  }, 20000);
+}
   document.getElementById('step-action').style.display='none'; document.getElementById('step-target').style.display='none';
   const tb=document.getElementById('turn-banner'); tb.className='turn-banner wait'; tb.textContent='Carte en cours…';
 }
