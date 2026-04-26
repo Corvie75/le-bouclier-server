@@ -123,6 +123,7 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
   font-size:10px;font-weight:800;font-family:'Inter',sans-serif;
   box-shadow:0 2px 6px rgba(0,0,0,.4);
   flex-shrink:0;
+  color:#111;
 }
 .last-card-mini.red{color:var(--red)}
 .last-card-mini.jkr{color:var(--blue)}
@@ -448,6 +449,8 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
   </div>
   <div class="turn-zone" id="turn-zone">
     <div class="turn-banner wait" id="turn-banner">En attente…</div>
+    <!-- Panel Nécromancien dédié -->
+    <div id="necro-panel" style="display:none;flex-direction:column;gap:6px;padding:2px 0"></div>
     <div id="step-action" style="display:none">
       <div class="step-label" style="margin-bottom:6px">1 · Quelle action ?</div>
       <div class="charge-warning" id="charge-warning" style="display:none">⚡ Charge active — vous devez attaquer !</div>
@@ -837,6 +840,7 @@ socket.on('game_started',({state})=>{
 socket.on('choose_action',({deckCount,discardTop,mustAttack,canUsePotion,potions,isBonus,clairvoyantCard})=>{
   clearTimeout(stuckTimer);
   isMyTurn=true; pendingAction=null; pendingTargetId=null;
+  document.getElementById('necro-panel').style.display='none';
   if(gs){ gs.deckCount=deckCount; gs.discardTop=discardTop; }
   document.getElementById('deck-pill').textContent=`Pioche : ${deckCount}`;
   const tb=document.getElementById('turn-banner');
@@ -873,32 +877,39 @@ socket.on('action_popup',({emoji,main,detail,result,resultType})=>{
   popupT=setTimeout(()=>{ hideReveal(); playCartoonAnim(resultType); setTimeout(()=>showPopup(emoji,main,detail,result,resultType),800); },2000);
 });
 // Nécromancien — choix défausse ou pioche
-let mageAutoCloseTimer = null;
 socket.on('necro_choose',({lastDiscard, type})=>{
   // Restaurer le tour pour que le joueur puisse interagir
   isMyTurn=true;
   const tb=document.getElementById('turn-banner');
   tb.className='turn-banner mine';
   tb.textContent='💀 Nécromancien — Choisir la source';
+  // Cacher step-action/target, afficher le panel necro dédié
   document.getElementById('step-action').style.display='none';
   document.getElementById('step-target').style.display='none';
   const actionLabel = type==='charge' ? 'charger' : 'attaquer';
-  const div=document.getElementById('hero-extra-btns');
-  div.innerHTML=`
-    <div style="background:#1a1a1a;border:1px solid #2e2e2e;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:7px">
-      <div style="font-size:11px;color:var(--text3);text-align:center;letter-spacing:1px">💀 NÉCROMANCIEN — SOURCE POUR ${actionLabel.toUpperCase()}</div>
-      <div style="display:flex;gap:7px">
-        <button onclick="necroUseDiscard()" class="btn btn-ghost" style="flex:1;padding:9px 5px;font-size:11px;border-color:var(--red)">
-          Défausse<br><span style="color:var(--red);font-weight:700">${lastDiscard.display}${lastDiscard.suit} (${lastDiscard.numVal})</span>
-        </button>
-        <button onclick="necroUseRandom()" class="btn btn-ghost" style="flex:1;padding:9px 5px;font-size:11px">
-          Pioche<br><span style="color:var(--text3);font-size:10px">Carte aléatoire</span>
-        </button>
-      </div>
+  const panel = document.getElementById('necro-panel');
+  panel.style.display='flex';
+  panel.innerHTML=`
+    <div style="font-size:11px;color:var(--text3);text-align:center;letter-spacing:1px;margin-bottom:7px">💀 SOURCE POUR ${actionLabel.toUpperCase()}</div>
+    <div style="display:flex;gap:7px">
+      <button onclick="necroUseDiscard()" class="btn btn-atk" style="flex:1;padding:9px 5px;font-size:11px">
+        Défausse<br><span style="font-weight:900">${lastDiscard.display}${lastDiscard.suit} (${lastDiscard.numVal})</span>
+      </button>
+      <button onclick="necroUseRandom()" class="btn btn-ghost" style="flex:1;padding:9px 5px;font-size:11px">
+        Pioche<br><span style="color:var(--text3);font-size:10px">Carte aléatoire</span>
+      </button>
     </div>`;
 });
-function necroUseDiscard(){ document.getElementById('hero-extra-btns').innerHTML=''; socket.emit('necro_use_discard',{code:roomCode}); }
-function necroUseRandom(){ document.getElementById('hero-extra-btns').innerHTML=''; socket.emit('necro_use_random',{code:roomCode}); }
+function necroUseDiscard(){
+  document.getElementById('necro-panel').style.display='none';
+  socket.emit('necro_use_discard',{code:roomCode});
+}
+function necroUseRandom(){
+  document.getElementById('necro-panel').style.display='none';
+  socket.emit('necro_use_random',{code:roomCode});
+}
+
+let mageAutoCloseTimer = null;
 socket.on('waiting_for',(data)=>{
   const el=document.getElementById('waiting-for-banner');
   if(!data){ el.style.display='none'; return; }
