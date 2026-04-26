@@ -936,7 +936,6 @@ function renderLastCard(card){
 }
 
 // ── MAGE POPUP (bloquant — attend la décision) ──
-let mageAutoCloseTimer = null;
 socket.on('mage_can_transform',({card,actorName,targetName,actionType})=>{
   const actionLabels={attack:'attaque',shield_swap:'change bouclier',charge:'se charge',necro_discard:'attaque (défausse)'};
   const aLabel=actionLabels[actionType]||actionType;
@@ -1233,9 +1232,6 @@ function emitAction(type,targetId,extra){
   stuckTimer = setTimeout(()=>{
     if(!isMyTurn) socket.emit('request_state',{code:roomCode});
   }, 20000);
-}
-  document.getElementById('step-action').style.display='none'; document.getElementById('step-target').style.display='none';
-  const tb=document.getElementById('turn-banner'); tb.className='turn-banner wait'; tb.textContent='Carte en cours…';
 }
 function confirmVol(){ socket.emit('voleuse_exchange',{code:roomCode,...volState}); closeOv('ov-vol'); }
 function closeOv(id){ document.getElementById(id).classList.remove('open'); }
