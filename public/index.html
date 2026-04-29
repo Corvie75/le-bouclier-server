@@ -330,6 +330,12 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
 
 <!-- HOME -->
 <div id="screen-home" class="screen active">
+  <!-- Sélecteur de langue -->
+  <div style="display:flex;justify-content:center;gap:8px;padding:20px 20px 0">
+    <button onclick="setLang('fr')" id="lang-fr" class="btn btn-ghost btn-sm" style="padding:5px 12px;font-size:14px">🇫🇷</button>
+    <button onclick="setLang('en')" id="lang-en" class="btn btn-ghost btn-sm" style="padding:5px 12px;font-size:14px">🇬🇧</button>
+    <button onclick="setLang('es')" id="lang-es" class="btn btn-ghost btn-sm" style="padding:5px 12px;font-size:14px">🇪🇸</button>
+  </div>
   <div class="home-logo">
     <div class="home-logo-icon">🛡️</div>
     <div class="home-logo-title">Le Bouclier</div>
@@ -339,8 +345,8 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
     <div class="avatar-picker" onclick="document.getElementById('avatar-input').click()">
       <div class="avatar-preview" id="avatar-preview">👤</div>
       <div class="avatar-picker-info">
-        <div class="avatar-picker-title">Photo de profil</div>
-        <div class="avatar-picker-sub">Optionnel — caméra ou galerie</div>
+        <div class="avatar-picker-title" id="avatar-picker-title">Photo de profil</div>
+        <div class="avatar-picker-sub" id="avatar-picker-sub">Optionnel — caméra ou galerie</div>
       </div>
       <input type="file" id="avatar-input" accept="image/*">
     </div>
@@ -348,15 +354,15 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
       <div class="input-label">Votre nom</div>
       <input id="inp-name" class="inp" type="text" placeholder="Ex: Toine…" maxlength="12" autocomplete="off">
     </div>
-    <button class="btn btn-primary" onclick="doCreate()">Créer une partie</button>
-    <div class="sep">ou rejoindre</div>
+    <button class="btn btn-primary" id="btn-create-home" onclick="doCreate()">Créer une partie</button>
+    <div class="sep"><span id="label-or">ou rejoindre</span></div>
     <div class="input-group">
-      <div class="input-label">Code de la partie</div>
+      <div class="input-label" id="label-code">Code de la partie</div>
       <input id="inp-code" class="inp inp-code" type="text" placeholder="· · · · · ·" maxlength="6" autocomplete="off" inputmode="numeric">
     </div>
-    <button class="btn btn-ghost" onclick="doJoin()">Rejoindre →</button>
+    <button class="btn btn-ghost" id="btn-join-home" onclick="doJoin()">Rejoindre →</button>
     <div class="err-msg" id="home-err"></div>
-    <div class="rules-toggle" onclick="document.getElementById('rules-content').classList.toggle('open')">📖 Voir les règles</div>
+    <div class="rules-toggle" id="rules-toggle-btn" onclick="document.getElementById('rules-content').classList.toggle('open')">📖 Voir les règles</div>
     <div class="rules-content" id="rules-content">
       <strong>Mise en place :</strong> 3 cartes — 2 plus grandes = PV, la plus faible = Bouclier.<br><br>
       <strong>À votre tour :</strong> Choisissez action puis cible.<br>
@@ -374,26 +380,26 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
   <div class="lobby-top">
     <div class="lobby-header">
       <h2>Salle d'attente</h2>
-      <button class="lobby-leave" onclick="doLeave()">← Quitter</button>
+      <button class="lobby-leave" id="lobby-leave-btn" onclick="doLeave()">← Quitter</button>
     </div>
     <div class="code-row">
       <div class="code-label">Code</div>
       <div class="code-val" id="lobby-code">------</div>
     </div>
     <div class="hero-mode-row">
-      <div class="hm-info"><div class="hm-name">🦸 Mode héros</div><div class="hm-sub">Pouvoirs spéciaux</div></div>
+      <div class="hm-info"><div class="hm-name" id="hm-name-hero">🦸 Mode héros</div><div class="hm-sub" id="hm-sub-hero">Pouvoirs spéciaux</div></div>
       <div class="toggle-sw disabled" id="hero-mode-toggle" onclick="toggleHeroMode()"></div>
     </div>
     <div class="hero-mode-row" style="margin-top:6px">
-      <div class="hm-info"><div class="hm-name">⚔️ Meurtre</div><div class="hm-sub">Tuer → action bonus immédiate</div></div>
+      <div class="hm-info"><div class="hm-name" id="hm-name-meurtre">⚔️ Meurtre</div><div class="hm-sub" id="hm-sub-meurtre">Tuer → action bonus immédiate</div></div>
       <div class="toggle-sw disabled" id="opt-meurtre-toggle" onclick="toggleOption('optMeurtre')"></div>
     </div>
     <div class="hero-mode-row" style="margin-top:6px">
-      <div class="hm-info"><div class="hm-name">🔮 Clairvoyance</div><div class="hm-sub">1 PV → voir 1ère carte pioche</div></div>
+      <div class="hm-info"><div class="hm-name" id="hm-name-clairvoyance">🔮 Clairvoyance</div><div class="hm-sub" id="hm-sub-clairvoyance">1 PV → voir 1ère carte pioche</div></div>
       <div class="toggle-sw disabled" id="opt-clairvoyance-toggle" onclick="toggleOption('optClairvoyance')"></div>
     </div>
     <div class="hero-mode-row" style="margin-top:6px">
-      <div class="hm-info"><div class="hm-name">🐉 Réveil du dragon</div><div class="hm-sub">Pioche vide → attaque tous</div></div>
+      <div class="hm-info"><div class="hm-name" id="hm-name-dragon">🐉 Réveil du dragon</div><div class="hm-sub" id="hm-sub-dragon">Pioche vide → attaque tous</div></div>
       <div class="toggle-sw disabled" id="opt-dragon-toggle" onclick="toggleOption('optDragon')"></div>
     </div>
   </div>
@@ -529,7 +535,7 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
       <div><div style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:5px" id="vol-their-lbl">Leur carte</div><div id="vol-their"></div></div>
     </div>
     <button class="btn btn-primary" id="btn-vol-ok" onclick="confirmVol()" disabled>Confirmer</button>
-    <button class="btn btn-ghost" onclick="closeOv('ov-vol')">Passer</button>
+    <button class="btn btn-ghost" onclick="voLeusePasser()">Passer</button>
   </div>
 </div>
 <div class="overlay" id="ov-demon">
@@ -607,6 +613,102 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
 <script>
 const SERVER_URL = 'https://le-bouclier-server-production.up.railway.app';
 const socket = io(SERVER_URL, {transports:['websocket','polling']});
+
+// ── I18N ──
+const LANGS = {
+  fr:{
+    create:'Créer une partie', join:'Rejoindre →', name_ph:'Votre nom…', code_ph:'· · · · · ·',
+    code_label:'Code de la partie', or:'ou rejoindre',
+    start:'⚔️ Lancer la partie', waiting:'En attente de joueurs… (min. 2)',
+    hero_mode:'🦸 Mode héros', hero_sub:'Pouvoirs spéciaux',
+    opt_meurtre:'⚔️ Meurtre', opt_meurtre_sub:'Tuer → action bonus immédiate',
+    opt_clairvoyance:'🔮 Clairvoyance', opt_clairvoyance_sub:'1 PV → voir 1ère carte pioche',
+    opt_dragon:'🐉 Réveil du dragon', opt_dragon_sub:'Pioche vide → attaque tous',
+    your_turn:'À votre tour !', wait_turn:'Tour de', draw_in_progress:'Carte en cours…',
+    attack:'⚔️ Attaquer', shield:'🛡️ Bouclier', charge:'⚡ Charger',
+    must_attack:'⚡ Attaque obligatoire !', bonus_action:'⚗️ Action bonus !',
+    chat_ph:'Message…', send:'→', leave:'← Quitter', abandon:'🏳️ Abandonner',
+    deck:'Pioche', blocked:'Bloqué !', back:'← Retour',
+    choose_target:'2 · Choisir une cible', choose_action:'1 · Quelle action ?',
+    charge_warning:'⚡ Charge active — vous devez attaquer !',
+    your_cards:'VOS CARTES', shield_label:'🛡️ Bouclier', pv_label:'❤️ Points de vie', charge_label:'⚡ Charge(s)',
+    you:'Vous', victory:'Victoire !', wins:'victoire', wins_pl:'victoires', returning:'Retour au lobby dans quelques secondes…',
+    avatar_title:'Photo de profil', avatar_sub:'Optionnel — caméra ou galerie',
+    rules_toggle:'📖 Voir les règles',
+  },
+  en:{
+    create:'Create a game', join:'Join →', name_ph:'Your name…', code_ph:'· · · · · ·',
+    code_label:'Game code', or:'or join',
+    start:'⚔️ Start game', waiting:'Waiting for players… (min. 2)',
+    hero_mode:'🦸 Hero mode', hero_sub:'Special powers',
+    opt_meurtre:'⚔️ Murder', opt_meurtre_sub:'Kill → bonus action',
+    opt_clairvoyance:'🔮 Clairvoyance', opt_clairvoyance_sub:'1 HP → see top card',
+    opt_dragon:'🐉 Dragon Awakening', opt_dragon_sub:'Empty deck → attacks all',
+    your_turn:'Your turn!', wait_turn:'Turn of', draw_in_progress:'Drawing card…',
+    attack:'⚔️ Attack', shield:'🛡️ Shield', charge:'⚡ Charge',
+    must_attack:'⚡ Must attack!', bonus_action:'⚗️ Bonus action!',
+    chat_ph:'Message…', send:'→', leave:'← Leave', abandon:'🏳️ Abandon',
+    deck:'Deck', blocked:'Blocked!', back:'← Back',
+    choose_target:'2 · Choose a target', choose_action:'1 · Choose action',
+    charge_warning:'⚡ Charge active — you must attack!',
+    your_cards:'YOUR CARDS', shield_label:'🛡️ Shield', pv_label:'❤️ Hit points', charge_label:'⚡ Charge(s)',
+    you:'You', victory:'Victory!', wins:'win', wins_pl:'wins', returning:'Returning to lobby in a few seconds…',
+    avatar_title:'Profile picture', avatar_sub:'Optional — camera or gallery',
+    rules_toggle:'📖 View rules',
+  },
+  es:{
+    create:'Crear partida', join:'Unirse →', name_ph:'Tu nombre…', code_ph:'· · · · · ·',
+    code_label:'Código de partida', or:'o unirse',
+    start:'⚔️ Empezar', waiting:'Esperando jugadores… (mín. 2)',
+    hero_mode:'🦸 Modo héroe', hero_sub:'Poderes especiales',
+    opt_meurtre:'⚔️ Asesinato', opt_meurtre_sub:'Matar → acción extra',
+    opt_clairvoyance:'🔮 Clarividencia', opt_clairvoyance_sub:'1 PV → ver 1ª carta',
+    opt_dragon:'🐉 Despertar del dragón', opt_dragon_sub:'Mazo vacío → ataca a todos',
+    your_turn:'¡Tu turno!', wait_turn:'Turno de', draw_in_progress:'Carta en curso…',
+    attack:'⚔️ Atacar', shield:'🛡️ Escudo', charge:'⚡ Cargar',
+    must_attack:'⚡ ¡Ataque obligatorio!', bonus_action:'⚗️ ¡Acción extra!',
+    chat_ph:'Mensaje…', send:'→', leave:'← Salir', abandon:'🏳️ Abandonar',
+    deck:'Mazo', blocked:'¡Bloqueado!', back:'← Volver',
+    choose_target:'2 · Elegir objetivo', choose_action:'1 · ¿Qué acción?',
+    charge_warning:'⚡ Carga activa — ¡debes atacar!',
+    your_cards:'TUS CARTAS', shield_label:'🛡️ Escudo', pv_label:'❤️ Puntos de vida', charge_label:'⚡ Carga(s)',
+    you:'Tú', victory:'¡Victoria!', wins:'victoria', wins_pl:'victorias', returning:'Volviendo al lobby en unos segundos…',
+    avatar_title:'Foto de perfil', avatar_sub:'Opcional — cámara o galería',
+    rules_toggle:'📖 Ver reglas',
+  }
+};
+let lang = localStorage.getItem('lb_lang') || 'fr';
+function t(k){ return LANGS[lang][k] || LANGS['fr'][k] || k; }
+function setLang(l){
+  lang=l; localStorage.setItem('lb_lang',l);
+  ['fr','en','es'].forEach(x=>{ document.getElementById('lang-'+x).style.borderColor=x===l?'var(--red)':'var(--bord)'; });
+  applyLang();
+}
+function applyLang(){
+  const ids={
+    'btn-create-home':t('create'), 'btn-join-home':t('join'),
+    'inp-name':'placeholder:'+t('name_ph'), 'inp-code':'placeholder:'+t('code_ph'),
+    'label-code':t('code_label'), 'label-or':t('or'),
+    'btn-start':t('start'), 'lobby-wait':t('waiting'),
+    'avatar-picker-title':t('avatar_title'), 'avatar-picker-sub':t('avatar_sub'),
+    'rules-toggle-btn':t('rules_toggle'),
+    'hm-name-hero':t('hero_mode'), 'hm-sub-hero':t('hero_sub'),
+    'hm-name-meurtre':t('opt_meurtre'), 'hm-sub-meurtre':t('opt_meurtre_sub'),
+    'hm-name-clairvoyance':t('opt_clairvoyance'), 'hm-sub-clairvoyance':t('opt_clairvoyance_sub'),
+    'hm-name-dragon':t('opt_dragon'), 'hm-sub-dragon':t('opt_dragon_sub'),
+    'btn-atk':t('attack'), 'btn-shl':t('shield'), 'btn-chg':t('charge'),
+    'lobby-chat-inp':'placeholder:'+t('chat_ph'), 'game-chat-inp':'placeholder:'+t('chat_ph'),
+    'lobby-leave-btn':t('leave'), 'btn-abandon':t('abandon'),
+    'returning-msg':t('returning'),
+  };
+  Object.entries(ids).forEach(([id,val])=>{
+    const el=document.getElementById(id); if(!el) return;
+    if(val.startsWith('placeholder:')) el.placeholder=val.slice(12);
+    else el.textContent=val;
+  });
+  document.getElementById('lang-'+lang).style.borderColor='var(--red)';
+}
+window.addEventListener('DOMContentLoaded',()=>{ setTimeout(applyLang,100); });
 
 // ── DEV LOG PANEL ──
 // Activer avec ?debug dans l'URL
@@ -743,6 +845,10 @@ socket.on('option_changed',({option,value})=>{
 });
 socket.on('return_to_lobby',({players,heroMode:hm,hostId})=>{
   heroMode=hm||false; isHost=(hostId===myId);
+  // Nettoyer tous les états de jeu
+  document.getElementById('waiting-for-banner').style.display='none';
+  document.getElementById('necro-panel').style.display='none';
+  closeOv('ov-mage'); closeOv('ov-vol'); closeOv('ov-barde'); closeOv('ov-barde-pv');
   document.getElementById('go-screen').classList.remove('show');
   document.getElementById('victory-screen').classList.remove('show');
   document.getElementById('lobby-code').textContent=roomCode;
@@ -805,15 +911,27 @@ socket.on('pick_hero',({choices})=>{
     const d=document.createElement('div');
     d.style.cssText='flex:1;background:var(--bg3);border:2px solid var(--bord);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s';
     d.innerHTML=`<div style="font-size:30px;margin-bottom:6px">${h.emoji}</div><div style="font-size:13px;font-weight:700;margin-bottom:4px">${h.name}</div><div style="font-size:11px;color:var(--text2);line-height:1.4">${h.desc}</div>`;
-    d.onclick=()=>{ document.querySelectorAll('#hero-cards>div').forEach(x=>x.style.borderColor='var(--bord)'); d.style.borderColor='var(--red)'; d.style.background='var(--red-bg)'; socket.emit('choose_hero',{code:roomCode,heroId:h.id}); };
+    d.onclick=()=>{
+      document.querySelectorAll('#hero-cards>div').forEach(x=>{ x.style.borderColor='var(--bord)'; x.style.background='var(--bg3)'; });
+      d.style.borderColor='var(--red)'; d.style.background='var(--red-bg)';
+      socket.emit('choose_hero',{code:roomCode,heroId:h.id});
+    };
     c.appendChild(d);
   });
 });
-socket.on('hero_chosen',({hero})=>{ document.getElementById('hp-status').textContent=`✅ ${hero.emoji} ${hero.name} choisi !`; });
-socket.on('hero_pick_update',({playerId,playerName,heroEmoji,heroName,allChosen})=>{
+socket.on('hero_chosen',({hero})=>{ document.getElementById('hp-status').textContent=`✅ ${hero.emoji} ${hero.name} — clique pour changer`; });
+socket.on('hero_pick_update',({playerId,playerName,allChosen})=>{
   const el=document.getElementById(`hpp-${playerId}`);
-  if(el){ el.style.color='var(--text)'; el.querySelector('.hp-status').textContent=`${heroEmoji} ${heroName}`; }
-  if(allChosen){ document.getElementById('hp-status').textContent='Tous prêts ! La partie commence…'; setTimeout(()=>closeOv('ov-hero-pick'),1000); }
+  if(el){
+    el.style.color='var(--text)';
+    // Cacher le héros des autres joueurs, juste montrer "Prêt ✅"
+    if(playerId===myId){
+      // propre héros déjà affiché dans hero_chosen
+    } else {
+      el.querySelector('.hp-status').textContent='✅ Prêt';
+    }
+  }
+  if(allChosen){ document.getElementById('hp-status').textContent='Tous prêts ! La partie commence…'; setTimeout(()=>closeOv('ov-hero-pick'),1500); }
 });
 function renderHpWaiting(players){
   const list=document.getElementById('hp-waiting-list'); list.innerHTML='';
@@ -845,14 +963,18 @@ socket.on('choose_action',({deckCount,discardTop,mustAttack,canUsePotion,potions
   document.getElementById('deck-pill').textContent=`Pioche : ${deckCount}`;
   const tb=document.getElementById('turn-banner');
   tb.className='turn-banner mine';
-  let bannerText = isBonus?'⚗️ Action bonus !':mustAttack?'⚡ Attaque obligatoire !':'À votre tour !';
-  if(clairvoyantCard) bannerText += ` 🔮 Prochaine: ${clairvoyantCard.display}${clairvoyantCard.suit}`;
+  let bannerText = isBonus?t('bonus_action'):mustAttack?t('must_attack'):t('your_turn');
+  if(clairvoyantCard) bannerText += ` 🔮 ${clairvoyantCard.display}${clairvoyantCard.suit}`;
   tb.textContent=bannerText;
   document.getElementById('step-action').style.display='block';
   document.getElementById('step-target').style.display='none';
   document.getElementById('btn-shl').classList.toggle('forced',mustAttack);
   document.getElementById('btn-chg').classList.toggle('forced',mustAttack);
   document.getElementById('charge-warning').style.display=mustAttack?'block':'none';
+  document.getElementById('charge-warning').textContent=t('charge_warning');
+  document.getElementById('btn-atk').textContent=t('attack');
+  document.getElementById('btn-shl').textContent=t('shield');
+  document.getElementById('btn-chg').textContent=t('charge');
   if(potions) updatePotions(potions,canUsePotion);
   buildHeroExtra(discardTop);
   setTimeout(calcCardSize,50);
@@ -861,9 +983,9 @@ socket.on('choose_action',({deckCount,discardTop,mustAttack,canUsePotion,potions
 socket.on('wait_turn',({playerName,deckCount})=>{
   isMyTurn=false; pendingAction=null;
   if(gs) gs.deckCount=deckCount;
-  document.getElementById('deck-pill').textContent=`Pioche : ${deckCount}`;
+  document.getElementById('deck-pill').textContent=`${t('deck')} : ${deckCount}`;
   const tb=document.getElementById('turn-banner');
-  tb.className='turn-banner wait'; tb.textContent=`Tour de ${playerName}…`;
+  tb.className='turn-banner wait'; tb.textContent=`${t('wait_turn')} ${playerName}…`;
   document.getElementById('step-action').style.display='none';
   document.getElementById('step-target').style.display='none';
 });
@@ -1239,7 +1361,7 @@ function emitAction(type,targetId,extra){
   socket.emit('action',{code:roomCode,type,targetId,extra});
   document.getElementById('step-action').style.display='none';
   document.getElementById('step-target').style.display='none';
-  const tb=document.getElementById('turn-banner'); tb.className='turn-banner wait'; tb.textContent='Carte en cours…';
+  const tb=document.getElementById('turn-banner'); tb.className='turn-banner wait'; tb.textContent=t('draw_in_progress');
   // Timeout de sécurité : si rien ne se passe en 20s, demander le state
   clearTimeout(stuckTimer);
   stuckTimer = setTimeout(()=>{
@@ -1247,6 +1369,7 @@ function emitAction(type,targetId,extra){
   }, 20000);
 }
 function confirmVol(){ socket.emit('voleuse_exchange',{code:roomCode,...volState}); closeOv('ov-vol'); }
+function voLeusePasser(){ closeOv('ov-vol'); socket.emit('voleuse_skip',{code:roomCode}); }
 function closeOv(id){ document.getElementById(id).classList.remove('open'); }
 
 // Voir défausse
