@@ -525,7 +525,7 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
   <div class="sheet"><div class="sheet-title">✨ Quelle carte PV soigner ?</div><div class="sheet-note">Sera remplacée par la carte piochée.</div><div id="prt-list"></div><button class="btn btn-ghost" onclick="closeOv('ov-prt')">Annuler</button></div>
 </div>
 <div class="overlay" id="ov-shl">
-  <div class="sheet"><div class="sheet-title">🛡️ Choisir un bouclier</div><div id="shl-list"></div><button class="btn btn-ghost" onclick="closeOv('ov-shl')">Annuler</button></div>
+  <div class="sheet"><div class="sheet-title" id="shl-sheet-title">🛡️ Choisir un bouclier</div><div id="shl-list"></div><button class="btn btn-ghost" id="shl-cancel-btn" onclick="closeOv('ov-shl')">Annuler</button></div>
 </div>
 <div class="overlay" id="ov-vol">
   <div class="sheet">
@@ -535,7 +535,7 @@ body.game-active{overflow:hidden;position:fixed;width:100%;max-width:430px}
       <div><div style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:5px" id="vol-their-lbl">Leur carte</div><div id="vol-their"></div></div>
     </div>
     <button class="btn btn-primary" id="btn-vol-ok" onclick="confirmVol()" disabled>Confirmer</button>
-    <button class="btn btn-ghost" onclick="voLeusePasser()">Passer</button>
+    <button class="btn btn-ghost" onclick="voLeusePasser()" id="vol-pass-btn">Passer</button>
   </div>
 </div>
 <div class="overlay" id="ov-demon">
@@ -628,13 +628,35 @@ const LANGS = {
     attack:'⚔️ Attaquer', shield:'🛡️ Bouclier', charge:'⚡ Charger',
     must_attack:'⚡ Attaque obligatoire !', bonus_action:'⚗️ Action bonus !',
     chat_ph:'Message…', send:'→', leave:'← Quitter', abandon:'🏳️ Abandonner',
-    deck:'Pioche', blocked:'Bloqué !', back:'← Retour',
+    deck:'Pioche', blocked:'Bloqué !', back:'← Retour', cancel:'Annuler', pass:'Passer',
     choose_target:'2 · Choisir une cible', choose_action:'1 · Quelle action ?',
     charge_warning:'⚡ Charge active — vous devez attaquer !',
     your_cards:'VOS CARTES', shield_label:'🛡️ Bouclier', pv_label:'❤️ Points de vie', charge_label:'⚡ Charge(s)',
     you:'Vous', victory:'Victoire !', wins:'victoire', wins_pl:'victoires', returning:'Retour au lobby dans quelques secondes…',
     avatar_title:'Photo de profil', avatar_sub:'Optionnel — caméra ou galerie',
     rules_toggle:'📖 Voir les règles',
+    hero_pick_title:'🦸 Choisissez votre héros', hero_pick_sub:'Sélectionnez 1 héros parmi les 2 proposés',
+    hero_pick_waiting:'En attente de votre choix…', hero_pick_changeable:'✅ — Cliquez pour changer',
+    hero_pick_all_ready:'Tous prêts ! La partie commence…', hero_pick_ready:'✅ Prêt',
+    waiting_banner:'En attente…', discard_title:'🃏 Dernière carte de la défausse', close:'Fermer',
+    shield_choose:'🛡️ Choisir un bouclier', potion_feu_title:'🔥 Potion de Feu — 2e cible',
+    potion_feu_sub:'Choisissez une 2e cible pour votre attaque.',
+    hero_desc_title:'Description des héros', unknown_power:'Pouvoir inconnu',
+    hero_names:{guerriere:'Guerrière',necromancien:'Nécromancien',voleuse:'Voleuse',mage:'Mage',paladin:'Paladin',pretresse:'Prêtresse',demoniste:'Démoniste',espionne:'Espionne',alchimiste:'Alchimiste',ogre:'Ogre',barde:'Barde',bete:'Bête'},
+    hero_descs:{
+      guerriere:'Cumule plusieurs charges. Bouclier +2 par charge. Doit toutes les utiliser en attaquant.',
+      necromancien:'Peut utiliser la dernière carte de la défausse pour attaquer ou charger.',
+      voleuse:'Après avoir infligé des dégâts, échange une carte avec la cible.',
+      mage:'Quand un As ou Roi est joué en attaque, peut choisir de transformer la carte.',
+      paladin:'Si perd des PV sur une attaque, riposte automatiquement avec 2 attaques.',
+      pretresse:'Peut choisir quelle carte PV échanger contre la première carte de la pioche.',
+      demoniste:'Peut relancer la carte piochée en payant 3 PV.',
+      espionne:'Son bouclier est toujours caché. Si elle est en jeu, tous les boucliers sont cachés.',
+      alchimiste:'3 potions : Feu (2 cibles), Invisibilité (esquive), Vitesse (action bonus).',
+      ogre:'Commence avec 3 cartes PV. Si attaque = bouclier adverse → élimination directe.',
+      barde:'Même couleur → 2 cartes. Même symbole → 3 cartes. Perd des PV → choisit depuis la défausse.',
+      bete:'Chaque attaque qui blesse ajoute un marqueur (+3 dégâts/marqueur aux prochaines attaques).',
+    },
   },
   en:{
     create:'Create a game', join:'Join →', name_ph:'Your name…', code_ph:'· · · · · ·',
@@ -644,17 +666,39 @@ const LANGS = {
     opt_meurtre:'⚔️ Murder', opt_meurtre_sub:'Kill → bonus action',
     opt_clairvoyance:'🔮 Clairvoyance', opt_clairvoyance_sub:'1 HP → see top card',
     opt_dragon:'🐉 Dragon Awakening', opt_dragon_sub:'Empty deck → attacks all',
-    your_turn:'Your turn!', wait_turn:'Turn of', draw_in_progress:'Drawing card…',
+    your_turn:'Your turn!', wait_turn:'Turn of', draw_in_progress:'Drawing…',
     attack:'⚔️ Attack', shield:'🛡️ Shield', charge:'⚡ Charge',
     must_attack:'⚡ Must attack!', bonus_action:'⚗️ Bonus action!',
     chat_ph:'Message…', send:'→', leave:'← Leave', abandon:'🏳️ Abandon',
-    deck:'Deck', blocked:'Blocked!', back:'← Back',
+    deck:'Deck', blocked:'Blocked!', back:'← Back', cancel:'Cancel', pass:'Skip',
     choose_target:'2 · Choose a target', choose_action:'1 · Choose action',
     charge_warning:'⚡ Charge active — you must attack!',
     your_cards:'YOUR CARDS', shield_label:'🛡️ Shield', pv_label:'❤️ Hit points', charge_label:'⚡ Charge(s)',
-    you:'You', victory:'Victory!', wins:'win', wins_pl:'wins', returning:'Returning to lobby in a few seconds…',
+    you:'You', victory:'Victory!', wins:'win', wins_pl:'wins', returning:'Returning to lobby…',
     avatar_title:'Profile picture', avatar_sub:'Optional — camera or gallery',
     rules_toggle:'📖 View rules',
+    hero_pick_title:'🦸 Choose your hero', hero_pick_sub:'Select 1 hero from the 2 offered',
+    hero_pick_waiting:'Waiting for your choice…', hero_pick_changeable:'✅ — Click to change',
+    hero_pick_all_ready:'Everyone ready! Game starting…', hero_pick_ready:'✅ Ready',
+    waiting_banner:'Waiting…', discard_title:'🃏 Last discarded card', close:'Close',
+    shield_choose:'🛡️ Choose a shield', potion_feu_title:'🔥 Fire Potion — 2nd target',
+    potion_feu_sub:'Choose a 2nd target for your attack.',
+    hero_desc_title:'Hero descriptions', unknown_power:'Unknown power',
+    hero_names:{guerriere:'Warrior',necromancien:'Necromancer',voleuse:'Thief',mage:'Mage',paladin:'Paladin',pretresse:'Priestess',demoniste:'Warlock',espionne:'Spy',alchimiste:'Alchemist',ogre:'Ogre',barde:'Bard',bete:'Beast'},
+    hero_descs:{
+      guerriere:'Stacks multiple charges. Shield +2 per charge. Must use all charges when attacking.',
+      necromancien:'Can use the last discarded card to attack or charge.',
+      voleuse:'After dealing damage, swaps a card with the target.',
+      mage:'When an Ace or King is played in attack, can choose to transform it.',
+      paladin:'If HP are lost from an attack, automatically ripostes with 2 attacks.',
+      pretresse:'Can choose which HP card to swap with the top deck card.',
+      demoniste:'Can re-draw the picked card for 3 HP. Usable multiple times per turn.',
+      espionne:'Her shield is always hidden. If in play, all shields are hidden except for her.',
+      alchimiste:'3 potions: Fire (2 targets), Invisibility (dodge), Speed (bonus action).',
+      ogre:'Starts with 3 HP cards. If attack = opponent shield → instant elimination.',
+      barde:'Same color → pick from 2. Same suit → pick from 3. Loses HP → picks from discard.',
+      bete:'Each damaging attack adds a wound marker (+3 damage/marker on next attacks).',
+    },
   },
   es:{
     create:'Crear partida', join:'Unirse →', name_ph:'Tu nombre…', code_ph:'· · · · · ·',
@@ -664,17 +708,39 @@ const LANGS = {
     opt_meurtre:'⚔️ Asesinato', opt_meurtre_sub:'Matar → acción extra',
     opt_clairvoyance:'🔮 Clarividencia', opt_clairvoyance_sub:'1 PV → ver 1ª carta',
     opt_dragon:'🐉 Despertar del dragón', opt_dragon_sub:'Mazo vacío → ataca a todos',
-    your_turn:'¡Tu turno!', wait_turn:'Turno de', draw_in_progress:'Carta en curso…',
+    your_turn:'¡Tu turno!', wait_turn:'Turno de', draw_in_progress:'Robando carta…',
     attack:'⚔️ Atacar', shield:'🛡️ Escudo', charge:'⚡ Cargar',
-    must_attack:'⚡ ¡Ataque obligatorio!', bonus_action:'⚗️ ¡Acción extra!',
+    must_attack:'⚡ ¡Debes atacar!', bonus_action:'⚗️ ¡Acción extra!',
     chat_ph:'Mensaje…', send:'→', leave:'← Salir', abandon:'🏳️ Abandonar',
-    deck:'Mazo', blocked:'¡Bloqueado!', back:'← Volver',
+    deck:'Mazo', blocked:'¡Bloqueado!', back:'← Volver', cancel:'Cancelar', pass:'Pasar',
     choose_target:'2 · Elegir objetivo', choose_action:'1 · ¿Qué acción?',
     charge_warning:'⚡ Carga activa — ¡debes atacar!',
     your_cards:'TUS CARTAS', shield_label:'🛡️ Escudo', pv_label:'❤️ Puntos de vida', charge_label:'⚡ Carga(s)',
-    you:'Tú', victory:'¡Victoria!', wins:'victoria', wins_pl:'victorias', returning:'Volviendo al lobby en unos segundos…',
+    you:'Tú', victory:'¡Victoria!', wins:'victoria', wins_pl:'victorias', returning:'Volviendo al lobby…',
     avatar_title:'Foto de perfil', avatar_sub:'Opcional — cámara o galería',
     rules_toggle:'📖 Ver reglas',
+    hero_pick_title:'🦸 Elige tu héroe', hero_pick_sub:'Selecciona 1 héroe de los 2 ofrecidos',
+    hero_pick_waiting:'Esperando tu elección…', hero_pick_changeable:'✅ — Clic para cambiar',
+    hero_pick_all_ready:'¡Todos listos! Comenzando…', hero_pick_ready:'✅ Listo',
+    waiting_banner:'Esperando…', discard_title:'🃏 Última carta descartada', close:'Cerrar',
+    shield_choose:'🛡️ Elegir escudo', potion_feu_title:'🔥 Poción de fuego — 2º objetivo',
+    potion_feu_sub:'Elige un 2º objetivo para tu ataque.',
+    hero_desc_title:'Descripciones de héroes', unknown_power:'Poder desconocido',
+    hero_names:{guerriere:'Guerrera',necromancien:'Nigromante',voleuse:'Ladrona',mage:'Mago',paladin:'Paladín',pretresse:'Sacerdotisa',demoniste:'Brujo',espionne:'Espía',alchimiste:'Alquimista',ogre:'Ogro',barde:'Bardo',bete:'Bestia'},
+    hero_descs:{
+      guerriere:'Acumula cargas. Escudo +2 por carga. Debe usarlas todas al atacar.',
+      necromancien:'Puede usar la última carta descartada para atacar o cargar.',
+      voleuse:'Tras infligir daño, intercambia una carta con el objetivo.',
+      mage:'Cuando se juega un As o Rey en ataque, puede transformarlo.',
+      paladin:'Si pierde PV de un ataque, contraataca automáticamente con 2 ataques.',
+      pretresse:'Puede elegir qué carta PV intercambiar con la primera del mazo.',
+      demoniste:'Puede volver a robar la carta por 3 PV. Usable varias veces por turno.',
+      espionne:'Su escudo siempre está oculto. Si está en juego, todos los escudos están ocultos.',
+      alchimiste:'3 pociones: Fuego (2 objetivos), Invisibilidad (esquivar), Velocidad (acción extra).',
+      ogre:'Empieza con 3 cartas PV. Si ataque = escudo rival → eliminación directa.',
+      barde:'Mismo color → elige entre 2. Mismo palo → entre 3. Pierde PV → elige del descarte.',
+      bete:'Cada ataque que hiere añade una marca (+3 daño/marca en próximos ataques).',
+    },
   }
 };
 let lang = localStorage.getItem('lb_lang') || 'fr';
@@ -687,7 +753,6 @@ function setLang(l){
 function applyLang(){
   const ids={
     'btn-create-home':t('create'), 'btn-join-home':t('join'),
-    'inp-name':'placeholder:'+t('name_ph'), 'inp-code':'placeholder:'+t('code_ph'),
     'label-code':t('code_label'), 'label-or':t('or'),
     'btn-start':t('start'), 'lobby-wait':t('waiting'),
     'avatar-picker-title':t('avatar_title'), 'avatar-picker-sub':t('avatar_sub'),
@@ -697,16 +762,14 @@ function applyLang(){
     'hm-name-clairvoyance':t('opt_clairvoyance'), 'hm-sub-clairvoyance':t('opt_clairvoyance_sub'),
     'hm-name-dragon':t('opt_dragon'), 'hm-sub-dragon':t('opt_dragon_sub'),
     'btn-atk':t('attack'), 'btn-shl':t('shield'), 'btn-chg':t('charge'),
-    'lobby-chat-inp':'placeholder:'+t('chat_ph'), 'game-chat-inp':'placeholder:'+t('chat_ph'),
     'lobby-leave-btn':t('leave'), 'btn-abandon':t('abandon'),
-    'returning-msg':t('returning'),
+    'vol-pass-btn':t('pass'),
+    'shl-sheet-title':t('shield_choose'), 'shl-cancel-btn':t('cancel'),
   };
-  Object.entries(ids).forEach(([id,val])=>{
-    const el=document.getElementById(id); if(!el) return;
-    if(val.startsWith('placeholder:')) el.placeholder=val.slice(12);
-    else el.textContent=val;
-  });
-  document.getElementById('lang-'+lang).style.borderColor='var(--red)';
+  const phs={'inp-name':t('name_ph'),'inp-code':t('code_ph'),'lobby-chat-inp':t('chat_ph'),'game-chat-inp':t('chat_ph')};
+  Object.entries(ids).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.textContent=val; });
+  Object.entries(phs).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.placeholder=val; });
+  ['fr','en','es'].forEach(x=>{ const el=document.getElementById('lang-'+x); if(el) el.style.borderColor=x===lang?'var(--red)':'var(--bord)'; });
 }
 window.addEventListener('DOMContentLoaded',()=>{ setTimeout(applyLang,100); });
 
@@ -906,11 +969,14 @@ socket.on('hero_pick_started',({players})=>{
   document.getElementById('ov-hero-pick').classList.add('open');
 });
 socket.on('pick_hero',({choices})=>{
+  document.getElementById('hp-status').textContent=t('hero_pick_waiting');
   const c=document.getElementById('hero-cards'); c.innerHTML='';
   choices.forEach(h=>{
+    const heroName=getHeroName(h.id)||h.name;
+    const heroDesc=getHeroDesc(h.id)||h.desc;
     const d=document.createElement('div');
     d.style.cssText='flex:1;background:var(--bg3);border:2px solid var(--bord);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s';
-    d.innerHTML=`<div style="font-size:30px;margin-bottom:6px">${h.emoji}</div><div style="font-size:13px;font-weight:700;margin-bottom:4px">${h.name}</div><div style="font-size:11px;color:var(--text2);line-height:1.4">${h.desc}</div>`;
+    d.innerHTML=`<div style="font-size:30px;margin-bottom:6px">${h.emoji}</div><div style="font-size:13px;font-weight:700;margin-bottom:4px">${heroName}</div><div style="font-size:11px;color:var(--text2);line-height:1.4">${heroDesc}</div>`;
     d.onclick=()=>{
       document.querySelectorAll('#hero-cards>div').forEach(x=>{ x.style.borderColor='var(--bord)'; x.style.background='var(--bg3)'; });
       d.style.borderColor='var(--red)'; d.style.background='var(--red-bg)';
@@ -919,19 +985,11 @@ socket.on('pick_hero',({choices})=>{
     c.appendChild(d);
   });
 });
-socket.on('hero_chosen',({hero})=>{ document.getElementById('hp-status').textContent=`✅ ${hero.emoji} ${hero.name} — clique pour changer`; });
+socket.on('hero_chosen',({hero})=>{ document.getElementById('hp-status').textContent=`${hero.emoji} ${getHeroName(hero.id)} — ${t('hero_pick_changeable')}`; });
 socket.on('hero_pick_update',({playerId,playerName,allChosen})=>{
   const el=document.getElementById(`hpp-${playerId}`);
-  if(el){
-    el.style.color='var(--text)';
-    // Cacher le héros des autres joueurs, juste montrer "Prêt ✅"
-    if(playerId===myId){
-      // propre héros déjà affiché dans hero_chosen
-    } else {
-      el.querySelector('.hp-status').textContent='✅ Prêt';
-    }
-  }
-  if(allChosen){ document.getElementById('hp-status').textContent='Tous prêts ! La partie commence…'; setTimeout(()=>closeOv('ov-hero-pick'),1500); }
+  if(el){ el.style.color='var(--text)'; if(playerId!==myId) el.querySelector('.hp-status').textContent=t('hero_pick_ready'); }
+  if(allChosen){ document.getElementById('hp-status').textContent=t('hero_pick_all_ready'); setTimeout(()=>closeOv('ov-hero-pick'),1500); }
 });
 function renderHpWaiting(players){
   const list=document.getElementById('hp-waiting-list'); list.innerHTML='';
@@ -939,7 +997,7 @@ function renderHpWaiting(players){
     const row=document.createElement('div');
     row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--bg3);border:1px solid var(--bord);border-radius:10px;font-size:13px;color:var(--text2)';
     row.id=`hpp-${p.id}`;
-    row.innerHTML=`<span>${p.name}</span><span class="hp-status">En attente…</span>`;
+    row.innerHTML=`<span>${p.name}</span><span class="hp-status">${t('hero_pick_waiting')}</span>`;
     list.appendChild(row);
   });
 }
@@ -1303,11 +1361,13 @@ function buildTargets(type){
 }
 
 function openShieldSwap(){
+  document.getElementById('shl-sheet-title').textContent=t('shield_choose');
+  document.getElementById('shl-cancel-btn').textContent=t('cancel');
   const list=document.getElementById('shl-list'); list.innerHTML='';
   gs.players.forEach(p=>{
     if(p.eliminated) return;
     const btn=document.createElement('div'); btn.className='pick-item';
-    btn.innerHTML=`<span class="pick-item-name">${p.id===myId?'Moi':p.name}</span><span class="pick-item-stats">🛡️ ${p.shieldVal}</span>`;
+    btn.innerHTML=`<span class="pick-item-name">${p.id===myId?t('you'):p.name}</span><span class="pick-item-stats">🛡️ ${p.shieldVal}</span>`;
     btn.onclick=()=>{ closeOv('ov-shl'); emitAction('shield_swap',p.id); };
     list.appendChild(btn);
   });
@@ -1391,28 +1451,21 @@ function showMyHeroDesc(){
     const box=document.createElement('div'); box.className='hero-desc-box';
     const wounds = gs.players.find(x=>x.id===myId)?.woundMarkers?.[p.id]||0;
     const woundStr = wounds>0 ? ` <span style="color:var(--red);font-size:11px">(🐾 ×${wounds})</span>` : '';
-    box.innerHTML=`<div class="hero-desc-row"><span class="hero-desc-emoji">${p.heroEmoji}</span><div><div class="hero-desc-name">${p.name}${p.id===myId?' (vous)':''}</div><div style="font-size:11px;color:var(--text3)">${p.heroName}${woundStr}</div></div></div><div class="hero-desc-text">${getHeroDesc(p.heroId)}</div>`;
+    const heroName = getHeroName(p.heroId) || p.heroName;
+    box.innerHTML=`<div class="hero-desc-row"><span class="hero-desc-emoji">${p.heroEmoji}</span><div><div class="hero-desc-name">${p.name}${p.id===myId?` (${t('you')})`:''}</div><div style="font-size:11px;color:var(--text3)">${heroName}${woundStr}</div></div></div><div class="hero-desc-text">${getHeroDesc(p.heroId)}</div>`;
     list.appendChild(box);
   });
-  if(!list.children.length) list.innerHTML='<div style="color:var(--text3);font-size:13px;text-align:center;padding:10px">Mode héros non activé</div>';
+  if(!list.children.length) list.innerHTML=`<div style="color:var(--text3);font-size:13px;text-align:center;padding:10px">${t('hero_mode')} non activé</div>`;
+  document.getElementById('ov-hero-desc').querySelector('.sheet-title').textContent=t('hero_desc_title');
   document.getElementById('ov-hero-desc').classList.add('open');
 }
 function getHeroDesc(id){
-  const h={
-    guerriere:'Cumule plusieurs charges. Bouclier +2 par charge. Doit toutes les utiliser en attaquant.',
-    necromancien:'Peut utiliser la dernière carte de la défausse pour attaquer ou charger.',
-    voleuse:'Après avoir infligé des dégâts, échange une carte avec la cible.',
-    mage:'Quand un As ou Roi est joué en attaque, peut choisir de transformer la carte.',
-    paladin:'Si perd des PV sur une attaque, riposte automatiquement avec 2 attaques.',
-    pretresse:'Peut choisir quelle carte PV échanger contre la première carte de la pioche.',
-    demoniste:'Peut relancer la carte piochée en payant 3 PV.',
-    espionne:'Son bouclier est toujours caché. Si elle est en jeu, tous les boucliers sont cachés.',
-    alchimiste:'3 potions : Feu (2 cibles), Invisibilité (esquive), Vitesse (action bonus).',
-    ogre:'Commence avec 3 cartes PV. Si attaque = bouclier adverse → élimination directe.',
-    barde:'Même couleur → 2 cartes. Même symbole → 3 cartes. Perd des PV → choisit depuis la défausse.',
-    bete:'Chaque attaque qui blesse ajoute un marqueur (+3 dégâts/marqueur aux prochaines attaques).',
-  };
-  return h[id]||'Pouvoir inconnu';
+  const descs = LANGS[lang]?.hero_descs || LANGS['fr'].hero_descs;
+  return descs[id] || t('unknown_power');
+}
+function getHeroName(id){
+  const names = LANGS[lang]?.hero_names || LANGS['fr'].hero_names;
+  return names[id] || id;
 }
 
 // ── REVEAL ──
