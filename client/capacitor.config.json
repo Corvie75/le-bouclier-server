@@ -1,0 +1,27 @@
+{
+  "appId": "com.corvie.lebouclier",
+  "appName": "Le Bouclier",
+  "webDir": "www",
+  "server": {
+    "iosScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "launchShowDuration": 2000,
+      "backgroundColor": "#090909",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "Dark",
+      "backgroundColor": "#090909"
+    },
+    "Keyboard": {
+      "resize": "native",
+      "resizeOnFullScreen": true
+    },
+    "AdMob": {
+      "appIdIos": "ca-app-pub-1295000773461347~7280719019"
+    }
+  }
+}
